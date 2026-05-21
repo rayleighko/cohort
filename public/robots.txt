@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cohort.co.kr/sitemap.xml

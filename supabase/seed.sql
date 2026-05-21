@@ -1,0 +1,3 @@
+-- Cohort — local/dev seed data.
+-- TODO(W2+): seed sample macro fixtures + a demo watchlist for local development.
+-- Intentionally empty for Day 1.

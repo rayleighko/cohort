@@ -1,0 +1,25 @@
+/* Pretendard — Korean-first variable web font */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cohort-primary: #a8243f;
+  --cohort-amber: #e8a33d;
+  --cohort-ivory: #f8f4ed;
+  --cohort-charcoal: #1a1a1a;
+}
+
+html,
+body {
+  background-color: var(--cohort-ivory);
+  color: var(--cohort-charcoal);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mobile-first: respect safe-area insets on notched devices */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}

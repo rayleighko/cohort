@@ -1,0 +1,13 @@
+repos:
+  - repo: local
+    hooks:
+      - id: typecheck
+        name: TypeScript check
+        entry: pnpm typecheck
+        language: system
+        pass_filenames: false
+      - id: lint
+        name: ESLint
+        entry: pnpm lint
+        language: system
+        pass_filenames: false
