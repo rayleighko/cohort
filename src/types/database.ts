@@ -340,6 +340,8 @@ export type Database = {
           landing_page_version: string | null
           mascot_last_interaction_at: string | null
           mascot_streak_days: number | null
+          polar_customer_id: string | null
+          polar_subscription_id: string | null
           sub_cluster: string | null
           subscription_active: boolean | null
           subscription_renewal_at: string | null
@@ -359,6 +361,8 @@ export type Database = {
           landing_page_version?: string | null
           mascot_last_interaction_at?: string | null
           mascot_streak_days?: number | null
+          polar_customer_id?: string | null
+          polar_subscription_id?: string | null
           sub_cluster?: string | null
           subscription_active?: boolean | null
           subscription_renewal_at?: string | null
@@ -378,6 +382,8 @@ export type Database = {
           landing_page_version?: string | null
           mascot_last_interaction_at?: string | null
           mascot_streak_days?: number | null
+          polar_customer_id?: string | null
+          polar_subscription_id?: string | null
           sub_cluster?: string | null
           subscription_active?: boolean | null
           subscription_renewal_at?: string | null
