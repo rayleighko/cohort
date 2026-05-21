@@ -1,13 +1,23 @@
 /**
- * Supabase auth middleware helper — refreshes the session cookie on each request.
- * Day 2 will extend this to protect /dashboard routes (redirect unauthenticated
- * users to /login).
+ * Supabase auth middleware helper — refreshes the session cookie on each request
+ * and returns the current user so the Next.js root middleware can gate routes.
+ * @supabase/ssr 0.10.x modern getAll/setAll cookie API (not legacy get/set/remove).
  */
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import type { User } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 
-export async function updateSession(request: NextRequest) {
+export interface SessionResult {
+  /** Response carrying refreshed auth cookies — must be returned (or cookies copied). */
+  response: NextResponse;
+  /** Authenticated user, or null if no valid session. */
+  user: User | null;
+}
+
+export async function updateSession(
+  request: NextRequest,
+): Promise<SessionResult> {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(
@@ -31,8 +41,11 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // Touch the session so it stays fresh. Route protection lands Day 2.
-  await supabase.auth.getUser();
+  // getUser() revalidates the token with Supabase Auth (do not trust getSession()
+  // alone in middleware). This also refreshes the session cookie when needed.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return response;
+  return { response, user };
 }
