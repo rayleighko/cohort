@@ -6,10 +6,10 @@
  * (Lemon Squeezy is the documented fallback).
  *
  * POLAR_ACCESS_TOKEN + POLAR_WEBHOOK_SECRET are server-only secrets —
- * never expose via NEXT_PUBLIC_*. Never import this into a client component.
+ * never expose via NEXT_PUBLIC_*. Never import this into a client component
+ * (it would bundle the SDK). Client-safe plan config lives in ./plans.
  */
 import { Polar } from '@polar-sh/sdk';
-import type { SubscriptionTier } from '@/types/shapes';
 
 /** 'sandbox' until W5 launch, then 'production'. */
 export const POLAR_SERVER: 'sandbox' | 'production' =
@@ -34,44 +34,4 @@ export function getPolarClient(): Polar {
 
   client = new Polar({ accessToken, server: POLAR_SERVER });
   return client;
-}
-
-/** Paid plans — USD pricing approximate, finalized before W5 launch. */
-export const POLAR_PLANS = {
-  pro: {
-    tier: 'pro' as const,
-    label: 'Pro',
-    priceUsd: 19,
-    productEnvVar: 'POLAR_PRODUCT_ID_PRO',
-  },
-  premium: {
-    tier: 'premium' as const,
-    label: 'Premium',
-    priceUsd: 59,
-    productEnvVar: 'POLAR_PRODUCT_ID_PREMIUM',
-  },
-} as const;
-
-export type PaidPlan = keyof typeof POLAR_PLANS;
-
-/** Resolves the configured Polar product id for a paid plan. */
-export function productIdForPlan(plan: PaidPlan): string {
-  const id = process.env[POLAR_PLANS[plan].productEnvVar];
-  if (!id) {
-    throw new Error(
-      `[Cohort] ${POLAR_PLANS[plan].productEnvVar} is not set. Configure the Polar product.`,
-    );
-  }
-  return id;
-}
-
-/**
- * Maps a Polar product id back to a Cohort tier (used by the webhook handler
- * to decide which tier a subscription grants). Falls back to 'pro'.
- */
-export function tierForProductId(productId: string): SubscriptionTier {
-  if (productId && productId === process.env.POLAR_PRODUCT_ID_PREMIUM) {
-    return 'premium';
-  }
-  return 'pro';
 }

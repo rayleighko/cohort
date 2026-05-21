@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getPolarClient, productIdForPlan, type PaidPlan } from '@/lib/polar/client';
+import { getPolarClient } from '@/lib/polar/client';
+import { productIdForPlan, type PaidPlan } from '@/lib/polar/plans';
 
 /**
  * Polar checkout session — POST { plan: 'pro' | 'premium' }.

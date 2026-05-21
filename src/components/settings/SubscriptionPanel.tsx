@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import MascotAvatar from '@/components/mascot/MascotAvatar';
-import { POLAR_PLANS, type PaidPlan } from '@/lib/polar/client';
+import { POLAR_PLANS, type PaidPlan } from '@/lib/polar/plans';
 import type { SubscriptionTier } from '@/types/shapes';
 
 /**

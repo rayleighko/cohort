@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { tierForProductId } from '@/lib/polar/client';
+import { tierForProductId } from '@/lib/polar/plans';
 
 // Derive the Subscription payload type from validateEvent's return union
 // (avoids depending on an internal SDK import path).
