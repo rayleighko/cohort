@@ -393,6 +393,36 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist: {
+        Row: {
+          ab_variant: string | null
+          consent_marketing: boolean | null
+          consent_pipa: boolean
+          created_at: string | null
+          email: string
+          id: string
+          referral_source: string | null
+        }
+        Insert: {
+          ab_variant?: string | null
+          consent_marketing?: boolean | null
+          consent_pipa: boolean
+          created_at?: string | null
+          email: string
+          id?: string
+          referral_source?: string | null
+        }
+        Update: {
+          ab_variant?: string | null
+          consent_marketing?: boolean | null
+          consent_pipa?: boolean
+          created_at?: string | null
+          email?: string
+          id?: string
+          referral_source?: string | null
+        }
+        Relationships: []
+      }
       watchlist: {
         Row: {
           added_at: string | null
