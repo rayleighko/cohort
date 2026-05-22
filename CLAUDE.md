@@ -67,6 +67,15 @@ Methodology:
 - AO-5 CLAUDE.md drift → vault 38-brief = SoT, CLAUDE.md = working summary, vault wins if conflict
 - AO-10 Persona inconsistency → cohort-product sub-agent before mascot copy commit
 
+Design system (40/41/42/43 vault — bootstrap 2026-05-22):
+- AD-1 Raw hex/px in component → cohort-token-keeper skill BLOCKS
+- AD-2 Touch target < 44px on mobile → cohort-design-system + cohort-accessibility-auditor FAIL
+- AD-3 Korean body without `break-keep` → cohort-design-system WARN
+- AD-5 Option B 위반 component copy → cohort-ux-copy skill BLOCKS
+- AD-6 Animation without prefers-reduced-motion fallback → cohort-microinteraction-designer + cohort-accessibility-auditor FAIL
+- AD-7 Notification spam (>2/day) → Shape C trigger config hard cap
+- AD-8 Comparative social / leaderboard → 40 §6.3 brand SoT 위반
+
 ## Slash command defaults
 
 - Day start: `/context` (verify vault read) + `/goal` (declare stop condition)
@@ -74,6 +83,22 @@ Methodology:
 - Day end: `/review` (PR-grade) + `/retro` (learnings) + `/learn` (capture)
 - Mascot copy review: dispatch `cohort-product` sub-agent
 - Safety filter change: dispatch `safety-filter-tester` sub-agent (W4+)
+- UI component PR (Day 5+ mandatory): dispatch `cohort-design-system` + `cohort-accessibility-auditor` sub-agents in parallel
+- Day 5+ auto-trigger skills (UI-集約 단계): `cohort-token-keeper` (before component write) + `cohort-ux-copy` (before any label/error/empty/microcopy) + `cohort-component-spec-writer` (before non-trivial component) + `cohort-microinteraction-designer` (before any animation/transition)
+
+## Design system (bootstrap 2026-05-22, parallel Cowork session)
+
+- **Vault SoT**: 40 (architecture) + 41 (interaction patterns) + 42 (typography/color) + 43 (mascot illustration brief). 40-design-system-architecture가 master, 41/42/43이 deep dive layer. 충돌 시 vault → tailwind.config.ts wins (raw value authority).
+- **8 V1 component types**: Button · Card · Modal · MascotAvatar · MascotChatBubble · Input · Badge · ScoreDisplay (StreakIndicator 포함). V2 patterns 모두 5-week cap defer.
+- **Project-local skills + agents** (committed to repo, `~/Development/cohort/.claude/`):
+  - `.claude/agents/cohort-design-system.md` (token + interaction + mobile-first + Option B in components)
+  - `.claude/agents/cohort-accessibility-auditor.md` (WCAG 2.1 AA 8-dimension audit)
+  - `.claude/skills/cohort-token-keeper/SKILL.md` (pre-component token enforcement)
+  - `.claude/skills/cohort-component-spec-writer/SKILL.md` (docs/components/<name>.md template)
+  - `.claude/skills/cohort-ux-copy/SKILL.md` (Aurora/Vesper voice + Option B + Korean+English fallback)
+  - `.claude/skills/cohort-microinteraction-designer/SKILL.md` (8 V1 animation patterns + reduced-motion)
+- **W2 prereq**: tailwind.config.ts에 ink scale (`ink-{90,70,50,30,10,05}`) + state colors (`success/warning/danger/info`) + `fontFamily.mono` + `fontSize` overrides + `boxShadow.mascot-{aurora,vesper}` + `transitionDuration.{fast,slow,slower}` + `transitionTimingFunction.ease-{out,in-out}` + `screens.2xl` add (42 §6.2).
+- **W5 prereq (PRE-W5 commissioning)**: Illustrator hire — Aurora 6 + Vesper 6 + 석류 launcher = 13 master illustration. 43-mascot-illustration-brief §7. 31-tracker에 add 대상.
 
 ## Conventional commit format
 
@@ -102,6 +127,10 @@ Co-reviewed-by: cohort-product (PASS)
 |---|---|
 | Brand spec (SoT) | `~/Documents/elevate-portfolio/38-brand-architecture-brief.md` |
 | Methodology | `~/Documents/elevate-portfolio/39-claude-orchestration-methodology.md` |
+| Design system architecture (master) | `~/Documents/elevate-portfolio/40-design-system-architecture.md` |
+| Interaction patterns | `~/Documents/elevate-portfolio/41-interaction-patterns.md` |
+| Typography + color system | `~/Documents/elevate-portfolio/42-typography-color-system.md` |
+| Mascot illustration brief (PRE-W5 commissioning) | `~/Documents/elevate-portfolio/43-mascot-illustration-brief.md` |
 | W1 implementation | `~/Documents/elevate-portfolio/25-sprint-0-w1-implementation-spec.md` |
 | W2-W5 implementation | `~/Documents/elevate-portfolio/26-sprint-0-w2-w5-implementation-spec.md` |
 | Architecture | `~/Documents/elevate-portfolio/14-v1-core-architecture-sketch.md` (apply brand mapping §7 of 38-brief) |
