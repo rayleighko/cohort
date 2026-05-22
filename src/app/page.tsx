@@ -139,7 +139,7 @@ export default function LandingPage() {
           height={112}
           priority={false}
         />
-        <p className="mt-3 text-center text-sm leading-relaxed text-cohort-ink-50">
+        <p className="mt-3 text-center text-sm leading-relaxed text-cohort-ink-70">
           한 열매 안의 여러 씨앗처럼 — 같은 페이스를 걷는 cohort.
         </p>
       </Reveal>
@@ -212,7 +212,7 @@ export default function LandingPage() {
           <Link
             href="/waitlist"
             onClick={handleCtaClick}
-            className="flex min-h-[52px] w-full items-center justify-center rounded-lg bg-cohort-primary px-5 text-base font-semibold text-cohort-ivory shadow-mascot-aurora transition-colors duration-fast ease-out hover:bg-aurora-concerned active:bg-aurora-concerned"
+            className="flex min-h-[52px] w-full items-center justify-center rounded-lg bg-cohort-primary px-5 text-base font-semibold text-cohort-ivory shadow-mascot-aurora transition-colors duration-fast ease-out hover:bg-aurora-alert active:bg-aurora-concerned focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cohort-primary"
           >
             사전 신청하기 (무료)
           </Link>

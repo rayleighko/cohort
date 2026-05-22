@@ -19,7 +19,7 @@ import { getAbVariant } from '@/lib/analytics/ab';
 type FormState = 'idle' | 'submitting' | 'subscribed' | 'already' | 'error';
 
 const INPUT_CLASS =
-  'min-h-[44px] w-full rounded-lg border border-cohort-ink-10 bg-white px-4 text-base text-cohort-ink-90 outline-none focus:border-cohort-primary';
+  'min-h-[44px] w-full rounded-lg border border-cohort-ink-10 bg-white px-4 text-base text-cohort-ink-90 outline-none focus:border-cohort-primary focus-visible:ring-2 focus-visible:ring-cohort-primary focus-visible:ring-offset-2';
 
 const CHECK_ROW =
   'flex min-h-[44px] cursor-pointer items-start gap-3 py-1 text-sm leading-relaxed text-cohort-ink-70';
@@ -94,7 +94,7 @@ export default function WaitlistPage() {
         </p>
         <Link
           href="/"
-          className="mt-8 text-sm font-semibold text-cohort-primary"
+          className="mt-8 inline-flex min-h-[44px] items-center text-sm font-semibold text-cohort-primary"
         >
           홈으로 돌아가기
         </Link>
@@ -115,7 +115,7 @@ export default function WaitlistPage() {
         </p>
         <Link
           href="/"
-          className="mt-8 text-sm font-semibold text-cohort-primary"
+          className="mt-8 inline-flex min-h-[44px] items-center text-sm font-semibold text-cohort-primary"
         >
           홈으로 돌아가기
         </Link>
@@ -183,7 +183,7 @@ export default function WaitlistPage() {
         {errorMsg && (
           <p
             role="alert"
-            className="flex items-start gap-1.5 text-sm text-cohort-warning"
+            className="flex items-start gap-1.5 text-sm text-cohort-danger"
           >
             <span aria-hidden="true">ⓘ</span>
             <span>{errorMsg}</span>
@@ -196,13 +196,14 @@ export default function WaitlistPage() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="min-h-[52px] w-full rounded-lg bg-cohort-primary px-5 text-base font-semibold text-cohort-ivory transition-colors duration-fast ease-out disabled:opacity-50"
+              aria-busy={state === 'submitting'}
+              className="min-h-[52px] w-full rounded-lg bg-cohort-primary px-5 text-base font-semibold text-cohort-ivory transition-colors duration-fast ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cohort-primary disabled:opacity-50"
             >
-              {state === 'submitting' ? '신청 중…' : '사전 신청하기'}
+              사전 신청하기
             </button>
             <Link
               href="/"
-              className="flex min-h-[44px] items-center justify-center text-sm font-medium text-cohort-ink-50"
+              className="flex min-h-[44px] items-center justify-center text-sm font-medium text-cohort-ink-70"
             >
               취소
             </Link>
