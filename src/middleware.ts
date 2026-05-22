@@ -1,13 +1,27 @@
 /**
- * Next.js root middleware — Supabase session refresh + route protection.
+ * Next.js root middleware — Supabase session refresh + route protection
+ * + A/B variant assignment.
  *
  * - Unauthenticated user hitting a (dashboard) route → redirect to /login
  *   (with ?redirect=<original path> so login can return them).
  * - Authenticated user hitting /login or /signup → redirect to /shape-a.
  * - Tier 0 dashboard at / and marketing routes stay public.
+ * - On the landing (/), assigns a sticky A/B variant cookie (W2 A/B prereq;
+ *   Day 5b renders Version C regardless).
  */
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
+
+const AB_COOKIE = 'cohort-ab-variant';
+const AB_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+
+/** Random A/B/C assignment, evenly weighted. */
+function assignAbVariant(): 'A' | 'B' | 'C' {
+  const r = Math.random();
+  if (r < 1 / 3) return 'A';
+  if (r < 2 / 3) return 'B';
+  return 'C';
+}
 
 /** Authenticated-only routes (the (dashboard) route group). */
 const PROTECTED_PREFIXES = [
@@ -53,6 +67,17 @@ export async function middleware(request: NextRequest) {
     url.pathname = '/shape-a';
     url.search = '';
     return redirectWithCookies(url, response);
+  }
+
+  // Assign a sticky A/B variant on the landing page if not already set.
+  // SameSite=Lax + not HttpOnly — the client reads it for PostHog attribution.
+  if (pathname === '/' && !request.cookies.get(AB_COOKIE)) {
+    response.cookies.set(AB_COOKIE, assignAbVariant(), {
+      maxAge: AB_MAX_AGE,
+      sameSite: 'lax',
+      httpOnly: false,
+      path: '/',
+    });
   }
 
   return response;
