@@ -9,6 +9,26 @@
  *   /api/StatisticSearch/{key}/json/kr/{start}/{end}/{statCode}/{cycle}/{startDate}/{endDate}/{itemCode}
  * Series codes (statCode + itemCode) are reference values; if ECOS rejects
  * a series, the call throws and /api/macro degrades that indicator.
+ *
+ * TROUBLESHOOTING (Day 7 W2 Day 2 — 2026-05-23 dashboard degraded mode observed):
+ * If /dashboard shows "일부 지표 fetch 실패" with KR_10Y or USDKRW missing,
+ * the in-memory cache below may hold a stale failed result. Two likely causes:
+ *
+ *   1. Dev server cache stale — if ECOS_API_KEY was not yet in .env.local on
+ *      first dev server boot, the first /api/macro call cached a fail state.
+ *      Fix: restart `pnpm dev` (kills the in-memory Map below). 90% case.
+ *
+ *   2. ECOS_API_KEY activation delay — 한국은행 ECOS portal activates new
+ *      keys within 1 day of registration. If just registered, wait 24h.
+ *
+ *   3. (Edge case) statCode/itemCode mismatch — verify at
+ *      https://ecos.bok.or.kr/ → 통계검색 → "국고채(10년)" or
+ *      "원/달러 매매기준율" → 통계표 메타데이터에서 statCode 확인.
+ *      Current codes are common Korean fintech reference values; mismatch
+ *      is unlikely but possible if ECOS reorganized series.
+ *
+ * Cross-ref: vault_sot_priority light pointer Drift #1 (cache 3-way) +
+ * Day 7 dashboard ship commit 1d05856.
  */
 
 export interface EcosObservation {
