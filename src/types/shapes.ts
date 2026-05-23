@@ -6,13 +6,9 @@
  */
 
 // --- Shape A — Macro composite ----------------------------------------------
-export interface MacroScores {
-  kr_us_rate_spread: number;
-  krw_usd: number;
-  vix: number;
-  dxy: number;
-  composite: number;
-}
+// Shape A macro composite types now live in src/lib/macro/composite.ts
+// (MacroComposite + MacroIndicator + MacroZone). The flat MacroScores type
+// from W1 §5.3 was superseded in W2 per vault_sot_priority §4.4.
 
 // --- Shape B — 분할매수 decision support ------------------------------------
 export interface DecisionScores {
