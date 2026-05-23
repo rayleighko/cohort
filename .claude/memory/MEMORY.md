@@ -16,6 +16,7 @@ Working directory: `~/Development/cohort` · Vault SoT: `~/Documents/elevate-por
 - [**W2 Day 1 macro calibration α**](w2_day1_macro_calibration_alpha.md) — NEW 2026-05-23, Day 6 ship commit 31b5f40, 24-seo Page 5 calibration endpoints adopted + KRW/VIX piecewise normalize
 - [**Aurora narration assistant-mode safety filter limit**](aurora_narration_assistant_mode_safety_filter_limit.md) — NEW 2026-05-23 Day 7, output-side filter = defense-in-depth, W4 closure queue
 - [**UI UX Pro Max integration policy**](ui_ux_pro_max_integration_policy.md) — NEW 2026-05-23 Day 8, vault 38/40/41/42 wins on design system, UI UX Pro Max = reference layer (pre-delivery checklist 일부만 채택)
+- [**Aurora narration 4-category routing**](aurora_narration_4_category_routing.md) — NEW 2026-05-23 Day 9, single shared system prompt + per-category user prompt branching + exhaustive switch never guard pattern
 
 ## Feedback (collaboration rules)
 - [AO-5 vault wins](ao_5_vault_wins.md)
@@ -26,6 +27,6 @@ Working directory: `~/Development/cohort` · Vault SoT: `~/Documents/elevate-por
 
 ## Reference (external systems)
 - [Vault SoT 38-43](vault_sot_38_to_43.md) — vault file map (38=brand SoT, 39=methodology, 40=design master, 41/42/43=deep dive)
-- [**Vault SoT priority — working memory pointer**](vault_sot_priority.md) — light pointer to vault governance master `~/Documents/elevate-portfolio/vault_sot_priority.md` v0.1 DRAFT + Day-to-day implementation Drift catalog (#1-#12: cache / composite signature / mascot / payment / **Day 6 #5-#7: calibration α / route path / W2 file additions** / **Day 7 #8-#9: Aurora naming cleanup / Day 4 template→Claude evolution** / **Day 8 #11-#13: CompositeScoreCard naming / MacroDashboard naming / Favicon manifest split-brain**) + Vault enhancement log (V1: vault 44 §3 brand logo system)
+- [**Vault SoT priority — working memory pointer**](vault_sot_priority.md) — light pointer to vault governance master `~/Documents/elevate-portfolio/vault_sot_priority.md` v0.1 DRAFT + Day-to-day implementation Drift catalog (#1-#14: cache / composite signature / mascot / payment / **Day 6 #5-#7: calibration α / route path / W2 file additions** / **Day 7 #8-#9: Aurora naming cleanup / Day 4 template→Claude evolution** / **Day 8 #11-#13: CompositeScoreCard naming / MacroDashboard naming / Favicon manifest split-brain** / **Day 9 #14: Aurora narration category naming macro_overview→morning_brief**) + Vault enhancement log (V1: vault 44 §3 brand logo system)
 - [Postgres migrations](postgres_migration_history.md)
 - [Connected MCPs](connected_mcps.md)

@@ -150,6 +150,16 @@ Day 7 사장님 결정 의식적 evolution. 26-spec line 114 verbatim: *"Impleme
 
 **Resolution**: 사장님 workflow output (realfavicongenerator export convention) 채택. vault 44 §2.2 filename naming은 reference only — actual filename은 export tool에 따라 달라질 수 있음. W2 종료 batch cleanup: vault 44 §2.2 annotation *"naming variant acceptable — realfavicongenerator.net export convention compatible (web-app-manifest-*.png and icon-*.png 모두 가능)"*. PWA install + browser tab favicon 정상 작동 확인 (Day 8 Block A favicon verify section).
 
+### Drift #14 — Aurora narration category naming (RESOLVED Day 9 ship a44a4b2)
+
+- `26-spec` line 112 명시: narration category 중 하나를 `macro_overview` 명명
+- `38-brief §2.2` line 110 명시: *"Morning brief (default daily ritual)"* — Aurora의 primary surface
+- Day 7 ship (commit 1d05856) + Day 9 ship (commit a44a4b2): `morning_brief` 명명 사용 (38 §2.2 정합)
+
+**Resolution (Drift #3/#8 brand-naming family)**: vault_sot_priority §4.1 brand domain hierarchy — 38 supersedes 26. Day 9 ship apply `morning_brief` to 4-category enum (`'morning_brief' | 'single_indicator_focus' | 'score_change' | 'weekly_summary'`). 26-spec line 112 annotation W2-close: *"macro_overview renamed morning_brief per 38 §2.2 brand alignment"*.
+
+**Architectural insight from Day 9**: 4 categories 채택 시 **단일 AURORA_NARRATION_SYSTEM + per-category user prompt branching** pattern 적용 — 4-way system prompt drift 회피 + register 일관성 자동 보장 + exhaustive switch never guard. 신규 memory [[aurora-narration-4-category-routing]] (project) 등록.
+
 ---
 
 ## Vault enhancements (not drift — Cowork direct contributions)
