@@ -39,6 +39,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      aurora_narration_log: {
+        Row: {
+          category: string
+          character: string
+          composite_snapshot: Json
+          created_at: string
+          id: string
+          safety_filter_category: string | null
+          text: string
+          triggered: boolean
+        }
+        Insert: {
+          category: string
+          character?: string
+          composite_snapshot: Json
+          created_at?: string
+          id?: string
+          safety_filter_category?: string | null
+          text: string
+          triggered?: boolean
+        }
+        Update: {
+          category?: string
+          character?: string
+          composite_snapshot?: Json
+          created_at?: string
+          id?: string
+          safety_filter_category?: string | null
+          text?: string
+          triggered?: boolean
+        }
+        Relationships: []
+      }
       loi_conversion: {
         Row: {
           churn_reason: string[] | null
