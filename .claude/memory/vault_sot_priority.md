@@ -100,13 +100,43 @@ W2 Day 1 (Day 6) Code CLI가 sub-task 1 vault verbatim extraction 중 empirical 
 
 **Resolution**: vault_sot_priority.md §4.4 evolution rule 적용 (Drift #2와 같은 family). W2 종료 batch cleanup: 26-spec W2 file additions 갱신 (composite-score.ts → composite.ts, MacroScores shape annotation → MacroComposite reference).
 
-### Drift #8 — vault 44 §3 신설 (W2 Day 2 / Day 7 prep, 2026-05-23)
+### Drift #8 — 26-spec Aurora naming Day 7 cleanup (RESOLVED Day 7 ship 1d05856, vault cleanup pending)
 
-W2 Day 2 (Day 7 prep) Cowork session에서 사장님이 favicon (§2.2) ship 후 "favicon ≠ 로고" 관찰을 제기. vault 44가 P0-P3 8개 자산만 다루고 brand logo system (wordmark / lockup / monochrome variants / Lottie)이 누락되어 있음을 발견.
+Day 7 (W2 Day 2) Code CLI sub-task 1 vault verbatim extraction 중 추가 확인: 26-spec line 109-122 (W2 Day 4 narration system) + 시리즈 file path references가 모두 "준/joon" 명명 사용. 38-brief §1 LOCKED 후 진화한 Aurora 🕊 명명과 충돌.
 
-**Resolution**: vault 44 §3 "Brand logo system specs" 신설 — Primary brandmark large + Wordmark Korean/English + 4 Lockup variations + Monochrome variants + Clear space rules + Lottie deferred to V1.1. §0 priority table 6 row 추가 (#9-#14). 기존 §3-§7 renumber to §4-§8. Lottie scope = Sprint 0 W5 cap 외, Framer Motion + CSS로 motion 영역 대체.
+| Source | Position |
+|---|---|
+| 26-spec line 109-122 (W2 Day 4) | "준 narration system" + `src/lib/joon/narration-templates.ts` + `/api/joon/narration/route.ts` + `JoonNarration.tsx` |
+| 38-brief §1 (2026-05-21 LOCKED) | "Replaces all '준 / Joon / Joon-Mate' legacy references in vault." |
+| Day 7 ship (commit 1d05856) | `src/lib/aurora/aurora-prompt.ts` + `/api/aurora/narration/route.ts` + `AuroraNarrationCard.tsx` |
 
-**Status**: 직접 vault write 가능 확인 (cohort/.claude/memory 막힘과 대조). 사장님 manual merge 불필요.
+**Resolution (Day 7 ship)**: Aurora naming 적용. 26-spec line 109-122 W2 종료 batch cleanup queue (Drift #3과 같은 family). vault_sot_priority §4.1 (brand 38 supersedes) 정합.
+
+### Drift #9 — 26-spec Day 4 template-only → Claude API evolution (RESOLVED Day 7 ship 1d05856, vault cleanup pending)
+
+Day 7 사장님 결정 의식적 evolution. 26-spec line 114 verbatim: *"Implement `/api/joon/narration/route.ts` — template-based generation (no Claude API for W2, just templates)"*. Day 7 prompt + 사장님 결정 = actual sonnet-4-6 generation + 3-layer safety filter pipeline (defense-in-depth).
+
+| Source | Position |
+|---|---|
+| 26-spec line 114 | "template-based generation (no Claude API for W2, just templates)" |
+| Day 7 prompt v1 P2 | "All Aurora narration responses pass through applySafetyFilter (3-layer)" + "Claude sonnet-4-6 via src/lib/claude/client.ts" |
+| Day 7 ship (commit 1d05856) | callPersona('aurora', ...) sonnet-4-6 + containsForbiddenOutput + applySafetyFilter 3-layer |
+
+**Resolution**: Per vault_sot_priority §4.4 W2 evolution rule (Drift #2 / #5 / #7 family — W2 implementation legitimate evolution of W1/W2 stub). 26-spec line 114 annotation at W2 close: "Day 7 evolution per operator decision — sonnet-4-6 generation + 3-layer output safety filter; template-only was W2 prep version, superseded".
+
+**Architectural follow-up**: Layer 1/2 safety filter는 user input 용 설계이나 Day 7 assistant output에 적용. Defense-in-depth로 working but false-negative gap on soft phrasing — W4 safety-filter-tester re-run + Layer 2 prompt rewrite for assistant-mode queued. 신규 memory [[aurora-narration-assistant-mode-safety-filter-limit]] (project) 등록.
+
+---
+
+## Vault enhancements (not drift — Cowork direct contributions)
+
+이 section은 drift catalog가 아닌 Cowork이 vault SoT 자체를 *enhance*한 항목 누적. Drift와 구분되는 이유: drift = vault SoT 간 또는 vault-code 간 충돌, enhancement = vault SoT를 확장한 contribution.
+
+### V1 — vault 44 §3 Brand logo system specs 신설 (2026-05-23 W2 Day 2)
+
+사장님이 favicon (§2.2) ship 후 "favicon ≠ 로고" 관찰을 제기. vault 44가 P0-P3 8개 자산만 다루고 brand logo system (wordmark / lockup / monochrome variants / Lottie)이 누락되어 있음을 발견.
+
+**Contribution**: vault 44 §3 "Brand logo system specs" 신설 — Primary brandmark large + Wordmark Korean/English + 4 Lockup variations + Monochrome variants + Clear space rules + Lottie deferred to V1.1. §0 priority table 6 row 추가 (#9-#14). 기존 §3-§7 renumber to §4-§8. Cowork direct write to vault file (manual merge 불필요).
 
 ## Working memory ↔ vault sync rules
 
