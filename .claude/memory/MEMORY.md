@@ -24,6 +24,6 @@ Working directory: `~/Development/cohort` · Vault SoT: `~/Documents/elevate-por
 
 ## Reference (external systems)
 - [Vault SoT 38-43](vault_sot_38_to_43.md) — vault file map (38=brand SoT, 39=methodology, 40=design master, 41/42/43=deep dive)
-- [**Vault SoT priority — working memory pointer**](vault_sot_priority.md) — light pointer to vault governance master `~/Documents/elevate-portfolio/vault_sot_priority.md` v0.1 DRAFT + Day-to-day implementation Drift catalog (#1-#7: cache / composite signature evolution / mascot / payment / **NEW Day 6: calibration α / route path / W2 file additions superseded**)
+- [**Vault SoT priority — working memory pointer**](vault_sot_priority.md) — light pointer to vault governance master `~/Documents/elevate-portfolio/vault_sot_priority.md` v0.1 DRAFT + Day-to-day implementation Drift catalog (#1-#8: cache / composite signature / mascot / payment / **Day 6: calibration α / route path / W2 file additions superseded** / **Day 7 prep: vault 44 §3 brand logo system**)
 - [Postgres migrations](postgres_migration_history.md)
 - [Connected MCPs](connected_mcps.md)

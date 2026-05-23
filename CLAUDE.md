@@ -134,6 +134,8 @@ Co-reviewed-by: cohort-product (PASS)
 | W1 implementation | `~/Documents/elevate-portfolio/25-sprint-0-w1-implementation-spec.md` |
 | W2-W5 implementation | `~/Documents/elevate-portfolio/26-sprint-0-w2-w5-implementation-spec.md` |
 | Architecture | `~/Documents/elevate-portfolio/14-v1-core-architecture-sketch.md` (apply brand mapping §7 of 38-brief) |
+| Digital asset prompts + Brand logo system | `~/Documents/elevate-portfolio/44-digital-asset-prompts.md` (§2 individual digital assets + §3 brand logo system NEW 2026-05-23) |
+| Vault SoT priority + drift catalog | `~/Documents/elevate-portfolio/vault_sot_priority.md` v0.1 DRAFT (operator sign-off pending via 23-batch-review-prep) |
 | Landing copy | `~/Documents/elevate-portfolio/17-pre-launch-landing-page-sketch.md` (apply Set A-D taglines from 38-brief §4) |
 | SEO content | `~/Documents/elevate-portfolio/24-pre-launch-seo-content.md` |
 | Onboarding survey | `~/Documents/elevate-portfolio/20-sim-real-verification-mechanism.md` §11 |

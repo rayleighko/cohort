@@ -100,6 +100,14 @@ W2 Day 1 (Day 6) Code CLI가 sub-task 1 vault verbatim extraction 중 empirical 
 
 **Resolution**: vault_sot_priority.md §4.4 evolution rule 적용 (Drift #2와 같은 family). W2 종료 batch cleanup: 26-spec W2 file additions 갱신 (composite-score.ts → composite.ts, MacroScores shape annotation → MacroComposite reference).
 
+### Drift #8 — vault 44 §3 신설 (W2 Day 2 / Day 7 prep, 2026-05-23)
+
+W2 Day 2 (Day 7 prep) Cowork session에서 사장님이 favicon (§2.2) ship 후 "favicon ≠ 로고" 관찰을 제기. vault 44가 P0-P3 8개 자산만 다루고 brand logo system (wordmark / lockup / monochrome variants / Lottie)이 누락되어 있음을 발견.
+
+**Resolution**: vault 44 §3 "Brand logo system specs" 신설 — Primary brandmark large + Wordmark Korean/English + 4 Lockup variations + Monochrome variants + Clear space rules + Lottie deferred to V1.1. §0 priority table 6 row 추가 (#9-#14). 기존 §3-§7 renumber to §4-§8. Lottie scope = Sprint 0 W5 cap 외, Framer Motion + CSS로 motion 영역 대체.
+
+**Status**: 직접 vault write 가능 확인 (cohort/.claude/memory 막힘과 대조). 사장님 manual merge 불필요.
+
 ## Working memory ↔ vault sync rules
 
 - `.claude/memory/*.md` = **light auto-load context** (333 LOC total across ~15 files). 본 file도 그 일부.
