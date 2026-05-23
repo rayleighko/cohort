@@ -1,12 +1,9 @@
 import { Suspense } from 'react';
 import Card from '@/components/ui/Card';
 import AuroraNarrationCard from '@/components/aurora/AuroraNarrationCard';
+import IndicatorCard from '@/components/shape-a/IndicatorCard';
 import { getMacroSnapshot } from '@/lib/macro/snapshot';
-import type {
-  MacroComposite,
-  MacroIndicator,
-  MacroZone,
-} from '@/lib/macro/composite';
+import type { MacroComposite, MacroZone } from '@/lib/macro/composite';
 
 // Strategic Decision 0 Option B: zone label uses neutral monetary register
 // only. No allocation, timing, or buy/sell copy anywhere on this surface.
@@ -40,13 +37,6 @@ const INDICATOR_LABEL_KO: Record<string, string> = {
   USDKRW: '원/달러 환율',
   VIXCLS: 'VIX 변동성',
   DTWEXBGS: '달러 지수 (DXY proxy)',
-};
-
-const INDICATOR_UNIT: Record<string, string> = {
-  KR_US_RATE_SPREAD: '%p',
-  USDKRW: '원',
-  VIXCLS: '',
-  DTWEXBGS: '',
 };
 
 const KST_DATETIME_FMT = new Intl.DateTimeFormat('ko-KR', {
@@ -111,8 +101,8 @@ function CompositeCard({ composite }: { composite: MacroComposite }) {
         <ZoneBadge zone={composite.zone} />
         {composite.degraded ? (
           <p className="break-keep text-sm text-cohort-ink-70">
-            일부 지표 fetch 실패. {composite.missingIndicators?.length}개 누락
-            상태로 컴포지트 계산.
+            일부 지표 fetch 실패. {composite.missingIndicators?.length ?? 0}개
+            누락 상태로 컴포지트 계산.
           </p>
         ) : null}
       </div>
@@ -146,46 +136,26 @@ function KeyDriverCard({ composite }: { composite: MacroComposite }) {
   );
 }
 
-function IndicatorRow(props: MacroIndicator) {
-  const { source, code, latest, normalized, weight, contribution } = props;
-  const label = INDICATOR_LABEL_KO[code] ?? code;
-  const unit = INDICATOR_UNIT[code] ?? '';
+function IndicatorGrid({ composite }: { composite: MacroComposite }) {
+  // 26-spec line 107 (W2 Day 3): "card grid 1-column mobile, 2-column md,
+  // 3-column lg". Sparkline-equipped IndicatorCards land here.
   return (
-    <li className="flex flex-col gap-1 border-b border-cohort-ink-05 py-3 last:border-b-0">
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="break-keep font-medium text-cohort-ink-90">
-          {label}
-        </span>
-        <span className="font-mono text-sm text-cohort-ink-90">
-          {latest.toFixed(2)}
-          {unit ? ` ${unit}` : ''}
-        </span>
+    <section
+      aria-labelledby="indicators-heading"
+      className="flex flex-col gap-3"
+    >
+      <h2
+        id="indicators-heading"
+        className="text-sm font-medium uppercase tracking-wider text-cohort-ink-70"
+      >
+        Indicators
+      </h2>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {composite.indicators.map((i) => (
+          <IndicatorCard key={i.code} indicator={i} />
+        ))}
       </div>
-      <div className="flex items-baseline justify-between gap-3 font-mono text-xs text-cohort-ink-70">
-        <span className="uppercase tracking-wider">{source}</span>
-        <span>
-          정규화 {normalized.toFixed(2)} · 가중 {(weight * 100).toFixed(0)}%
-          · 기여 {contribution.toFixed(2)}
-        </span>
-      </div>
-    </li>
-  );
-}
-
-function IndicatorList({ composite }: { composite: MacroComposite }) {
-  return (
-    <Card>
-      <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium uppercase tracking-wider text-cohort-ink-70">
-          Indicators
-        </p>
-        <ul className="flex flex-col">
-          {composite.indicators.map((i) => (
-            <IndicatorRow key={i.code} {...i} />
-          ))}
-        </ul>
-      </div>
-    </Card>
+    </section>
   );
 }
 
@@ -216,7 +186,7 @@ async function MacroBody() {
         <CompositeCard composite={composite} />
         <AuroraNarrationCard composite={composite} />
         <KeyDriverCard composite={composite} />
-        <IndicatorList composite={composite} />
+        <IndicatorGrid composite={composite} />
       </div>
     );
   } catch {
@@ -226,7 +196,7 @@ async function MacroBody() {
 
 export default function DashboardPage() {
   return (
-    <main className="mx-auto flex w-full max-w-screen-md flex-col gap-4 px-4 pb-8 pt-6 sm:px-6">
+    <main className="mx-auto flex w-full max-w-screen-lg flex-col gap-4 px-4 pb-8 pt-6 sm:px-6">
       <Suspense
         fallback={
           <Card>
