@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import Card from '@/components/ui/Card';
+import AuroraNarrationCard from '@/components/aurora/AuroraNarrationCard';
 import { getMacroSnapshot } from '@/lib/macro/snapshot';
 import type {
   MacroComposite,
@@ -188,21 +189,6 @@ function IndicatorList({ composite }: { composite: MacroComposite }) {
   );
 }
 
-function AuroraPlaceholderCard() {
-  return (
-    <Card className="border-l-4 border-l-aurora-calm">
-      <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium uppercase tracking-wider text-cohort-ink-70">
-          🕊 Aurora morning brief
-        </p>
-        <p className="break-keep text-cohort-ink-50">
-          [Aurora morning brief — Day 7 wire-up]
-        </p>
-      </div>
-    </Card>
-  );
-}
-
 function MacroUnavailable() {
   return (
     <Card>
@@ -228,7 +214,7 @@ async function MacroBody() {
           </h1>
         </header>
         <CompositeCard composite={composite} />
-        <AuroraPlaceholderCard />
+        <AuroraNarrationCard composite={composite} />
         <KeyDriverCard composite={composite} />
         <IndicatorList composite={composite} />
       </div>
