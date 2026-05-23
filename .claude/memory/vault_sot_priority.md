@@ -126,6 +126,30 @@ Day 7 사장님 결정 의식적 evolution. 26-spec line 114 verbatim: *"Impleme
 
 **Architectural follow-up**: Layer 1/2 safety filter는 user input 용 설계이나 Day 7 assistant output에 적용. Defense-in-depth로 working but false-negative gap on soft phrasing — W4 safety-filter-tester re-run + Layer 2 prompt rewrite for assistant-mode queued. 신규 memory [[aurora-narration-assistant-mode-safety-filter-limit]] (project) 등록.
 
+### Drift #11 — CompositeScoreCard naming (26-spec line 105 vs Day 6 ship inline, RESOLVED Day 8 verify)
+
+- `26-spec` line 105 명시: *"CompositeScoreCard.tsx — composite + 5-zone color coding (risk-off red → risk-on green)"*
+- Day 6 ship (commit 31b5f40): inline'd as `CompositeCard` inside `src/app/(dashboard)/dashboard/page.tsx` (별도 file 없음)
+- Day 7 + Day 8 ship: 동일 inline pattern 유지
+
+**Resolution (Drift #2/#7 family — W2 evolution of W1 stub)**: Day 6 inline pattern 유지 (page.tsx 안에서 작동). 별도 CompositeScoreCard.tsx file 추출 deferred. W2 종료 batch cleanup target: 26-spec line 105 annotation "Day 6 evolution — inline'd in page.tsx; separate component file deferred to W3+ when Shape A full UI lands".
+
+### Drift #12 — MacroDashboard.tsx (26-spec line 103 vs Day 6 ship inline, RESOLVED Day 8 verify)
+
+- `26-spec` line 103 명시: *"MacroDashboard.tsx — vertical stack layout (mobile-first)"*
+- Day 6 ship (commit 31b5f40): inline'd as `MacroBody` async function inside `src/app/(dashboard)/dashboard/page.tsx`
+- Day 8 polish (commit e00764e): 같은 page.tsx 안에서 `IndicatorList` → `IndicatorGrid` 패치 (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3` per 26-spec line 107)
+
+**Resolution (Drift #11 same family)**: page.tsx inline pattern은 W2 Day 1-3 evolution legitimate. Sprint 0 W5 launch 시 단일 dashboard page에 inline이 component extraction보다 단순 + 정합. W2 종료 batch cleanup: 26-spec line 103 annotation "Day 6 evolution — inline'd in page.tsx".
+
+### Drift #13 — Favicon asset filename + manifest.json split-brain (RESOLVED Day 8 ship e00764e)
+
+- `vault 44 §2.2` 명시: `icon-{192,512}.png` + `maskable-icon-512.png` filename convention
+- realfavicongenerator.net export (사장님 자산): `web-app-manifest-{192,512}x{192,512}.png` filename convention
+- Day 8 ship: placeholder `public/manifest.json` deleted + `public/site.webmanifest` updated to Cohort branding + reference both PNG + SVG icons (maskable distinct). `src/app/layout.tsx` metadata.icons + manifest swap.
+
+**Resolution**: 사장님 workflow output (realfavicongenerator export convention) 채택. vault 44 §2.2 filename naming은 reference only — actual filename은 export tool에 따라 달라질 수 있음. W2 종료 batch cleanup: vault 44 §2.2 annotation *"naming variant acceptable — realfavicongenerator.net export convention compatible (web-app-manifest-*.png and icon-*.png 모두 가능)"*. PWA install + browser tab favicon 정상 작동 확인 (Day 8 Block A favicon verify section).
+
 ---
 
 ## Vault enhancements (not drift — Cowork direct contributions)
