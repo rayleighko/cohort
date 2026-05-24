@@ -188,13 +188,40 @@ export default function ChatWindow({
     [composite, draft, pending, sessionId],
   );
 
-  // Cmd/Ctrl+Enter submits; Enter alone inserts newline (textarea contract).
+  // Caret-aware Enter contract (사장님 spec 2026-05-24):
+  //   • Enter at end of textarea (and non-empty draft) → send
+  //   • Enter mid-textarea                              → newline (default)
+  //   • Shift+Enter (anywhere)                          → newline (default)
+  //   • Cmd (mac) / Ctrl (win) + Enter (anywhere)       → newline (intentional)
+  // Cmd/Ctrl+Enter is a no-op in native textarea, so we manually splice '\n'
+  // at the caret via setRangeText (auto-updates selection + scroll).
   const onKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      if (e.key !== 'Enter') return;
+
+      const target = e.currentTarget;
+
+      // Cmd/Ctrl+Enter → 명시적 개행
+      if (e.metaKey || e.ctrlKey) {
+        e.preventDefault();
+        target.setRangeText('\n', target.selectionStart, target.selectionEnd, 'end');
+        setDraft(target.value);
+        return;
+      }
+
+      // Shift+Enter → textarea default newline; nothing to override
+      if (e.shiftKey) return;
+
+      // 일반 Enter — caret 위치 + non-empty draft check
+      const caretAtEnd =
+        target.selectionStart === target.value.length &&
+        target.selectionEnd === target.value.length;
+
+      if (caretAtEnd && target.value.trim().length > 0) {
         e.preventDefault();
         void onSubmit();
       }
+      // caret 중간 또는 empty draft면 default behavior (newline insert)
     },
     [onSubmit],
   );
@@ -280,7 +307,7 @@ export default function ChatWindow({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="질문을 적어주세요 (Cmd/Ctrl+Enter 전송)"
+            placeholder="질문을 적어주세요 (Enter 전송 · Shift/⌘Enter 줄바꿈)"
             rows={2}
             maxLength={2000}
             disabled={pending}
