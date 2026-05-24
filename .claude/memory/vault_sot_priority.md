@@ -145,6 +145,24 @@ Day 7 사장님 결정 의식적 evolution. 26-spec line 114 verbatim: *"Impleme
 
 **Resolution (cohort repo side ✅ complete)**: Day 10 cohort repo cleanup 완료. **vault annotation pending** (W2 종료 batch Cowork trace) — 26-spec line 103 annotation: *"Day 6 evolution — inline'd in page.tsx as MacroBody; W1 stub deleted Day 10. Day 8 IndicatorGrid responsive grid added (md/lg)"*.
 
+### Drift #15 — 26-spec W1 outputs claim "joon_chat persistence" vs W1 actual ship (RESOLVED Day 11 ship 309f6ca, vault annotation pending)
+
+- `26-spec` line 17 verbatim (W1 outputs claim): *"Claude API + 준 chat surface + safety filter 3-layer + joon_chat persistence"*
+- W1 actual ship (Day 4 commit 2606bd5): `safety-filter.ts` only — **chat surface 없음, joon_chat table 없음**
+- **Day 11 ship (commit 309f6ca, 2026-05-24)**: `aurora_chat` migration 0005 + `/api/aurora/chat` route + MascotChatBubble/ChatWindow/ChatMessage — W1 deferred claim을 W3 Day 1에 Aurora naming으로 delivery (7일 late)
+
+**Resolution (Drift #2/#7/#9 evolution family)**: vault internal claim drift (W1 outputs spec과 W1 actual ship mismatch). Day 11 ship이 deferred claim을 fulfill. **vault annotation pending** (W2 종료 batch Cowork trace) — 26-spec line 17 annotation: *"Day 11 evolution — joon_chat surface + persistence deferred from W1 to W3 Day 1 scaffold (aurora_chat table 0005, joon→aurora naming per Drift #3/#8 cleanup); W5 Day 4 full per operator decision"*.
+
+### Drift #16 — 26-spec W5 Day 4 chat full spec ↔ Day 11 W3 Day 1 scaffold pull-forward (RESOLVED Day 11 ship 309f6ca, vault annotation pending)
+
+- `26-spec` line 411 + 513-524: *"W5 — ... + In-app chat full + Launch prep"* + W5 Day 4 chat full spec verbatim (JoonChatBubble + ChatWindow + ChatMessage + multi-turn 20-message + 3-layer safety filter + joon_chat persistence)
+- **Day 11 operator decision (2026-05-24)**: Pull W5 Day 4 chat scaffold forward 2 weeks → W3 Day 1 scaffold. Day 7-9 narration infra direct extension legitimate.
+- Day 11 ship: scaffold only (MascotChatBubble + ChatWindow + ChatMessage + /api/aurora/chat + aurora_chat 0005 + nullable user_id W5 future-proof). W5 Day 4 retains full-rewrite scope with Day 11 scaffold as baseline.
+
+**Resolution**: 2-week pull-forward legitimate evolution per [[option-a-clean-break-w1-w2]] §"W2 supersedes W1 when signature evolves" family (W3 Day 1 scaffold supersedes deferred plan, W5 Day 4 retains future expansion timing). **vault annotation pending** (W2 종료 batch Cowork trace) — 26-spec line 513-524 annotation: *"Day 11 scaffold pull-forward — MascotChatBubble + ChatWindow + ChatMessage + /api/aurora/chat + aurora_chat 0005 ship (joon→aurora naming Drift #3/#8 cleanup applied). W5 Day 4 scope: hydrate UI history on mount; focus trap + per-message SR speaker semantics; useScrollLock hook; FAB hide-on-modal; modal entry animation; auth-scoped chat (user_id population + RLS SELECT policy)"*.
+
+**Sub-pattern note**: Code CLI sub-task 1 HALT REPORT가 prompt 자체의 stale assumption "W4 Day 4"를 정확히 catch ([[prompt-stale-assumption-verify-gate]] 2nd successful invocation, Day 10 2xl breakpoint 1st). Pattern proven durable across 2 consecutive Day prompts.
+
 ### Drift #13 — Favicon asset filename + manifest.json split-brain (RESOLVED Day 8 ship e00764e)
 
 - `vault 44 §2.2` 명시: `icon-{192,512}.png` + `maskable-icon-512.png` filename convention

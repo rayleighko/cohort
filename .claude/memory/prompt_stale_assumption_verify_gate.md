@@ -68,5 +68,41 @@ Cowork이 외부에서 prompt 작성 시 "deferred", "stale", "pending" 등 coho
 
 본 pattern은 sub-task 1 형식 표준화 — **모든 Day prompt가 sub-task 1 verify HALT를 포함**해야 함. 단 sub-task 1 scope는 prompt 내 가장 risky assumption 1-3개로 제한 (over-verify 방지).
 
+## 2nd successful invocation — Day 11 W4 Day 4 → W5 Day 4 catch (2026-05-24)
+
+**Stale assumption**: Day 11 prompt v1 (2026-05-24, Cowork 작성)이 "26-spec W4 Day 4 chat full spec"이라고 4번 명시. 실제로는 **W5 Day 4 chat full spec** (26-spec line 411 + 513-524).
+
+**Cowork prompt drafting 시 발생한 원인**:
+- Cowork이 26-spec line 17 W1 outputs claim "joon_chat persistence" verbatim 본 후 chat surface가 어느 W에 spec됐는지 imagine
+- "W4"는 사장님이 자주 사용하는 shorthand (Cowork이 일부 prompt에서 W4-W5 묶음 표현 사용)와 mixed → Day 11 prompt에서 "W4 Day 4"로 잘못 작성
+- 실제 spec verify 안 함 (vault 26-spec line 411 verbatim — "W5 — ... + In-app chat full" 명시)
+
+**Catch mechanism**: Day 11 sub-task 1 "Vault extraction — REPORT ONLY, HALT for operator verify" gate에서 Code CLI가:
+1. 26-spec verbatim search ("chat surface", "chat scaffold", "MascotChat", "ChatBubble", "aurora_chat") → line 411 W5 명시 발견
+2. Drift catch report: *"the spec says W5 Day 4 (not W4 Day 4) for the chat full"* + 4 stale instances 표 + 1-week shift implication 분석 + scope verbatim 추출
+3. 5개 verify items 사장님 confirm 요청 (default-yes recommend)
+
+**Outcome**:
+- 1-week → 2-week pull-forward 정확히 reframe (Day 11 scaffold = W5 Day 4에서 2주 앞당김)
+- Drift #15 (W1 outputs claim) + Drift #16 (2-week pull-forward) catalog 추가
+- Commit message accurate (no false "W4 Day 4" claim)
+- Pattern 2회 연속 invocation proven durable
+
+## 3+ invocation projection
+
+Pattern이 future Cowork prompt drafting에서 stale assumption catch 지속 — 의도된 design:
+
+1. Cowork은 prompt 작성 시 vault SoT (38/40/41/42/26-spec 등) 만 보고 작성하면 정확하지 않은 inference (e.g., "W4 Day 4" — actual W5 Day 4) 가능
+2. Code CLI는 sub-task 1 HALT REPORT gate에서 empirical verbatim verify
+3. 사장님은 catch report 받고 default-yes confirmation
+4. Sub-task 2+ proceed with corrected scope
+
+**Cowork prompt drafting 시 명시적 self-guard**:
+- Day prompt drafting 전 "26-spec line X verbatim" reference 시도 시 actual line 번호 + verbatim quote include
+- "deferred", "stale", "pending" 키워드 사용 시 즉시 catch obligation
+- "evolution from W X Day Y" framing 시 W/Day verbatim verify
+
+향후 Day prompt마다 sub-task 1 HALT REPORT 유지 — pattern 진행 중.
+
 Related: [[ao-5-vault-wins]] [[option-a-clean-break-w1-w2]] [[claude-code-cli-handoff-pattern]]
 Source commit: b6d07dc (Day 10 W2-close cleanup 2026-05-24)
