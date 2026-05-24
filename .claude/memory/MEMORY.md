@@ -24,9 +24,10 @@ Working directory: `~/Development/cohort` · Vault SoT: `~/Documents/elevate-por
 - [Component-time state color rule](component_time_state_color_rule.md)
 - [No --no-verify](no_no_verify.md)
 - [**Option a clean break W1→W2**](option_a_clean_break_w1_w2.md) — NEW 2026-05-23, when W2 spec genuinely evolves W1 signature with zero callers, prefer clean break over side-by-side/wrapper
+- [**Prompt stale assumption verify gate**](prompt_stale_assumption_verify_gate.md) — NEW 2026-05-24 Day 10, sub-task 1 HALT REPORT empirical verify catches stale "deferred/stale/pending" prompt assumptions before they ship no-op code
 
 ## Reference (external systems)
 - [Vault SoT 38-43](vault_sot_38_to_43.md) — vault file map (38=brand SoT, 39=methodology, 40=design master, 41/42/43=deep dive)
-- [**Vault SoT priority — working memory pointer**](vault_sot_priority.md) — light pointer to vault governance master `~/Documents/elevate-portfolio/vault_sot_priority.md` v0.1 DRAFT + Day-to-day implementation Drift catalog (#1-#14: cache / composite signature / mascot / payment / **Day 6 #5-#7: calibration α / route path / W2 file additions** / **Day 7 #8-#9: Aurora naming cleanup / Day 4 template→Claude evolution** / **Day 8 #11-#13: CompositeScoreCard naming / MacroDashboard naming / Favicon manifest split-brain** / **Day 9 #14: Aurora narration category naming macro_overview→morning_brief**) + Vault enhancement log (V1: vault 44 §3 brand logo system)
+- [**Vault SoT priority — working memory pointer**](vault_sot_priority.md) — light pointer to vault governance master `~/Documents/elevate-portfolio/vault_sot_priority.md` v0.1 DRAFT + Day-to-day implementation Drift catalog (#1-#14: cache / composite signature / mascot / payment / **Day 6 #5-#7: calibration α / route path / W2 file additions** / **Day 7 #8-#9: Aurora naming cleanup / Day 4 template→Claude evolution** / **Day 8 #11-#13: CompositeScoreCard naming / MacroDashboard naming / Favicon manifest split-brain** [**Day 10 #11-#12: cohort repo side resolved (W1 stub deletion b6d07dc)**] / **Day 9 #14: Aurora narration category naming macro_overview→morning_brief**) + Vault enhancement log (V1: vault 44 §3 brand logo system)
 - [Postgres migrations](postgres_migration_history.md)
 - [Connected MCPs](connected_mcps.md)
