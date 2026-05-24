@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import * as Sentry from '@sentry/nextjs';
 import '@/styles/globals.css';
 import PostHogProvider from '@/components/analytics/PostHogProvider';
 import ServiceWorkerRegister from '@/components/pwa/ServiceWorkerRegister';
@@ -6,7 +7,7 @@ import ServiceWorkerRegister from '@/components/pwa/ServiceWorkerRegister';
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? 'Cohort';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cohort.co.kr';
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
     default: 'Cohort — 흔들리지 않는 투자 페이스',
@@ -30,6 +31,23 @@ export const metadata: Metadata = {
     title: APP_NAME,
   },
 };
+
+/**
+ * generateMetadata — Sentry wizard requirement (Sentry.getTraceData propagates
+ * server → client trace continuity via HTML metadata). Required by @sentry/nextjs
+ * 8.0+ Next.js 14 app router pattern.
+ *
+ * Note: Next.js requires `metadata` OR `generateMetadata`, not both. We chose
+ * generateMetadata to inject runtime trace data on each request.
+ */
+export function generateMetadata(): Metadata {
+  return {
+    ...baseMetadata,
+    other: {
+      ...Sentry.getTraceData(),
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
