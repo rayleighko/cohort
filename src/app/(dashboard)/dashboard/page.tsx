@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import Card from '@/components/ui/Card';
 import AuroraNarrationCard from '@/components/aurora/AuroraNarrationCard';
+import MascotChatBubble from '@/components/aurora/MascotChatBubble';
 import IndicatorCard from '@/components/shape-a/IndicatorCard';
 import { getMacroSnapshot } from '@/lib/macro/snapshot';
 import type { MacroComposite, MacroZone } from '@/lib/macro/composite';
@@ -206,6 +207,8 @@ export default function DashboardPage() {
       >
         <MacroBody />
       </Suspense>
+      {/* Always-accessible Aurora chat per 14-arch §14.3 + 26-spec line 520. */}
+      <MascotChatBubble />
     </main>
   );
 }

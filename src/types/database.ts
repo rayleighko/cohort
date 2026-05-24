@@ -39,6 +39,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      aurora_chat: {
+        Row: {
+          character: string
+          created_at: string
+          id: string
+          role: string
+          safety_filter_category: string | null
+          safety_filter_triggered: boolean
+          session_id: string
+          text: string
+          turn_index: number
+          user_id: string | null
+        }
+        Insert: {
+          character?: string
+          created_at?: string
+          id?: string
+          role: string
+          safety_filter_category?: string | null
+          safety_filter_triggered?: boolean
+          session_id: string
+          text: string
+          turn_index: number
+          user_id?: string | null
+        }
+        Update: {
+          character?: string
+          created_at?: string
+          id?: string
+          role?: string
+          safety_filter_category?: string | null
+          safety_filter_triggered?: boolean
+          session_id?: string
+          text?: string
+          turn_index?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       aurora_narration_log: {
         Row: {
           category: string

@@ -69,3 +69,32 @@ export async function callPersona(
     throw err;
   }
 }
+
+/** Multi-turn message payload. Aurora chat surface (Day 11+) consumer. */
+export type PersonaTurn = { role: 'user' | 'assistant'; content: string };
+
+/**
+ * Multi-turn variant of `callPersona` — accepts a pre-built messages array
+ * (system + history + new user turn) for chat surfaces where the prompt
+ * builder has already shaped the conversation. Day 11 introduces this for
+ * Aurora chat (W3 Day 1 scaffold).
+ */
+export async function callPersonaMultiTurn(
+  character: MascotCharacter,
+  systemPrompt: string,
+  messages: PersonaTurn[],
+): Promise<string> {
+  try {
+    const anthropic = getAnthropicClient();
+    const message = await anthropic.messages.create({
+      model: COHORT_PERSONA_MODEL,
+      max_tokens: 600,
+      system: systemPrompt,
+      messages,
+    });
+    return extractText(message);
+  } catch (err) {
+    console.error(`[Cohort] callPersonaMultiTurn failed (${character})`, err);
+    throw err;
+  }
+}
