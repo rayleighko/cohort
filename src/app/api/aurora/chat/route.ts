@@ -40,22 +40,20 @@ import {
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getServerPostHog } from '@/lib/analytics/posthog-server';
 import type { MacroComposite, MacroZone } from '@/lib/macro/composite';
+import {
+  QUOTA_EXCEEDED_REDIRECT_KO,
+  QUOTA_WARN_THRESHOLD,
+  resolveUserTier,
+  TIER_QUOTAS,
+  tomorrowMidnightKstIso,
+  type TierType,
+} from '@/lib/aurora/chat-quota';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const CHAT_UNAVAILABLE_KO =
   '[Aurora가 잠시 자리를 비웠습니다. 잠시 후 다시 시도해주세요.]';
-
-/**
- * Tier 0 anonymous quota — applied per (session_id, UTC date). Tier 1+
- * quotas (50/500/unlimited) land alongside auth wiring (W4+). The 429
- * redirect copy stays Aurora-style (calm + plan-reference + companion
- * register, cohort-product approved W3 Thu).
- */
-const TIER_0_DAILY_QUOTA = 10;
-const QUOTA_EXCEEDED_REDIRECT_KO =
-  '오늘 Aurora chat quota 10턴 모두 사용하셨어요. 본인 plan 영역 점검 시간으로 같이 호흡해볼까요. 내일 reset됩니다.';
 
 // Input bounds — Tier 0 endpoint is unauthenticated, so untrusted input must
 // not be allowed to inflate Anthropic prompts or amplify abuse vectors.
@@ -320,6 +318,70 @@ async function incrementSessionQuota(
   }
 }
 
+/**
+ * Emits per-tier quota PostHog events (vault 62 §1 Q4, 2026-05-25).
+ *   - `chat_quota_hit`: fired when daily usage crosses 80% threshold OR
+ *     equals the daily cap (threshold property = '80' | '100').
+ *   - `chat_quota_blocked`: fired alongside the 429 when a request is
+ *     refused for exceeding the cap.
+ * Self-contained: gets + shuts down its own PostHog client to keep call
+ * sites simple. Skips silently when PH is disabled or tier is unlimited.
+ */
+async function emitQuotaEvent(input: {
+  sessionId: string;
+  userId: string | null;
+  tier: TierType;
+  dailyCount: number;
+  dailyLimit: number;
+  blocked: boolean;
+}): Promise<void> {
+  if (!Number.isFinite(input.dailyLimit)) return;
+  const ph = getServerPostHog();
+  if (!ph) return;
+
+  const ratio = input.dailyCount / input.dailyLimit;
+  const threshold =
+    ratio >= 1.0 ? '100' : ratio >= QUOTA_WARN_THRESHOLD ? '80' : null;
+  const distinctId = input.userId ?? `aurora-chat-${input.sessionId}`;
+
+  try {
+    if (threshold) {
+      ph.capture({
+        distinctId,
+        event: 'chat_quota_hit',
+        properties: {
+          tier: input.tier,
+          daily_count: input.dailyCount,
+          daily_limit: input.dailyLimit,
+          threshold,
+        },
+      });
+    }
+    if (input.blocked) {
+      ph.capture({
+        distinctId,
+        event: 'chat_quota_blocked',
+        properties: {
+          tier: input.tier,
+          daily_count: input.dailyCount,
+          daily_limit: input.dailyLimit,
+        },
+      });
+    }
+  } catch (err) {
+    console.error('[Cohort] PostHog quota event emit failed (non-fatal)', err);
+  } finally {
+    try {
+      await ph.shutdown();
+    } catch (err) {
+      console.error(
+        '[Cohort] PostHog shutdown after quota emit failed (non-fatal)',
+        err,
+      );
+    }
+  }
+}
+
 async function emitPostHog(event: {
   sessionId: string;
   triggered: boolean;
@@ -454,14 +516,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return noStoreJson(response);
   }
 
-  // Step 1.5 — Tier 0 quota check. Inserted AFTER input filter so safety
-  // primacy holds (Layer 1/2 always run, see Day 11 architecture); inserted
-  // BEFORE persona call so quota-exhausted users don't waste Sonnet/Haiku
-  // dollars. Input-side BLOCK already returned above (those don't count
-  // toward quota — Layer 1/2 filter rejection is system-side, not user
-  // consumption).
+  // Step 1.5 — per-tier quota check (vault 62 §1 Q3, 2026-05-25). Inserted
+  // AFTER input filter so safety primacy holds (Layer 1/2 always run, see
+  // Day 11 architecture); inserted BEFORE persona call so quota-exhausted
+  // users don't waste Sonnet/Haiku dollars. Input-side BLOCK already
+  // returned above (those don't count toward quota — Layer 1/2 filter
+  // rejection is system-side, not user consumption).
+  //
+  // Chat is anonymous in V1; userId stays null until W5 Wed auth wiring
+  // lands. resolveUserTier(null) → 'tier_0', daily cap 5.
+  const userId: string | null = null;
+  const userTier = await resolveUserTier(userId);
+  const tierLimits = TIER_QUOTAS[userTier];
   const usedToday = await fetchTodayQuotaForSession(sessionId);
-  if (usedToday >= TIER_0_DAILY_QUOTA) {
+
+  if (usedToday >= tierLimits.daily) {
+    await emitQuotaEvent({
+      sessionId,
+      userId,
+      tier: userTier,
+      dailyCount: usedToday,
+      dailyLimit: tierLimits.daily,
+      blocked: true,
+    });
     const text = QUOTA_EXCEEDED_REDIRECT_KO;
     const persistOk = await persistTurnPair({
       sessionId,
@@ -479,14 +556,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       side: 'pass',
       persistenceFailed: !persistOk,
     });
-    const response: ChatTurnResponse = {
-      character: 'aurora',
-      text,
-      triggered: false,
+    return noStoreJson(
+      {
+        error: 'chat_quota_exceeded',
+        character: 'aurora',
+        text,
+        triggered: false,
+        sessionId,
+        turnIndex: assistantTurnIndex,
+        tier: userTier,
+        daily_count: usedToday,
+        daily_limit: tierLimits.daily,
+        reset_at: tomorrowMidnightKstIso(),
+      },
+      { status: 429 },
+    );
+  }
+
+  // 80% warning emit (request still proceeds — quota_hit is informational).
+  if (usedToday >= tierLimits.daily * QUOTA_WARN_THRESHOLD) {
+    await emitQuotaEvent({
       sessionId,
-      turnIndex: assistantTurnIndex,
-    };
-    return noStoreJson(response, { status: 429 });
+      userId,
+      tier: userTier,
+      dailyCount: usedToday,
+      dailyLimit: tierLimits.daily,
+      blocked: false,
+    });
   }
 
   // Step 2 — build prompt from history fetched above (single fetch reused).
@@ -607,3 +703,4 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   };
   return noStoreJson(response);
 }
+

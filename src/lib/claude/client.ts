@@ -25,14 +25,22 @@ export const COHORT_CLASSIFIER_MODEL = 'claude-haiku-4-5-20251001';
 
 /**
  * Per-turn model routing heuristic (vault 51 §4.4 — Haiku/Sonnet smart routing).
- * Goal: route ~60-70% of queries to Haiku (10× cheaper than Sonnet) without
- * sacrificing framework-coach quality on the queries that actually need it.
+ *
+ * V1 runtime default (vault 62 §2.1, CEO confirm 2026-05-25): env flag
+ * `AURORA_MODEL_ROUTING_ENABLED !== 'true'` → always return true (Sonnet),
+ * regardless of message / profile. The heuristic below is retained but
+ * dormant; V1.5 enables routing via a Vercel env-var toggle + redeploy
+ * (no code change required).
+ *
+ * Heuristic (V1.5 active path): route ~60-70% of queries to Haiku (10×
+ * cheaper than Sonnet) without sacrificing framework-coach quality on the
+ * queries that actually need it.
  *
  * ADVISORY_REQUEST is short-circuited by the input-side safety filter BEFORE
  * any Claude call, so this heuristic never sees them. Caller is responsible
  * for that ordering (see `/api/aurora/chat/route.ts` Step 1).
  *
- * Returns true → Sonnet (deep). Returns false → Haiku (fast, default).
+ * Returns true → Sonnet (deep). Returns false → Haiku (fast).
  *
  * Heuristic signals (any one trips Sonnet):
  *   1. Length > 200 chars (long question implies complexity / multi-clause)
@@ -63,6 +71,14 @@ export function shouldUseSonnet(
     'frameworkAffinity'
   > | null,
 ): boolean {
+  // V1 default (vault 62 §2.1, 2026-05-25) — force Sonnet at runtime unless
+  // the routing env flag is explicitly 'true'. Case-sensitive; undefined /
+  // 'false' / '' all keep V1 default. V1.5 enables routing via Vercel env
+  // update + redeploy (no code change).
+  if (process.env.AURORA_MODEL_ROUTING_ENABLED !== 'true') {
+    return true;
+  }
+
   const msg = userMessage ?? '';
   if (msg.length > 200) return true;
   if (FRAMEWORK_RE.test(msg)) return true;

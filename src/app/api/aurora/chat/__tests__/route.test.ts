@@ -27,9 +27,24 @@ vi.mock('@/lib/claude/safety-filter', async () => {
   };
 });
 
+const mockedPostHogCapture = vi.fn();
+const mockedPostHogShutdown = vi.fn(async () => {});
+
 vi.mock('@/lib/analytics/posthog-server', () => ({
-  getServerPostHog: vi.fn(() => null),
+  getServerPostHog: vi.fn(() => ({
+    capture: mockedPostHogCapture,
+    shutdown: mockedPostHogShutdown,
+  })),
 }));
+
+vi.mock('@/lib/aurora/chat-quota', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/lib/aurora/chat-quota')>();
+  return {
+    ...actual,
+    resolveUserTier: vi.fn(actual.resolveUserTier),
+  };
+});
 
 // Mutable admin mocks — table-aware dispatcher (aurora_chat history+insert
 // vs chat_quota_usage select+insert+update — different chained calls).
@@ -80,9 +95,11 @@ vi.mock('@/lib/supabase/admin', () => ({
 import { POST } from '../route';
 import { callPersonaMultiTurn } from '@/lib/claude/client';
 import { applySafetyFilter } from '@/lib/claude/safety-filter';
+import { resolveUserTier } from '@/lib/aurora/chat-quota';
 
 const mockedCallPersonaMultiTurn = vi.mocked(callPersonaMultiTurn);
 const mockedApplySafetyFilter = vi.mocked(applySafetyFilter);
+const mockedResolveUserTier = vi.mocked(resolveUserTier);
 
 const SAMPLE_COMPOSITE: MacroComposite = {
   score: 2.34,
@@ -136,6 +153,9 @@ beforeEach(() => {
   mockedQuotaFetch.mockResolvedValue({ data: null, error: null });
   mockedQuotaInsert.mockImplementation(async () => ({ error: null }));
   mockedQuotaUpdate.mockImplementation(async () => ({ error: null }));
+  // Chat is anonymous-only in V1 → resolveUserTier(null) returns 'tier_0'.
+  // Per-tier tests override this per case.
+  mockedResolveUserTier.mockResolvedValue('tier_0');
 });
 
 afterEach(() => {
@@ -147,6 +167,9 @@ afterEach(() => {
   mockedQuotaFetch.mockReset();
   mockedQuotaInsert.mockReset();
   mockedQuotaUpdate.mockReset();
+  mockedResolveUserTier.mockReset();
+  mockedPostHogCapture.mockReset();
+  mockedPostHogShutdown.mockReset();
 });
 
 describe('POST /api/aurora/chat — input validation', () => {
@@ -461,11 +484,12 @@ describe('POST /api/aurora/chat — composite context (optional)', () => {
   });
 });
 
-describe('POST /api/aurora/chat — Tier 0 quota (W3 Thu)', () => {
-  it('returns 429 + Aurora-style redirect when quota >= 10 (TIER_0_DAILY_QUOTA)', async () => {
+describe('POST /api/aurora/chat — per-tier quota (vault 62 §1 Q3, 2026-05-25)', () => {
+  it('Tier 0 anonymous: returns 429 chat_quota_exceeded at 5 msg/day cap', async () => {
     mockedApplySafetyFilter.mockResolvedValueOnce(ALLOW_FILTER);
+    mockedResolveUserTier.mockResolvedValueOnce('tier_0');
     mockedQuotaFetch.mockResolvedValueOnce({
-      data: { id: 'q-1', message_count: 10, haiku_count: 7, sonnet_count: 3 },
+      data: { id: 'q-1', message_count: 5, haiku_count: 3, sonnet_count: 2 },
       error: null,
     });
 
@@ -478,29 +502,107 @@ describe('POST /api/aurora/chat — Tier 0 quota (W3 Thu)', () => {
 
     expect(res.status).toBe(429);
     const body = await res.json();
+    expect(body.error).toBe('chat_quota_exceeded');
     expect(body.character).toBe('aurora');
     expect(body.triggered).toBe(false);
+    expect(body.tier).toBe('tier_0');
+    expect(body.daily_count).toBe(5);
+    expect(body.daily_limit).toBe(5);
     expect(body.text).toContain('quota');
     expect(body.text).toContain('본인 plan');
     expect(body.text).toContain('내일');
+    // reset_at must be a valid ISO timestamp in the future.
+    expect(typeof body.reset_at).toBe('string');
+    expect(new Date(body.reset_at).getTime()).toBeGreaterThan(Date.now());
 
-    // Quota-exhausted user must NOT invoke Claude (cost-save primary intent).
     expect(mockedCallPersonaMultiTurn).not.toHaveBeenCalled();
-    // Quota path still persists the user message + redirect (history continuity).
     expect(mockedInsert).toHaveBeenCalledOnce();
-    // No quota increment on 429 — we don't penalize the user for hitting the cap.
     expect(mockedQuotaInsert).not.toHaveBeenCalled();
     expect(mockedQuotaUpdate).not.toHaveBeenCalled();
   });
 
-  it('boundary: count=9 passes through (under cap), count=10 returns 429', async () => {
-    // count=9 → pass
+  it('Tier 1 free signup: returns 429 at 20 msg/day cap', async () => {
+    mockedApplySafetyFilter.mockResolvedValueOnce(ALLOW_FILTER);
+    mockedResolveUserTier.mockResolvedValueOnce('tier_1');
+    mockedQuotaFetch.mockResolvedValueOnce({
+      data: { id: 'q-1', message_count: 20, haiku_count: 12, sonnet_count: 8 },
+      error: null,
+    });
+
+    const res = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '안녕' }) as never,
+    );
+
+    expect(res.status).toBe(429);
+    const body = await res.json();
+    expect(body.error).toBe('chat_quota_exceeded');
+    expect(body.tier).toBe('tier_1');
+    expect(body.daily_limit).toBe(20);
+    expect(mockedCallPersonaMultiTurn).not.toHaveBeenCalled();
+  });
+
+  it('Tier 2 Pro: returns 429 at 100 msg/day cap', async () => {
+    mockedApplySafetyFilter.mockResolvedValueOnce(ALLOW_FILTER);
+    mockedResolveUserTier.mockResolvedValueOnce('tier_2_pro');
+    mockedQuotaFetch.mockResolvedValueOnce({
+      data: {
+        id: 'q-1',
+        message_count: 100,
+        haiku_count: 60,
+        sonnet_count: 40,
+      },
+      error: null,
+    });
+
+    const res = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '안녕' }) as never,
+    );
+
+    expect(res.status).toBe(429);
+    const body = await res.json();
+    expect(body.tier).toBe('tier_2_pro');
+    expect(body.daily_limit).toBe(100);
+  });
+
+  it('Tier 3 Premium: never blocks (unlimited V1 defer per vault 53 §1)', async () => {
+    mockedApplySafetyFilter
+      .mockResolvedValueOnce(ALLOW_FILTER)
+      .mockResolvedValueOnce(ALLOW_FILTER);
+    mockedCallPersonaMultiTurn.mockResolvedValueOnce('응답');
+    mockedResolveUserTier.mockResolvedValueOnce('tier_3_premium');
+    mockedQuotaFetch.mockResolvedValueOnce({
+      data: {
+        id: 'q-1',
+        message_count: 9999,
+        haiku_count: 5000,
+        sonnet_count: 4999,
+      },
+      error: null,
+    });
+
+    const res = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '안녕' }) as never,
+    );
+
+    expect(res.status).toBe(200);
+    expect(mockedCallPersonaMultiTurn).toHaveBeenCalledOnce();
+    // Unlimited tier emits NO quota events (Number.isFinite guard).
+    expect(mockedPostHogCapture).not.toHaveBeenCalledWith(
+      expect.objectContaining({ event: 'chat_quota_hit' }),
+    );
+    expect(mockedPostHogCapture).not.toHaveBeenCalledWith(
+      expect.objectContaining({ event: 'chat_quota_blocked' }),
+    );
+  });
+
+  it('boundary tier_0: count=3 passes silently, count=4 passes + chat_quota_hit (80%), count=5 returns 429', async () => {
+    // count=3 — under 80% threshold, request proceeds, no quota event
     mockedApplySafetyFilter
       .mockResolvedValueOnce(ALLOW_FILTER)
       .mockResolvedValueOnce(ALLOW_FILTER);
     mockedCallPersonaMultiTurn.mockResolvedValueOnce('응답 1');
     mockedQuotaFetch.mockResolvedValueOnce({
-      data: { id: 'q-1', message_count: 9, haiku_count: 6, sonnet_count: 3 },
+      data: { id: 'q-1', message_count: 3, haiku_count: 2, sonnet_count: 1 },
       error: null,
     });
 
@@ -508,19 +610,48 @@ describe('POST /api/aurora/chat — Tier 0 quota (W3 Thu)', () => {
       makeRequest({ sessionId: VALID_SESSION, message: '짧은 질문' }) as never,
     );
     expect(r1.status).toBe(200);
-    expect(mockedCallPersonaMultiTurn).toHaveBeenCalledOnce();
+    expect(mockedPostHogCapture).not.toHaveBeenCalledWith(
+      expect.objectContaining({ event: 'chat_quota_hit' }),
+    );
 
-    // count=10 → 429
-    mockedApplySafetyFilter.mockResolvedValueOnce(ALLOW_FILTER);
+    // count=4 — at 80% threshold, request proceeds + chat_quota_hit fires
+    mockedPostHogCapture.mockClear();
+    mockedApplySafetyFilter
+      .mockResolvedValueOnce(ALLOW_FILTER)
+      .mockResolvedValueOnce(ALLOW_FILTER);
+    mockedCallPersonaMultiTurn.mockResolvedValueOnce('응답 2');
     mockedQuotaFetch.mockResolvedValueOnce({
-      data: { id: 'q-1', message_count: 10, haiku_count: 7, sonnet_count: 3 },
+      data: { id: 'q-1', message_count: 4, haiku_count: 3, sonnet_count: 1 },
       error: null,
     });
 
     const r2 = await POST(
       makeRequest({ sessionId: VALID_SESSION, message: '다음 질문' }) as never,
     );
-    expect(r2.status).toBe(429);
+    expect(r2.status).toBe(200);
+    expect(mockedPostHogCapture).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'chat_quota_hit',
+        properties: expect.objectContaining({
+          tier: 'tier_0',
+          daily_count: 4,
+          daily_limit: 5,
+          threshold: '80',
+        }),
+      }),
+    );
+
+    // count=5 — at cap, returns 429
+    mockedApplySafetyFilter.mockResolvedValueOnce(ALLOW_FILTER);
+    mockedQuotaFetch.mockResolvedValueOnce({
+      data: { id: 'q-1', message_count: 5, haiku_count: 3, sonnet_count: 2 },
+      error: null,
+    });
+
+    const r3 = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '한 번 더' }) as never,
+    );
+    expect(r3.status).toBe(429);
   });
 
   it('fail-open on quota fetch error (no lockout from supabase blip)', async () => {
@@ -543,8 +674,102 @@ describe('POST /api/aurora/chat — Tier 0 quota (W3 Thu)', () => {
   });
 });
 
+describe('POST /api/aurora/chat — PostHog quota events (vault 62 §1 Q4)', () => {
+  it('emits chat_quota_hit + chat_quota_blocked at 100% cap', async () => {
+    mockedApplySafetyFilter.mockResolvedValueOnce(ALLOW_FILTER);
+    mockedResolveUserTier.mockResolvedValueOnce('tier_0');
+    mockedQuotaFetch.mockResolvedValueOnce({
+      data: { id: 'q-1', message_count: 5, haiku_count: 3, sonnet_count: 2 },
+      error: null,
+    });
+
+    const res = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '안녕' }) as never,
+    );
+
+    expect(res.status).toBe(429);
+    // Both events fire on the 429 path.
+    expect(mockedPostHogCapture).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'chat_quota_hit',
+        properties: expect.objectContaining({
+          tier: 'tier_0',
+          daily_count: 5,
+          daily_limit: 5,
+          threshold: '100',
+        }),
+      }),
+    );
+    expect(mockedPostHogCapture).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'chat_quota_blocked',
+        properties: expect.objectContaining({
+          tier: 'tier_0',
+          daily_count: 5,
+          daily_limit: 5,
+        }),
+      }),
+    );
+  });
+
+  it('uses sessionId-prefixed distinctId for anonymous tier_0 users', async () => {
+    mockedApplySafetyFilter.mockResolvedValueOnce(ALLOW_FILTER);
+    mockedResolveUserTier.mockResolvedValueOnce('tier_0');
+    mockedQuotaFetch.mockResolvedValueOnce({
+      data: { id: 'q-1', message_count: 5, haiku_count: 3, sonnet_count: 2 },
+      error: null,
+    });
+
+    await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '안녕' }) as never,
+    );
+
+    expect(mockedPostHogCapture).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'chat_quota_blocked',
+        distinctId: `aurora-chat-${VALID_SESSION}`,
+      }),
+    );
+  });
+});
+
 describe('POST /api/aurora/chat — model routing + quota increment (W3 Thu)', () => {
-  it('routes short factual message to Haiku and increments haiku_count', async () => {
+  // V1 default (vault 62 §2.1) forces Sonnet regardless of message. These
+  // tests exercise the V1.5 heuristic path — enable the routing env flag
+  // for the whole describe; restore after each.
+  const ORIGINAL_FLAG = process.env.AURORA_MODEL_ROUTING_ENABLED;
+  beforeEach(() => {
+    process.env.AURORA_MODEL_ROUTING_ENABLED = 'true';
+  });
+  afterEach(() => {
+    if (ORIGINAL_FLAG === undefined) {
+      delete process.env.AURORA_MODEL_ROUTING_ENABLED;
+    } else {
+      process.env.AURORA_MODEL_ROUTING_ENABLED = ORIGINAL_FLAG;
+    }
+  });
+
+  it('V1 default (env flag off) forces Sonnet even on short factual message', async () => {
+    delete process.env.AURORA_MODEL_ROUTING_ENABLED;
+    mockedApplySafetyFilter
+      .mockResolvedValueOnce(ALLOW_FILTER)
+      .mockResolvedValueOnce(ALLOW_FILTER);
+    mockedCallPersonaMultiTurn.mockResolvedValueOnce('짧은 응답');
+
+    await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '안녕' }) as never,
+    );
+
+    const callArgs = mockedCallPersonaMultiTurn.mock.calls[0] as unknown as [
+      string,
+      string,
+      Array<unknown>,
+      string,
+    ];
+    expect(callArgs[3]).toBe('claude-sonnet-4-6');
+  });
+
+  it('routes short factual message to Haiku and increments haiku_count (V1.5 heuristic)', async () => {
     mockedApplySafetyFilter
       .mockResolvedValueOnce(ALLOW_FILTER)
       .mockResolvedValueOnce(ALLOW_FILTER);

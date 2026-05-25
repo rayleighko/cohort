@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import {
   COHORT_PERSONA_MODEL,
   COHORT_PERSONA_MODEL_DEEP,
@@ -6,6 +6,23 @@ import {
   shouldUseSonnet,
 } from '@/lib/claude/client';
 import type { UserInvestmentProfile } from '@/types/profile';
+
+// Most assertions below exercise the V1.5 heuristic (vault 62 §2.1) — pin
+// the env flag ON for the whole file, then per-test overrides as needed.
+// The dedicated env-flag describe restores ORIGINAL after each case.
+const ORIGINAL_ROUTING_FLAG = process.env.AURORA_MODEL_ROUTING_ENABLED;
+
+beforeAll(() => {
+  process.env.AURORA_MODEL_ROUTING_ENABLED = 'true';
+});
+
+afterAll(() => {
+  if (ORIGINAL_ROUTING_FLAG === undefined) {
+    delete process.env.AURORA_MODEL_ROUTING_ENABLED;
+  } else {
+    process.env.AURORA_MODEL_ROUTING_ENABLED = ORIGINAL_ROUTING_FLAG;
+  }
+});
 
 describe('persona model constants (W3 Thu — dual-model routing)', () => {
   it('keeps COHORT_PERSONA_MODEL as the Sonnet alias for backward compat', () => {
@@ -150,5 +167,40 @@ describe('shouldUseSonnet — empty / edge inputs', () => {
 
   it('handles whitespace-only', () => {
     expect(shouldUseSonnet('     ')).toBe(false);
+  });
+});
+
+describe('shouldUseSonnet — env flag (vault 62 §2.1, CEO confirm 2026-05-25)', () => {
+  // These cases override the file-level beforeAll (which pins the flag ON for
+  // the V1.5 heuristic tests) to verify V1 runtime forcing.
+  afterEach(() => {
+    process.env.AURORA_MODEL_ROUTING_ENABLED = 'true';
+  });
+
+  it('returns true (Sonnet) when env flag is undefined — V1 default', () => {
+    delete process.env.AURORA_MODEL_ROUTING_ENABLED;
+    expect(shouldUseSonnet('짧은 질문')).toBe(true);
+  });
+
+  it('returns true (Sonnet) when env flag is "false"', () => {
+    process.env.AURORA_MODEL_ROUTING_ENABLED = 'false';
+    expect(shouldUseSonnet('짧은 질문')).toBe(true);
+  });
+
+  it('returns true (Sonnet) when env flag is empty string', () => {
+    process.env.AURORA_MODEL_ROUTING_ENABLED = '';
+    expect(shouldUseSonnet('짧은 질문')).toBe(true);
+  });
+
+  it('returns true (Sonnet) on case-mismatched "TRUE" — case-sensitive guard', () => {
+    process.env.AURORA_MODEL_ROUTING_ENABLED = 'TRUE';
+    expect(shouldUseSonnet('짧은 질문')).toBe(true);
+  });
+
+  it('falls back to heuristic when env flag is exactly "true"', () => {
+    process.env.AURORA_MODEL_ROUTING_ENABLED = 'true';
+    expect(shouldUseSonnet('짧은 질문')).toBe(false); // Haiku for short
+    expect(shouldUseSonnet('드러켄밀러 macro 베팅 어떻게')).toBe(true); // framework
+    expect(shouldUseSonnet('VIX reasoning 어떻게 봐')).toBe(true); // macro + reasoning
   });
 });
