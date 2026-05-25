@@ -6,6 +6,10 @@ import {
   type ChatMessage,
 } from '@/lib/aurora/chat-prompt';
 import type { MacroComposite } from '@/lib/macro/composite';
+import type {
+  ShapeCTrigger,
+  UserInvestmentProfile,
+} from '@/types/profile';
 
 const SAMPLE_COMPOSITE: MacroComposite = {
   score: 2.34,
@@ -24,6 +28,64 @@ const SAMPLE_COMPOSITE: MacroComposite = {
   computedAt: '2026-05-24T01:00:00.000Z',
   asOfDate: '2026-05-23',
 };
+
+const SAMPLE_PROFILE: UserInvestmentProfile = {
+  userId: '00000000-0000-0000-0000-000000000001',
+  experienceTier: 'sophisticated',
+  frameworkAffinity: ['drukenmiller_macro', 'kostolany_cycle'],
+  riskTolerance: 1,
+  timeHorizon: 'long',
+  portfolioCompositionPct: { kr_equity: 30, us_equity: 40, bonds: 20, cash: 10 },
+  splitBuyEnforcement: 'mostly',
+  macroWatchingFreq: 'heavy',
+  planFormalization: 'structured',
+  emotionalDecisionCount12m: 'few',
+  weaknessSelfAssessment: '시장 -5% 하락 시 panic sell 충동',
+  paymentWillingnessCeilingKrw: 25000,
+  serviceExpectations: ['informational', 'behavioral_guard'],
+  infoSources: ['Bloomberg', 'Twitter'],
+  clusterBSubClassification: 'B.1.a',
+  classificationConfidence: 90,
+  frameworkAffinityInferred: ['drukenmiller_macro'],
+  createdAt: '2026-05-25T00:00:00.000Z',
+  lastUpdatedAt: '2026-05-25T00:00:00.000Z',
+};
+
+const SAMPLE_TRIGGERS: ShapeCTrigger[] = [
+  {
+    id: 'trig-1',
+    userId: '00000000-0000-0000-0000-000000000001',
+    triggerType: 'price_drop',
+    conditionParams: { symbol: 'KOSPI', threshold_pct: -3, window_hours: 1 },
+    cooldownHours: 24,
+    lastFiredAt: null,
+    isActive: true,
+    createdAt: '2026-05-25T00:00:00.000Z',
+    updatedAt: '2026-05-25T00:00:00.000Z',
+  },
+  {
+    id: 'trig-2',
+    userId: '00000000-0000-0000-0000-000000000001',
+    triggerType: 'macro_composite',
+    conditionParams: { zone: 'hawkish', score_threshold: -5 },
+    cooldownHours: 48,
+    lastFiredAt: '2026-05-23T12:00:00.000Z',
+    isActive: true,
+    createdAt: '2026-05-20T00:00:00.000Z',
+    updatedAt: '2026-05-23T12:00:00.000Z',
+  },
+  {
+    id: 'trig-3-inactive',
+    userId: '00000000-0000-0000-0000-000000000001',
+    triggerType: 'disclosure',
+    conditionParams: { issuer: '삼성전자' },
+    cooldownHours: 24,
+    lastFiredAt: null,
+    isActive: false,
+    createdAt: '2026-05-10T00:00:00.000Z',
+    updatedAt: '2026-05-10T00:00:00.000Z',
+  },
+];
 
 describe('AURORA_CHAT_SYSTEM (chat system prompt — Q&A turn-taking register)', () => {
   it('contains 38-brief §2.2 Aurora register keywords', () => {
@@ -68,6 +130,30 @@ describe('AURORA_CHAT_SYSTEM (chat system prompt — Q&A turn-taking register)',
   it('disclaims itself as INFORMATION + DECISION SUPPORT', () => {
     expect(AURORA_CHAT_SYSTEM).toContain('INFORMATION');
     expect(AURORA_CHAT_SYSTEM).toContain('DECISION SUPPORT');
+  });
+
+  it('contains FRAMEWORK COACH section (vault 51 §3.1 — profile-aware)', () => {
+    expect(AURORA_CHAT_SYSTEM).toContain('FRAMEWORK COACH');
+    expect(AURORA_CHAT_SYSTEM).toContain(
+      '[참고: 본인 investment profile]',
+    );
+    expect(AURORA_CHAT_SYSTEM).toContain(
+      '[참고: 본인 active Shape C triggers]',
+    );
+  });
+
+  it('contains framework-matching ALLOWED + cluster calibration cues', () => {
+    expect(AURORA_CHAT_SYSTEM).toContain('드러켄밀러식');
+    expect(AURORA_CHAT_SYSTEM).toContain('B.1.a Sophisticated Disciplined');
+    expect(AURORA_CHAT_SYSTEM).toContain('B.1.b Time-Constrained Emotional');
+    expect(AURORA_CHAT_SYSTEM).toContain('B.1.c English-Native Cross-cultural');
+    expect(AURORA_CHAT_SYSTEM).toContain('self_discovery');
+  });
+
+  it('still forbids 종목+verb / 비중+verb / timing assertion even in framework coach', () => {
+    expect(AURORA_CHAT_SYSTEM).toContain('삼성전자 매수하세요');
+    expect(AURORA_CHAT_SYSTEM).toContain('30%로 가세요');
+    expect(AURORA_CHAT_SYSTEM).toContain('지금 timing입니다');
   });
 });
 
@@ -207,5 +293,144 @@ describe('buildAuroraChatPrompt — composite preamble', () => {
     expect(out.messages[0].content).toBe('prior question');
     expect(out.messages[1].content).toBe('prior answer');
     expect(out.messages[2].content).toContain('macro composite');
+  });
+});
+
+describe('buildAuroraChatPrompt — profile preamble (framework coach context)', () => {
+  it('inlines profile preamble when userProfile provided', () => {
+    const out = buildAuroraChatPrompt({
+      history: [],
+      newUserMessage: '본인 framework이 macro 베팅인데 오늘 reference 어때요?',
+      userProfile: SAMPLE_PROFILE,
+    });
+    const last = out.messages[out.messages.length - 1];
+    expect(last.role).toBe('user');
+    expect(last.content).toContain('[참고: 본인 investment profile]');
+    expect(last.content).toContain('sophisticated');
+    expect(last.content).toContain('drukenmiller_macro');
+    expect(last.content).toContain('kostolany_cycle');
+    expect(last.content).toContain('B.1.a');
+    expect(last.content).toContain('structured');
+    // % portfolio (no absolute KRW per PIPA strict)
+    expect(last.content).toContain('kr_equity');
+    expect(last.content).not.toMatch(/[0-9]{6,}/);
+    // Weakness self-assessment (Q9) used for behavioral nudge calibration
+    expect(last.content).toContain('시장 -5% 하락 시 panic sell');
+    // User message body appended after preamble
+    expect(last.content).toContain(
+      '본인 framework이 macro 베팅인데 오늘 reference 어때요?',
+    );
+  });
+
+  it('omits profile preamble when userProfile is undefined', () => {
+    const out = buildAuroraChatPrompt({
+      history: [],
+      newUserMessage: '안녕',
+    });
+    expect(out.messages[0].content).toBe('안녕');
+    expect(out.messages[0].content).not.toContain('investment profile');
+  });
+
+  it('only emits fields present on the profile (graceful nulls)', () => {
+    const minimal: UserInvestmentProfile = {
+      ...SAMPLE_PROFILE,
+      experienceTier: null,
+      riskTolerance: null,
+      timeHorizon: null,
+      portfolioCompositionPct: null,
+      weaknessSelfAssessment: null,
+      frameworkAffinity: [],
+    };
+    const out = buildAuroraChatPrompt({
+      history: [],
+      newUserMessage: 'q',
+      userProfile: minimal,
+    });
+    const content = out.messages[0].content;
+    expect(content).toContain('[참고: 본인 investment profile]');
+    // Present fields:
+    expect(content).toContain('B.1.a');
+    expect(content).toContain('structured');
+    // Absent fields must NOT leak literal 'null':
+    expect(content).not.toContain('null');
+    expect(content).not.toContain('framework affinity:');
+  });
+});
+
+describe('buildAuroraChatPrompt — triggers preamble (self-check context)', () => {
+  it('inlines active triggers and omits inactive ones', () => {
+    const out = buildAuroraChatPrompt({
+      history: [],
+      newUserMessage: 'KOSPI -3% trigger 작동했나요?',
+      activeTriggers: SAMPLE_TRIGGERS,
+    });
+    const content = out.messages[0].content;
+    expect(content).toContain('[참고: 본인 active Shape C triggers]');
+    expect(content).toContain('price_drop');
+    expect(content).toContain('macro_composite');
+    expect(content).toContain('cooldown 24h');
+    expect(content).toContain('cooldown 48h');
+    expect(content).toContain('last fired 2026-05-23');
+    expect(content).toContain('not yet fired');
+    // Inactive trigger (disclosure on 삼성전자) must NOT leak
+    expect(content).not.toContain('disclosure');
+    expect(content).not.toContain('삼성전자');
+  });
+
+  it('omits triggers preamble when activeTriggers is empty array', () => {
+    const out = buildAuroraChatPrompt({
+      history: [],
+      newUserMessage: 'q',
+      activeTriggers: [],
+    });
+    expect(out.messages[0].content).toBe('q');
+    expect(out.messages[0].content).not.toContain(
+      'active Shape C triggers',
+    );
+  });
+
+  it('omits triggers preamble when all triggers are inactive', () => {
+    const allInactive = SAMPLE_TRIGGERS.map((t) => ({ ...t, isActive: false }));
+    const out = buildAuroraChatPrompt({
+      history: [],
+      newUserMessage: 'q',
+      activeTriggers: allInactive,
+    });
+    expect(out.messages[0].content).toBe('q');
+    expect(out.messages[0].content).not.toContain(
+      'active Shape C triggers',
+    );
+  });
+});
+
+describe('buildAuroraChatPrompt — combined preambles (order + composability)', () => {
+  it('combines profile + triggers + composite in deterministic order', () => {
+    const out = buildAuroraChatPrompt({
+      history: [],
+      newUserMessage: '오늘 어떻게 봐야 할까요?',
+      userProfile: SAMPLE_PROFILE,
+      activeTriggers: SAMPLE_TRIGGERS,
+      composite: SAMPLE_COMPOSITE,
+    });
+    const content = out.messages[0].content;
+    const profileIdx = content.indexOf('[참고: 본인 investment profile]');
+    const triggersIdx = content.indexOf('[참고: 본인 active Shape C triggers]');
+    const compositeIdx = content.indexOf('[참고: 오늘의 macro composite');
+    const userIdx = content.indexOf('오늘 어떻게 봐야 할까요?');
+    expect(profileIdx).toBeGreaterThanOrEqual(0);
+    expect(triggersIdx).toBeGreaterThan(profileIdx);
+    expect(compositeIdx).toBeGreaterThan(triggersIdx);
+    expect(userIdx).toBeGreaterThan(compositeIdx);
+  });
+
+  it('handles no-context fallback (no profile, no triggers, no composite)', () => {
+    const out = buildAuroraChatPrompt({
+      history: [],
+      newUserMessage: '안녕하세요',
+    });
+    expect(out.messages[0].content).toBe('안녕하세요');
+    expect(out.messages[0].content).not.toContain('investment profile');
+    expect(out.messages[0].content).not.toContain('Shape C triggers');
+    expect(out.messages[0].content).not.toContain('macro composite');
   });
 });
