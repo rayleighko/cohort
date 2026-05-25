@@ -120,13 +120,11 @@ export default function LandingPage() {
           mounted ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <h1 className="text-3xl font-extrabold leading-snug text-cohort-ink-90 sm:text-4xl lg:text-5xl">
-          본인 plan과 cohort —<br />
-          흔들리지 않는 페이스.
+        <h1 className="break-keep text-3xl font-medium text-cohort-ink-90 sm:text-4xl lg:text-5xl">
+          본인 plan과 cohort — 흔들리지 않는 페이스.
         </h1>
-        <p className="mt-5 text-base leading-relaxed text-cohort-ink-70">
-          Top 5-10% sophisticated retail을 위한 투자 페이스 메이트. 정보 + 도구 +
-          의사결정 지원 — 추천도, 권장도 하지 않습니다.
+        <p className="mt-4 break-keep text-base text-cohort-ink-70 sm:text-lg">
+          학습 commit X. 일 1분. 본인 plan 영역 페이스 영역만.
         </p>
       </section>
 
