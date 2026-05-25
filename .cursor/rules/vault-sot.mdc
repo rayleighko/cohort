@@ -1,0 +1,62 @@
+---
+description: Vault SoT references — full path map for vault 38-62 + Drift catalog reference. Cite vault on every spec decision.
+alwaysApply: true
+---
+
+# Vault SoT References (`~/Documents/elevate-portfolio/`)
+
+## Brand + Architecture
+- `38-brand-architecture-brief.md` (LOCKED 2026-05-21) — Aurora + Vesper + 석류
+- `14-v1-core-architecture-sketch.md` — V1 architecture (§14 Aurora system prompt + safety filter)
+
+## Methodology
+- `39-claude-orchestration-methodology.md` — prompt template + sub-agent + hook
+
+## Design system
+- `40-design-system-architecture.md` (master)
+- `41-interaction-patterns.md`
+- `42-typography-color-system.md` (token raw value SoT — vault wins over tailwind.config)
+- `43-mascot-illustration-brief.md` (PRE-W5 illustrator commissioning)
+
+## Implementation specs
+- `25-sprint-0-w1-implementation-spec.md`
+- `26-sprint-0-w2-w5-implementation-spec.md` (§0a annotation block, 18 drift entries)
+
+## CEO Decision lock-in (2026-05-25)
+- `56-ceo-decision-lock-in-record-2026-05-25.md` (6 decisions)
+- `57-ceo-cto-handoff-workflow-2026-05-25.md` (CEO→CTO workflow + 8 Q answer)
+
+## V2 strategic update (2026-05-25)
+- `59-valley-ai-competitive-analysis-niche-sharpening-2026-05-25.md` (Niche + Pivot 0 Acquisition Iterate)
+- `60-viral-caching-personalization-spec-2026-05-25.md` (Viral K=0.7 + 3-Layer Cache + Model routing)
+- `61-cto-strategic-direction-v2-2026-05-25.md` (CTO direction v2, **supersedes vault 58 v1**)
+
+## ★ CEO confirm amendment (2026-05-25)
+- `62-ceo-confirm-cto-ping-w3-thu-race-2026-05-25.md` — **vault 61 v2 §2 D20 + §4 amended in place**
+
+## Aurora chat evolution
+- `51-aurora-chat-evolution-spec-2026-05-24.md` (profile-aware framework coach + chat economics)
+- `53-cohort-v1-product-spec-dev-handoff-2026-05-24.md` (V1 product spec + Investment Profile Survey 10Q + UI/UX + Mascot strategy)
+
+## Content + Copy
+- `17-pre-launch-landing-page-sketch.md` (Set A-D taglines from 38 §4)
+- `24-pre-launch-seo-content.md` (§GEO baseline section)
+
+## Operator + Compliance
+- `22-compliance-review-prep.md` (PIPA + 자본시장법)
+- `27-privacy-policy-terms-draft.md`
+- `31-operator-manual-prerequisites-tracker.md`
+
+## Master + Drift catalog
+- `00-master-context.md` (v1.1.7 DRAFT — supreme SoT)
+- `09-anti-pattern-log.md` (Case N archive)
+- `vault_sot_priority.md` v0.2 DRAFT (§4a Drift catalog, 18 entries)
+
+## Vault priority on conflict
+
+1. `00-master-context.md` §10.3 Cancelled Past Decisions — OVERRIDES ALL
+2. `38-brand-architecture-brief.md` (mascot + brand basics)
+3. `62-ceo-confirm-...md` (amended in place — vault 61 v2 supersede)
+4. `56-ceo-decision-lock-in-record-...md` (CEO lock-in)
+5. Working memory (`main.mdc` + `.claude/memory/`)
+6. Implementation specs (25, 26)

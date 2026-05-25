@@ -1,0 +1,31 @@
+---
+description: cohort-microinteraction-designer — V1 animation pattern (8 patterns only) + reduced-motion fallback mandatory.
+alwaysApply: false
+---
+
+# cohort-microinteraction-designer Skill
+
+> Source: `~/Development/cohort/.claude/skills/cohort-microinteraction-designer/SKILL.md`
+
+## Triggers
+"add transition", "animate this", "design hover state", "loading animation", "state change animation", "mascot transition", "fade in", "slide animation", "어떻게 움직일까".
+
+## V1 8 patterns only
+1. fade-in (mount/unmount)
+2. slide-up (modal/sheet enter)
+3. opacity hover (button + card)
+4. scale 1.02 hover (CTA tactile)
+5. pulse (aurora bubble idle)
+6. spinner (loading)
+7. skeleton placeholder
+8. scroll-fade reveal
+
+## Hard rule
+- prefers-reduced-motion respect 의무 (`motion-safe:` Tailwind prefix)
+- Duration: fast (150ms) / slow (300ms) / slower (500ms) 영역 tailwind.config 정합
+- Easing: ease-out (enter) / ease-in-out (state change)
+- Subtle + calm (sophisticated retail tone — flashy 배제)
+
+## Output format
+- Animation spec: duration + easing + transform + reduced-motion fallback
+- Tailwind/CSS implementation hint

@@ -1,0 +1,43 @@
+---
+description: Anti-pattern catalog — Orchestration (AO) + Design (AD) + AI Native (AN). Blocks listed patterns on all commits.
+alwaysApply: true
+---
+
+# Cohort Anti-Pattern Catalog
+
+> Full archive: `~/Documents/elevate-portfolio/09-anti-pattern-log.md`
+> Strategic anti-pattern: `~/Documents/elevate-portfolio/00-master-context.md` §9 (#13 sunk cost / #14 premature lock-in / #14a goalpost / #14b energy surge)
+
+## AO — Orchestration anti-patterns
+
+- **AO-1**: Ad-hoc prompt construction → always use vault 39 §2.1 template skeleton
+- **AO-2**: Skipping Tier 0 INIT → Day 0 verification gate every session 의무
+- **AO-3**: Sequential parallel-eligible sub-agent dispatch → cohort-design-system + cohort-accessibility-auditor + cohort-product 영역 parallel 의무
+- **AO-4**: `--no-verify` push → **BANNED**. Fix hook root cause instead.
+- **AO-5**: CLAUDE.md / .cursor/rules drift → vault 38 brief = SoT, working memory = summary, vault wins if conflict
+- **AO-10**: Persona inconsistency → cohort-product sub-agent before mascot copy commit
+
+## AD — Design anti-patterns (vault 40-43 정합)
+
+- **AD-1**: Raw hex/px in component → cohort-token-keeper skill BLOCKS
+- **AD-2**: Touch target < 44px on mobile → cohort-design-system + cohort-accessibility-auditor FAIL
+- **AD-3**: Korean body without `break-keep` → cohort-design-system WARN
+- **AD-5**: Option B 위반 component copy → cohort-ux-copy skill BLOCKS (dashboard defer 포함)
+- **AD-6**: Animation without prefers-reduced-motion fallback → cohort-microinteraction-designer + cohort-accessibility-auditor FAIL
+- **AD-7**: Notification spam (>2/day) → Shape C trigger config hard cap + multi-channel spam cap (vault 56 D9)
+- **AD-8**: Comparative social / leaderboard → 40 §6.3 brand SoT 위반
+
+## AN — AI Native anti-patterns
+
+- **AN-1**: Spec drift — vault 영역 implementation 영역 spec deviate 영역 catalog 의무
+- **AN-2**: Verification skip — sub-agent dispatch X + manual review X
+- **AN-3**: Voice drift — LLM output 영역 brand persona deviate (Aurora/Vesper)
+- **AN-4**: Cost runaway — model routing X + caching X
+- **AN-5**: Persistence loss — chat ephemeral context 영역 memory persist X
+
+## Strategic anti-patterns (vault 00 §9)
+
+- **#13 Sunk cost** — vault 56 §2 영역 16-week PIVOT trigger + 24-week HARD SUNSET 영역 hard commit
+- **#14 Premature lock-in** — vault 38 brand lock 2026-05-21 영역 careful spec review
+- **#14a Goalpost moving** — Pivot direction priority lock-in (vault 56 §3)
+- **#14b Energy surge** — daily commit cap (~3 commits / day suggested)

@@ -1,0 +1,31 @@
+---
+description: cohort-design-system pre-commit verification — token + interaction + mobile-first + Option B in components. Auto-activate on UI commits.
+globs: src/components/ui/**/*.{ts,tsx}, src/components/shape-*/**/*.{ts,tsx}, src/components/onboarding/**/*.{ts,tsx}, src/components/engagement/**/*.{ts,tsx}, src/components/mascot/**/*.{ts,tsx}, src/app/**/page.tsx, src/app/**/layout.tsx, tailwind.config.ts
+alwaysApply: false
+---
+
+# cohort-design-system Sub-agent (Pre-Commit Verification)
+
+> Source: `~/Development/cohort/.claude/agents/cohort-design-system.md`
+
+## Activation
+UI component PR (Day 5+ mandatory). Cmd+I Composer 영역 commit 영역 의무 dispatch.
+
+## Cross-checks (vault SoT)
+- `40-design-system-architecture.md` (master)
+- `41-interaction-patterns.md` (animation + interaction)
+- `42-typography-color-system.md` (token raw value SoT)
+
+## Verification 8-dimension
+1. Token usage (raw hex/px BLOCK — AD-1)
+2. Mobile-first responsive (vertical stack default)
+3. Touch target ≥ 44px (AD-2)
+4. Korean break-keep (AD-3)
+5. State color rule (border-tier only, success/warning never body text)
+6. Option B copy compliance (AD-5)
+7. Animation reduced-motion fallback (AD-6)
+8. vault SoT 정합 (40/41/42 inline reference)
+
+## Output
+- `✓ cohort-design-system PASS` + 8-dimension check verdict
+- 또는 `❌ AD-N {detail}` + remediation suggestion

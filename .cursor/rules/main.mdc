@@ -1,0 +1,85 @@
+---
+description: Cohort project working memory — brand basics + stack + 5 non-negotiable constraints. Top-level harness rule.
+alwaysApply: true
+---
+
+# Cohort — Project Working Memory
+
+> Authoritative SoT: `~/Documents/elevate-portfolio/38-brand-architecture-brief.md`
+> Methodology layer: `~/Documents/elevate-portfolio/39-claude-orchestration-methodology.md`
+> This rule = working summary auto-loaded every session.
+
+## Brand basics (LOCKED 2026-05-21)
+
+- **Name**: Cohort / 코호트
+- **Etymology**: Latin *cohors* — group sharing a journey
+- **Mascots**: Aurora 🕊 (the Dove, dovish/patient/morning) + Vesper 🦅 (the Hawk, hawkish/decisive/evening)
+- **Visual**: 석류 (Pomegranate) — multi-seed unifier
+- **Colors**: `#A8243F` primary (pomegranate red) · `#E8A33D` amber (Vesper) · `#F8F4ED` ivory · `#1A1A1A` charcoal
+- **Domain**: cohort.co.kr (Korean V1, Vercel DNS)
+- **Repo**: plancy-dev/cohort (private)
+
+## Positioning (2026-05-25)
+
+**Personalized Behavioral Pace Companion** — 한국 sophisticated retail (Top 5-10%, 이미 plan 있는 분 narrow strict). 본인 plan + 페이스메이커 + 본성/일희일비 차단 + 개인화 service.
+
+5 차별점 (Toss + Valley AI conflict):
+1. Sophistication-only positioning
+2. Behavioral Adherence business model
+3. Broker-agnostic open ecosystem
+4. Solo founder voice + dogfooding
+5. Niche + detail strict (이미 plan 있는 분 narrow)
+
+## Stack
+
+- Frontend: Next.js 14 + TypeScript + Tailwind + PWA (manifest + service worker)
+- Backend: Supabase (Postgres + Auth + RLS + Realtime + Storage)
+- Payment: Toss Payments KRW V1 (W5 Wed live) + Polar USD V1 parallel + Polar legacy retain
+- AI: Claude API — `claude-haiku-4-5-20251001` (safety filter Layer 2) + `claude-sonnet-4-6` (default per vault 62 §2.1 — env flag `AURORA_MODEL_ROUTING_ENABLED=false` 영역 V1 Sonnet default). `claude-opus-4-6` reserved.
+- Delivery: Resend (email) + Web Push API + 카카오 알림톡 (Tier 2+ — vault 56 D9 2-track)
+- Analytics: PostHog + Sentry
+- Hosting: Vercel + Supabase managed
+
+## 5 Non-Negotiable Strategic Constraints
+
+1. **Strategic Decision 0 Option B** — Information + Tool + Decision Support ONLY. NEVER 추천/권장/비중 X%/지금 매수/timing입니다 / dashboard defer.
+2. **Mobile-first PWA strict** — Tailwind mobile-first, vertical stack, 44px+ touch, bottom-fixed CTA, manifest+SW required.
+3. **Dual mascot safety filter 3-layer (bidirectional)** — Layer 1 regex + Layer 2 Haiku classifier + Layer 3 redirect. All Claude API calls (Aurora + Vesper) pass through. Bidirectional (input + output) per Day 11 (commit 309f6ca).
+4. **PIPA compliance strict** — Onboarding consent + Supabase RLS + 즉시 삭제 + Privacy/ToS before W5 launch. Q2 portfolio composition `JSONB` % 비율만 (절대 금액 X).
+5. **Sprint 0 5-week cap** — V1 = Shape A polish + Shape C build (Behavioral Guard) + Aurora chat evolution + Toss live + Viral Option A + Layer 1 Opus daily cache + Daily Archive View. V2 explicitly deferred.
+
+## Vault references (key files — `~/Documents/elevate-portfolio/`)
+
+| Topic | File |
+|---|---|
+| Brand SoT (LOCKED) | `38-brand-architecture-brief.md` |
+| Methodology | `39-claude-orchestration-methodology.md` |
+| Design system master | `40-design-system-architecture.md` |
+| Interaction patterns | `41-interaction-patterns.md` |
+| Typography + color (token raw value SoT) | `42-typography-color-system.md` |
+| Mascot illustration brief (PRE-W5) | `43-mascot-illustration-brief.md` |
+| Architecture | `14-v1-core-architecture-sketch.md` (brand mapping §7 of 38) |
+| W2-W5 implementation spec | `26-sprint-0-w2-w5-implementation-spec.md` (§0a annotation block 18 drift) |
+| CEO Decision Lock-in 2026-05-25 | `56-ceo-decision-lock-in-record-2026-05-25.md` |
+| CEO→CTO handoff workflow | `57-ceo-cto-handoff-workflow-2026-05-25.md` |
+| Niche sharpening (Valley AI) | `59-valley-ai-competitive-analysis-niche-sharpening-2026-05-25.md` |
+| Viral + Caching + Model routing | `60-viral-caching-personalization-spec-2026-05-25.md` |
+| CTO strategic direction v2 | `61-cto-strategic-direction-v2-2026-05-25.md` |
+| **CEO confirm + vault 61 v2 amendment** | `62-ceo-confirm-cto-ping-w3-thu-race-2026-05-25.md` |
+| Vault SoT priority + Drift catalog (§4a, 18 entries) | `vault_sot_priority.md` v0.2 DRAFT |
+| Master context | `00-master-context.md` |
+| Anti-patterns archive | `09-anti-pattern-log.md` |
+
+## Conventional commit format
+
+```
+<type>(<scope>): <subject>
+
+Body explanation
+
+Co-reviewed-by: <sub-agent> (PASS)
+Refs: <vault ref> (lock-in date)
+```
+
+Types: feat, fix, chore, docs, refactor, test, perf, style, build, ci.
+Scopes: w3-thu-cascade, w3-fri, w4-mon-tue, w5-wed, aurora, vesper, safety, payment, viral 등.

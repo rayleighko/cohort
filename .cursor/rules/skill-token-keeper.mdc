@@ -1,0 +1,31 @@
+---
+description: cohort-token-keeper — pre-component token enforcement (vault 42 §2.1). Auto-activate on component files + tailwind.config.
+globs: src/components/**/*.{ts,tsx}, tailwind.config.ts, src/app/**/page.tsx, src/app/**/layout.tsx
+alwaysApply: false
+---
+
+# cohort-token-keeper Skill
+
+> Source: `~/Development/cohort/.claude/skills/cohort-token-keeper/SKILL.md`
+
+## Triggers
+"create a component", "add a button", "design a card", "style this element", "make this look like", "build a UI", or any JSX styling / Tailwind class authoring.
+
+## Hard rule
+**BLOCKS raw hex / px usage** — must use:
+- Colors: `text-cohort-ink-{90,70,50,30,10,05}`, `bg-cohort-{primary,ivory,charcoal,success,warning,danger,info}`
+- Spacing: Tailwind scale (`p-4`, `gap-6` etc.) — no `style={{ padding: '16px' }}`
+- Typography: `text-sm`, `text-base`, `text-lg`, `text-xl`, `text-2xl`, `text-3xl` (no raw font-size)
+- Shadow: `shadow-mascot-aurora`, `shadow-mascot-vesper`, `shadow-sm/md/lg`
+- Transition: `duration-fast`, `duration-slow`, `duration-slower`, `ease-out`, `ease-in-out`
+
+## Process
+1. Read vault 42 §2.1 (token spec) — `~/Documents/elevate-portfolio/42-typography-color-system.md`
+2. Identify token used in proposed component
+3. Verify tailwind.config.ts mapping exists
+4. Block raw hex/px
+5. Propose tailwind.config.ts addition if token missing
+
+## Output format
+- Raw value 발견 시: `❌ AD-1 raw {hex|px} — token mapping: {token name}` 또는 `🟡 tailwind.config 영역 추가 필요`
+- Pass 시: `✓ cohort-token-keeper PASS`

@@ -1,0 +1,24 @@
+---
+description: cohort-ux-copy — Aurora/Vesper voice-aware UX copy writer. Triggers on copy requests (label, error, empty state, onboarding, tooltip, microcopy).
+alwaysApply: false
+---
+
+# cohort-ux-copy Skill
+
+> Source: `~/Development/cohort/.claude/skills/cohort-ux-copy/SKILL.md`
+
+## Triggers
+"write copy for", "what should this button say", "empty state copy", "error message", "tooltip", "onboarding text", "loading message", "draft copy in Aurora's voice", "Vesper trigger alert wording", "label this CTA", or microcopy request inside Cohort surfaces.
+
+## Hard rule (Strategic Decision 0 Option B)
+**NEVER**: 추천 / 권장 / 비중 X% / 지금 매수 / timing입니다 / dashboard defer
+
+## Output format
+- 1-3 copy options per request
+- Korean primary + English fallback
+- Voice selection (Aurora / Vesper / neutral) + length budget justification
+
+## Voice mapping
+- Aurora 🕊: 차분 + 동행 + 따뜻함 (morning brief, behavioral guard, onboarding)
+- Vesper 🦅: alert + decisive (trigger alert, market signal)
+- Neutral: UI chrome / system message (no mascot voice)

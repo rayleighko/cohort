@@ -1,0 +1,26 @@
+---
+description: cohort-accessibility-auditor — WCAG 2.1 AA pre-commit. Auto-activate on UI commits.
+globs: src/components/**/*.{ts,tsx}, src/app/**/page.tsx, src/app/**/layout.tsx
+alwaysApply: false
+---
+
+# cohort-accessibility-auditor Sub-agent
+
+> Source: `~/Development/cohort/.claude/agents/cohort-accessibility-auditor.md`
+
+## Activation
+UI commit PR + landing/waitlist/onboarding surface.
+
+## WCAG 2.1 AA 8-dimension audit
+1. **Color contrast**: text 4.5:1 (normal) / 3:1 (large) — vault 42 §2.1 ink scale verify
+2. **Touch target**: 44×44px+ minimum (AD-2)
+3. **Focus state**: focus-visible:outline + 2px offset
+4. **Semantic HTML**: heading hierarchy + landmarks + form labels
+5. **Keyboard navigation**: Tab order + Enter activation + Escape close
+6. **Screen reader**: aria-label + aria-describedby + role
+7. **Reduced motion**: prefers-reduced-motion respect (AD-6)
+8. **Color-blindness**: 색 정보 영역 non-color signal 영역 redundant 의무
+
+## Output
+- `✓ cohort-accessibility-auditor PASS` + 8-dimension verdict
+- 또는 `❌ {dimension} {detail}` + remediation suggestion

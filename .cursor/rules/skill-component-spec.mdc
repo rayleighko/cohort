@@ -1,0 +1,24 @@
+---
+description: cohort-component-spec-writer — Component documentation template. Triggers on component spec / design handoff requests.
+alwaysApply: false
+---
+
+# cohort-component-spec-writer Skill
+
+> Source: `~/Development/cohort/.claude/skills/cohort-component-spec-writer/SKILL.md`
+
+## Triggers
+"write a spec for", "document this component", "design handoff", "create component docs", "spec out the Button", or pre-implementation design document.
+
+## Output target
+`~/Development/cohort/docs/components/<name>.md` 영역 single markdown file.
+
+## Locked template
+1. **Component name + variant**
+2. **Props table** (type / default / required / description)
+3. **States** (default / hover / focus / active / disabled / loading)
+4. **Accessibility note** (ARIA / keyboard / screen reader / contrast)
+5. **Mascot integration** (Aurora / Vesper voice usage if applicable)
+6. **Copy guidelines** (Korean primary + English fallback + Option B compliance)
+7. **Mobile-first responsive** (mobile 360px / md 768px / lg 1024px)
+8. **Token sourcing** (vault 42 §2.1 + tailwind.config 정합)

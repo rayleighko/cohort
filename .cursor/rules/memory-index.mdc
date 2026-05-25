@@ -1,0 +1,50 @@
+---
+description: Cohort memory index — pointer to .claude/memory/ persistent context (24 files). Full files retained for hybrid Claude Code use.
+alwaysApply: true
+---
+
+# Cohort Memory Index
+
+`.claude/memory/` 영역 24 files retained — Cursor 영역 *parallel deployment* (Claude Code 영역 future hybrid use).
+
+## User
+- `user_role.md` — solo founder + meta-orchestrating Cowork ↔ Code CLI ↔ Cursor
+
+## Project — locked decisions
+- `brand_lock_2026-05-21.md`
+- `strategic_decision_0_option_b.md`
+- `dual_mascot_safety_filter.md` (assistant-mode known limit 포함)
+- `polar_payment_architecture.md`
+- `sprint_0_5_week_cap.md`
+- `w2_day1_macro_calibration_alpha.md` (Day 6 ship commit 31b5f40, 24-seo Page 5)
+- `aurora_narration_assistant_mode_safety_filter_limit.md` (Day 7)
+- `ui_ux_pro_max_integration_policy.md` (Day 8 vault wins)
+- `aurora_narration_4_category_routing.md` (Day 9, single shared prompt + per-category)
+- `aurora_chat_bidirectional_safety_filter.md` (Day 11, input+output 3-gate + cost short-circuit)
+- `anonymous_session_uuid_pattern.md` (Day 11, RFC 4122 §4.4 + nullable user_id)
+
+## Project — 2026-05-24 strategic decisions
+- `cohort_concept_pacemaker_not_advisory.md` — substance-based separation 페이스메이커 / 비서
+- `information_provision_safety_disclaimer.md` — 13F + News + SEC filing micro disclaimer
+- `app_rollout_strategy_3phase.md` — Web (현재) → 앱인토스 (Sprint 1+) → Native (Phase 3)
+- `legal_consultation_deferred.md` — 자문 X, lawyer-attachment future preservation
+- `apps_in_toss_vibecoding_challenge_2026_05_24.md` — B-2 패스 결정
+
+## Feedback (collaboration rules)
+- `ao_5_vault_wins.md`
+- `claude_code_cli_handoff_pattern.md` (Cursor 영역 등 추가)
+- `component_time_state_color_rule.md`
+- `no_no_verify.md`
+- `option_a_clean_break_w1_w2.md`
+- `prompt_stale_assumption_verify_gate.md` (Day 10 + Day 11 2nd invocation)
+- `fetch_503_over_guess_pattern.md`
+
+## Reference (external systems)
+- `vault_sot_38_to_43.md`
+- `vault_sot_priority.md` v0.2 DRAFT (Drift catalog §4a 18 entries)
+- `postgres_migration_history.md`
+- `connected_mcps.md`
+
+## Usage in Cursor
+
+각 memory file 영역 `~/Development/cohort/.claude/memory/<name>.md` 영역 path retain. Cursor 영역 *manual @-mention* 영역 specific memory file 영역 reference 가능 (`@.claude/memory/aurora_chat_bidirectional_safety_filter.md`).

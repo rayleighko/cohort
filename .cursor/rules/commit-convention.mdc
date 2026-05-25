@@ -1,0 +1,51 @@
+---
+description: Conventional commit format + sub-agent attribution + vault refs requirement.
+alwaysApply: true
+---
+
+# Commit Convention
+
+## Format
+
+```
+<type>(<scope>): <subject>
+
+Body explanation — what + why (not how, code self-evident)
+
+Co-reviewed-by: <sub-agent> (PASS/details)
+Refs: <vault ref> (lock-in date)
+```
+
+## Types
+- `feat`: new feature
+- `fix`: bug fix
+- `chore`: build / config / housekeeping
+- `docs`: documentation only
+- `refactor`: code restructure without behavior change
+- `test`: test add / update
+- `perf`: performance improvement
+- `style`: formatting (no code change)
+- `build`: build system / external deps
+- `ci`: CI config / scripts
+
+## Scopes (cohort 정합)
+- `w3-thu-cascade` / `w3-fri` / `w4-mon-tue` / `w4-wed` / `w4-thu` / `w4-fri` / `w5-mon-tue` / `w5-wed` / `w5-thu` / `w5-fri`
+- `aurora` / `vesper` / `safety` / `payment` / `auth` / `viral` / `cache` / `survey` / `shape-c` / `nudge` / `landing` / `dashboard`
+
+## Co-reviewed-by attribution
+모든 commit 영역 sub-agent dispatch 결과 명시:
+```
+Co-reviewed-by: cohort-design-system (PASS — 8 dim), cohort-accessibility-auditor (PASS — 8 dim), cohort-product (PASS — 7 dim), safety-filter-tester (PASS — 50+ test case)
+```
+
+## Vault refs
+
+Spec decision 영역 vault ref 명시 의무:
+```
+Refs: vault 56 §6 D14, vault 62 §2.1 (CEO confirm 2026-05-25), vault 38 §2.2
+```
+
+## Anti-pattern guard
+
+- AO-4: `--no-verify` BANNED — fix hook root cause
+- Body explanation 영역 *why* > *what* > *how* priority

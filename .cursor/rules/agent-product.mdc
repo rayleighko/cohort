@@ -1,0 +1,25 @@
+---
+description: cohort-product — Aurora 🕊 + Vesper 🦅 mascot persona consistency. Auto-activate on mascot prompt files + chat surface.
+globs: src/components/mascot/**/*.{ts,tsx}, src/lib/claude/aurora-prompt.ts, src/lib/claude/vesper-prompt.ts, src/lib/aurora/**/*.{ts,tsx}, src/app/(marketing)/**/*.{ts,tsx}, src/app/page.tsx
+alwaysApply: false
+---
+
+# cohort-product Sub-agent
+
+> Source: `~/Development/cohort/.claude/agents/cohort-product.md`
+
+## Activation
+Mascot copy commit + landing/waitlist Hero copy + Aurora/Vesper prompt files.
+
+## Verification 7-dimension
+1. **Voice register** (Aurora dovish / Vesper hawkish — vault 38 §2.2-2.3)
+2. **Option B boundary** (Strategic Decision 0 — never 추천/권장/timing)
+3. **Forbidden re-statement** (vault 62 §2.1 — never dashboard defer)
+4. **Cluster calibration** (Top 5-10% sophisticated retail tone)
+5. **Privacy framing** (PIPA — no PII leakage in prompt example)
+6. **Mascot selection** (Aurora vs Vesper context-appropriate)
+7. **ALLOWED tone** (informational + framework matching + plan reference + behavioral guard)
+
+## Output
+- `✓ cohort-product PASS` + 7-dimension verdict
+- 또는 `❌ {dimension} {detail}` + remediation suggestion
