@@ -22,7 +22,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import {
   callPersonaMultiTurn,
+  COHORT_PERSONA_MODEL_FAST,
   getAnthropicClient,
+  shouldUseSonnet,
 } from '@/lib/claude/client';
 import {
   applySafetyFilter,
@@ -44,6 +46,16 @@ export const dynamic = 'force-dynamic';
 
 const CHAT_UNAVAILABLE_KO =
   '[Aurora가 잠시 자리를 비웠습니다. 잠시 후 다시 시도해주세요.]';
+
+/**
+ * Tier 0 anonymous quota — applied per (session_id, UTC date). Tier 1+
+ * quotas (50/500/unlimited) land alongside auth wiring (W4+). The 429
+ * redirect copy stays Aurora-style (calm + plan-reference + companion
+ * register, cohort-product approved W3 Thu).
+ */
+const TIER_0_DAILY_QUOTA = 10;
+const QUOTA_EXCEEDED_REDIRECT_KO =
+  '오늘 Aurora chat quota 10턴 모두 사용하셨어요. 본인 plan 영역 점검 시간으로 같이 호흡해볼까요. 내일 reset됩니다.';
 
 // Input bounds — Tier 0 endpoint is unauthenticated, so untrusted input must
 // not be allowed to inflate Anthropic prompts or amplify abuse vectors.
@@ -206,6 +218,108 @@ async function persistTurnPair(input: {
   }
 }
 
+/**
+ * Returns today's UTC ISO date — chat_quota_usage.date primary key second
+ * component. Quota window aligns with Supabase server timezone (UTC), which
+ * is acceptable for a soft cap (KST users get reset at 09:00 KST, not
+ * midnight — surfaced in the redirect copy by saying "내일 reset" without
+ * promising a clock).
+ */
+function todayUtcIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Reads the message_count for (session_id, today) — Tier 0 anonymous quota
+ * lookup. Returns 0 on no row (first turn) or any error (fail-open: a
+ * Supabase blip should not lock users out of chat — the persistence write
+ * has its own best-effort path).
+ */
+async function fetchTodayQuotaForSession(sessionId: string): Promise<number> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from('chat_quota_usage')
+      .select('message_count')
+      .eq('session_id', sessionId)
+      .eq('date', todayUtcIso())
+      .maybeSingle();
+    if (error) {
+      console.error('[Cohort] chat_quota_usage fetch failed', error);
+      return 0;
+    }
+    return (data?.message_count as number | undefined) ?? 0;
+  } catch (err) {
+    console.error('[Cohort] chat_quota_usage fetch threw', err);
+    return 0;
+  }
+}
+
+/**
+ * Atomically increments quota counters for (session_id, today). Two-step
+ * SELECT → UPDATE/INSERT because the partial UNIQUE index on (session_id,
+ * date) isn't easily targetable via PostgREST onConflict. Race window is
+ * narrow (single-user single-session typically) and the UNIQUE constraint
+ * surfaces collisions as Postgres errors → caught + logged. Best-effort:
+ * a quota write failure should not block the 200 response.
+ */
+async function incrementSessionQuota(
+  sessionId: string,
+  model: string,
+): Promise<void> {
+  const isHaiku = model === COHORT_PERSONA_MODEL_FAST;
+  try {
+    const admin = createAdminClient();
+    const date = todayUtcIso();
+    const { data: existing, error: selectError } = await admin
+      .from('chat_quota_usage')
+      .select('id, message_count, haiku_count, sonnet_count')
+      .eq('session_id', sessionId)
+      .eq('date', date)
+      .maybeSingle();
+    if (selectError) {
+      console.error('[Cohort] chat_quota_usage upsert SELECT failed', selectError);
+      return;
+    }
+    if (existing) {
+      const row = existing as {
+        id: string;
+        message_count: number;
+        haiku_count: number;
+        sonnet_count: number;
+      };
+      const { error: updateError } = await admin
+        .from('chat_quota_usage')
+        .update({
+          message_count: row.message_count + 1,
+          haiku_count: row.haiku_count + (isHaiku ? 1 : 0),
+          sonnet_count: row.sonnet_count + (isHaiku ? 0 : 1),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', row.id);
+      if (updateError) {
+        console.error('[Cohort] chat_quota_usage UPDATE failed', updateError);
+      }
+      return;
+    }
+    const { error: insertError } = await admin
+      .from('chat_quota_usage')
+      .insert({
+        session_id: sessionId,
+        tier: 'tier_0',
+        date,
+        message_count: 1,
+        haiku_count: isHaiku ? 1 : 0,
+        sonnet_count: isHaiku ? 0 : 1,
+      });
+    if (insertError) {
+      console.error('[Cohort] chat_quota_usage INSERT failed', insertError);
+    }
+  } catch (err) {
+    console.error('[Cohort] chat_quota_usage upsert threw', err);
+  }
+}
+
 async function emitPostHog(event: {
   sessionId: string;
   triggered: boolean;
@@ -340,6 +454,41 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return noStoreJson(response);
   }
 
+  // Step 1.5 — Tier 0 quota check. Inserted AFTER input filter so safety
+  // primacy holds (Layer 1/2 always run, see Day 11 architecture); inserted
+  // BEFORE persona call so quota-exhausted users don't waste Sonnet/Haiku
+  // dollars. Input-side BLOCK already returned above (those don't count
+  // toward quota — Layer 1/2 filter rejection is system-side, not user
+  // consumption).
+  const usedToday = await fetchTodayQuotaForSession(sessionId);
+  if (usedToday >= TIER_0_DAILY_QUOTA) {
+    const text = QUOTA_EXCEEDED_REDIRECT_KO;
+    const persistOk = await persistTurnPair({
+      sessionId,
+      userTurnIndex,
+      userText: userMessage,
+      assistantTurnIndex,
+      assistantText: text,
+      assistantTriggered: false,
+      safetyCategory: null,
+    });
+    await emitPostHog({
+      sessionId,
+      triggered: false,
+      safetyCategory: null,
+      side: 'pass',
+      persistenceFailed: !persistOk,
+    });
+    const response: ChatTurnResponse = {
+      character: 'aurora',
+      text,
+      triggered: false,
+      sessionId,
+      turnIndex: assistantTurnIndex,
+    };
+    return noStoreJson(response, { status: 429 });
+  }
+
   // Step 2 — build prompt from history fetched above (single fetch reused).
   const { system, messages } = buildAuroraChatPrompt({
     history,
@@ -347,10 +496,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     composite,
   });
 
-  // Step 3 — Claude call.
+  // Step 3 — Claude call. Model is chosen per-turn via shouldUseSonnet
+  // (vault 51 §4.4 cost optimization — Haiku default, Sonnet for framework
+  // matching / macro deep-dive / behavioral nudge).
+  const model = shouldUseSonnet(userMessage);
+  const chosenModel = model
+    ? 'claude-sonnet-4-6'
+    : COHORT_PERSONA_MODEL_FAST;
   let narration: string;
   try {
-    narration = await callPersonaMultiTurn('aurora', system, messages);
+    narration = await callPersonaMultiTurn(
+      'aurora',
+      system,
+      messages,
+      chosenModel,
+    );
   } catch (err) {
     console.error('[Cohort] Aurora chat generation failed', err);
     return noStoreJson(
@@ -385,6 +545,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       side: 'output',
       persistenceFailed: !persistOk,
     });
+    // Output-BLOCK still consumed a Claude call — count toward quota so
+    // bad-actor users can't burn cost indefinitely on forbidden-output trips.
+    await incrementSessionQuota(sessionId, chosenModel);
     const response: ChatTurnResponse = {
       character: 'aurora',
       text,
@@ -429,6 +592,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     side,
     persistenceFailed: !persistOk,
   });
+
+  // Successful persona turn (or output-side filter BLOCK) — both consumed
+  // a Claude call. Increment quota with the actual model used so the
+  // haiku_count / sonnet_count breakdown is accurate for cost attribution.
+  await incrementSessionQuota(sessionId, chosenModel);
 
   const response: ChatTurnResponse = {
     character: 'aurora',

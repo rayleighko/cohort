@@ -1,16 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MacroComposite } from '@/lib/macro/composite';
 
-vi.mock('@/lib/claude/client', () => ({
-  callPersonaMultiTurn: vi.fn(),
-  getAnthropicClient: vi.fn(() => ({
-    messages: {
-      create: vi.fn(),
-    },
-  })),
-  COHORT_PERSONA_MODEL: 'claude-sonnet-4-6',
-  COHORT_CLASSIFIER_MODEL: 'claude-haiku-4-5-20251001',
-}));
+vi.mock('@/lib/claude/client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/claude/client')>();
+  return {
+    ...actual,
+    // Mock only the network-hitting + Anthropic-client surfaces; keep
+    // shouldUseSonnet + model constants live so per-turn routing is
+    // exercised end-to-end in tests.
+    callPersonaMultiTurn: vi.fn(),
+    getAnthropicClient: vi.fn(() => ({
+      messages: {
+        create: vi.fn(),
+      },
+    })),
+  };
+});
 
 vi.mock('@/lib/claude/safety-filter', async () => {
   const actual = await vi.importActual<
@@ -26,22 +31,49 @@ vi.mock('@/lib/analytics/posthog-server', () => ({
   getServerPostHog: vi.fn(() => null),
 }));
 
-// Mutable admin mocks — each test resets the history fetch + insert behavior.
+// Mutable admin mocks — table-aware dispatcher (aurora_chat history+insert
+// vs chat_quota_usage select+insert+update — different chained calls).
 const mockedHistorySelect = vi.fn();
 const mockedInsert = vi.fn(async () => ({ error: null as Error | null }));
+const mockedQuotaFetch = vi.fn(async () => ({
+  data: null as
+    | { id: string; message_count: number; haiku_count: number; sonnet_count: number }
+    | null,
+  error: null as Error | null,
+}));
+const mockedQuotaInsert = vi.fn(async () => ({ error: null as Error | null }));
+const mockedQuotaUpdate = vi.fn(async () => ({ error: null as Error | null }));
 
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: vi.fn(() => ({
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          order: vi.fn(() => ({
-            limit: mockedHistorySelect,
+    from: vi.fn((table: string) => {
+      if (table === 'chat_quota_usage') {
+        return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                maybeSingle: mockedQuotaFetch,
+              })),
+            })),
+          })),
+          insert: mockedQuotaInsert,
+          update: vi.fn(() => ({
+            eq: mockedQuotaUpdate,
+          })),
+        };
+      }
+      // Default: aurora_chat (history fetch + turn pair persistence)
+      return {
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            order: vi.fn(() => ({
+              limit: mockedHistorySelect,
+            })),
           })),
         })),
-      })),
-      insert: mockedInsert,
-    })),
+        insert: mockedInsert,
+      };
+    }),
   })),
 }));
 
@@ -97,9 +129,13 @@ function makeRequest(body: unknown): Request {
 }
 
 beforeEach(() => {
-  // Default: no prior history. Tests that need prior turns override before POST.
+  // Default: no prior history + no prior quota usage. Tests that need prior
+  // state (turns or quota row) override before POST.
   mockedHistorySelect.mockResolvedValue({ data: [], error: null });
   mockedInsert.mockImplementation(async () => ({ error: null }));
+  mockedQuotaFetch.mockResolvedValue({ data: null, error: null });
+  mockedQuotaInsert.mockImplementation(async () => ({ error: null }));
+  mockedQuotaUpdate.mockImplementation(async () => ({ error: null }));
 });
 
 afterEach(() => {
@@ -108,6 +144,9 @@ afterEach(() => {
   mockedApplySafetyFilter.mockReset();
   mockedHistorySelect.mockReset();
   mockedInsert.mockReset();
+  mockedQuotaFetch.mockReset();
+  mockedQuotaInsert.mockReset();
+  mockedQuotaUpdate.mockReset();
 });
 
 describe('POST /api/aurora/chat — input validation', () => {
@@ -419,5 +458,207 @@ describe('POST /api/aurora/chat — composite context (optional)', () => {
     expect(newTurn.content).toContain('macro composite');
     expect(newTurn.content).toContain('neutral-dovish');
     expect(newTurn.content).toContain('오늘 매크로 어때요?');
+  });
+});
+
+describe('POST /api/aurora/chat — Tier 0 quota (W3 Thu)', () => {
+  it('returns 429 + Aurora-style redirect when quota >= 10 (TIER_0_DAILY_QUOTA)', async () => {
+    mockedApplySafetyFilter.mockResolvedValueOnce(ALLOW_FILTER);
+    mockedQuotaFetch.mockResolvedValueOnce({
+      data: { id: 'q-1', message_count: 10, haiku_count: 7, sonnet_count: 3 },
+      error: null,
+    });
+
+    const res = await POST(
+      makeRequest({
+        sessionId: VALID_SESSION,
+        message: '안녕',
+      }) as never,
+    );
+
+    expect(res.status).toBe(429);
+    const body = await res.json();
+    expect(body.character).toBe('aurora');
+    expect(body.triggered).toBe(false);
+    expect(body.text).toContain('quota');
+    expect(body.text).toContain('본인 plan');
+    expect(body.text).toContain('내일');
+
+    // Quota-exhausted user must NOT invoke Claude (cost-save primary intent).
+    expect(mockedCallPersonaMultiTurn).not.toHaveBeenCalled();
+    // Quota path still persists the user message + redirect (history continuity).
+    expect(mockedInsert).toHaveBeenCalledOnce();
+    // No quota increment on 429 — we don't penalize the user for hitting the cap.
+    expect(mockedQuotaInsert).not.toHaveBeenCalled();
+    expect(mockedQuotaUpdate).not.toHaveBeenCalled();
+  });
+
+  it('boundary: count=9 passes through (under cap), count=10 returns 429', async () => {
+    // count=9 → pass
+    mockedApplySafetyFilter
+      .mockResolvedValueOnce(ALLOW_FILTER)
+      .mockResolvedValueOnce(ALLOW_FILTER);
+    mockedCallPersonaMultiTurn.mockResolvedValueOnce('응답 1');
+    mockedQuotaFetch.mockResolvedValueOnce({
+      data: { id: 'q-1', message_count: 9, haiku_count: 6, sonnet_count: 3 },
+      error: null,
+    });
+
+    const r1 = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '짧은 질문' }) as never,
+    );
+    expect(r1.status).toBe(200);
+    expect(mockedCallPersonaMultiTurn).toHaveBeenCalledOnce();
+
+    // count=10 → 429
+    mockedApplySafetyFilter.mockResolvedValueOnce(ALLOW_FILTER);
+    mockedQuotaFetch.mockResolvedValueOnce({
+      data: { id: 'q-1', message_count: 10, haiku_count: 7, sonnet_count: 3 },
+      error: null,
+    });
+
+    const r2 = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '다음 질문' }) as never,
+    );
+    expect(r2.status).toBe(429);
+  });
+
+  it('fail-open on quota fetch error (no lockout from supabase blip)', async () => {
+    mockedApplySafetyFilter
+      .mockResolvedValueOnce(ALLOW_FILTER)
+      .mockResolvedValueOnce(ALLOW_FILTER);
+    mockedCallPersonaMultiTurn.mockResolvedValueOnce('응답');
+    mockedQuotaFetch.mockResolvedValueOnce({
+      data: null,
+      error: new Error('supabase blip'),
+    });
+
+    const res = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '안녕' }) as never,
+    );
+
+    // Treated as count=0 → proceeds to Claude call.
+    expect(res.status).toBe(200);
+    expect(mockedCallPersonaMultiTurn).toHaveBeenCalledOnce();
+  });
+});
+
+describe('POST /api/aurora/chat — model routing + quota increment (W3 Thu)', () => {
+  it('routes short factual message to Haiku and increments haiku_count', async () => {
+    mockedApplySafetyFilter
+      .mockResolvedValueOnce(ALLOW_FILTER)
+      .mockResolvedValueOnce(ALLOW_FILTER);
+    mockedCallPersonaMultiTurn.mockResolvedValueOnce('짧은 응답');
+
+    const res = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '안녕' }) as never,
+    );
+
+    expect(res.status).toBe(200);
+    expect(mockedCallPersonaMultiTurn).toHaveBeenCalledOnce();
+    const callArgs = mockedCallPersonaMultiTurn.mock.calls[0] as unknown as [
+      string,
+      string,
+      Array<unknown>,
+      string,
+    ];
+    expect(callArgs[3]).toBe('claude-haiku-4-5-20251001');
+    // First turn → quota INSERT (not UPDATE — no prior row).
+    expect(mockedQuotaInsert).toHaveBeenCalledOnce();
+    const quotaRow = (mockedQuotaInsert.mock.calls as unknown as Array<Array<unknown>>)[0][0] as {
+      tier: string;
+      session_id: string;
+      message_count: number;
+      haiku_count: number;
+      sonnet_count: number;
+    };
+    expect(quotaRow.tier).toBe('tier_0');
+    expect(quotaRow.session_id).toBe(VALID_SESSION);
+    expect(quotaRow.message_count).toBe(1);
+    expect(quotaRow.haiku_count).toBe(1);
+    expect(quotaRow.sonnet_count).toBe(0);
+  });
+
+  it('routes macro deep-dive (한미 금리차) to Sonnet and increments sonnet_count', async () => {
+    mockedApplySafetyFilter
+      .mockResolvedValueOnce(ALLOW_FILTER)
+      .mockResolvedValueOnce(ALLOW_FILTER);
+    mockedCallPersonaMultiTurn.mockResolvedValueOnce('깊은 응답');
+
+    const res = await POST(
+      makeRequest({
+        sessionId: VALID_SESSION,
+        message: '한미 금리차 어때요?',
+      }) as never,
+    );
+
+    expect(res.status).toBe(200);
+    const callArgs = mockedCallPersonaMultiTurn.mock.calls[0] as unknown as [
+      string,
+      string,
+      Array<unknown>,
+      string,
+    ];
+    expect(callArgs[3]).toBe('claude-sonnet-4-6');
+    expect(mockedQuotaInsert).toHaveBeenCalledOnce();
+    const quotaRow = (mockedQuotaInsert.mock.calls as unknown as Array<Array<unknown>>)[0][0] as {
+      haiku_count: number;
+      sonnet_count: number;
+    };
+    expect(quotaRow.haiku_count).toBe(0);
+    expect(quotaRow.sonnet_count).toBe(1);
+  });
+
+  it('UPDATEs existing quota row on subsequent turn (UPSERT path)', async () => {
+    mockedApplySafetyFilter
+      .mockResolvedValueOnce(ALLOW_FILTER)
+      .mockResolvedValueOnce(ALLOW_FILTER);
+    mockedCallPersonaMultiTurn.mockResolvedValueOnce('응답');
+    // Route fetches quota twice per turn (Step 1.5 check + increment helper);
+    // mockResolvedValue (persistent) so both fetches see the existing row.
+    mockedQuotaFetch.mockResolvedValue({
+      data: { id: 'q-existing', message_count: 3, haiku_count: 2, sonnet_count: 1 },
+      error: null,
+    });
+
+    const res = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '짧은 질문' }) as never,
+    );
+
+    expect(res.status).toBe(200);
+    expect(mockedQuotaUpdate).toHaveBeenCalledOnce();
+    expect(mockedQuotaInsert).not.toHaveBeenCalled();
+  });
+
+  it('still increments quota on output-side BLOCK (Claude was called)', async () => {
+    mockedApplySafetyFilter
+      .mockResolvedValueOnce(ALLOW_FILTER) // input pass
+      .mockResolvedValueOnce(BLOCK_FILTER); // output BLOCK
+    mockedCallPersonaMultiTurn.mockResolvedValueOnce('soft advisory phrasing');
+
+    const res = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '본인 plan 페이스?' }) as never,
+    );
+
+    expect(res.status).toBe(200);
+    // Output BLOCK trips Layer 3 redirect AND increments quota (cost was real).
+    expect(mockedQuotaInsert).toHaveBeenCalledOnce();
+  });
+
+  it('does NOT increment quota on input-side BLOCK (no Claude call)', async () => {
+    mockedApplySafetyFilter.mockResolvedValueOnce(BLOCK_FILTER);
+
+    const res = await POST(
+      makeRequest({
+        sessionId: VALID_SESSION,
+        message: '지금 매수해야 할까',
+      }) as never,
+    );
+
+    expect(res.status).toBe(200);
+    // Input filter rejected — Layer 2 Haiku classifier cost is system-side,
+    // user wasn't charged a turn.
+    expect(mockedQuotaInsert).not.toHaveBeenCalled();
+    expect(mockedQuotaUpdate).not.toHaveBeenCalled();
   });
 });

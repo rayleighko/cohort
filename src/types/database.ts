@@ -111,6 +111,51 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_quota_usage: {
+        Row: {
+          created_at: string
+          date: string
+          haiku_count: number
+          id: string
+          message_count: number
+          session_id: string | null
+          sonnet_count: number
+          tier: string
+          token_input_total: number
+          token_output_total: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          haiku_count?: number
+          id?: string
+          message_count?: number
+          session_id?: string | null
+          sonnet_count?: number
+          tier: string
+          token_input_total?: number
+          token_output_total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          haiku_count?: number
+          id?: string
+          message_count?: number
+          session_id?: string | null
+          sonnet_count?: number
+          tier?: string
+          token_input_total?: number
+          token_output_total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       loi_conversion: {
         Row: {
           churn_reason: string[] | null
