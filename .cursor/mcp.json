@@ -2,6 +2,16 @@
   "mcpServers": {
     "Sentry": {
       "url": "https://mcp.sentry.dev/mcp/elevate-u2/cohort"
+    },
+    "Supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "***REMOVED***"
+      }
     }
   }
 }
