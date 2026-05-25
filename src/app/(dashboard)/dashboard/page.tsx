@@ -1,7 +1,8 @@
 import { Suspense } from 'react';
 import Card from '@/components/ui/Card';
-import AuroraNarrationCard from '@/components/aurora/AuroraNarrationCard';
+import { AuroraNarrationBody } from '@/components/aurora/AuroraNarrationCard';
 import IndicatorCard from '@/components/shape-a/IndicatorCard';
+import MascotAvatar from '@/components/mascot/MascotAvatar';
 import { getMacroSnapshot } from '@/lib/macro/snapshot';
 import type { MacroComposite, MacroZone } from '@/lib/macro/composite';
 
@@ -23,13 +24,18 @@ const ZONE_LABEL_KO: Record<MacroZone, string> = {
   hawkish: '매파',
 };
 
-// State-color rule: border-tier only (success/warning never on body text).
-const ZONE_ACCENT: Record<MacroZone, string> = {
-  dovish: 'border-l-cohort-success',
-  'neutral-dovish': 'border-l-cohort-success',
-  neutral: 'border-l-cohort-ink-30',
-  'neutral-hawkish': 'border-l-cohort-warning',
-  hawkish: 'border-l-cohort-danger',
+// State-color rule: 42 §2.3 + 40 AD-1 — state tokens for border/icon only,
+// never on body text. W3 Mon Day 1 polish (브리프 §4.2 specific fix #1):
+// retired `border-l-4` card accent in favor of a colored-dot prefix on the
+// ZoneBadge — visual signal preserved without the "AI가 만든 것 같음"
+// left-border stripe the 사장님 flagged. Dot color uses the same state token,
+// applied as `bg-*` on a 6px circle (UI element, contrast 3:1 floor still met).
+const ZONE_DOT: Record<MacroZone, string> = {
+  dovish: 'bg-cohort-success',
+  'neutral-dovish': 'bg-cohort-success',
+  neutral: 'bg-cohort-ink-50',
+  'neutral-hawkish': 'bg-cohort-warning',
+  hawkish: 'bg-cohort-danger',
 };
 
 const INDICATOR_LABEL_KO: Record<string, string> = {
@@ -74,20 +80,22 @@ function formatAsOf(date: string): string {
 
 function ZoneBadge({ zone }: { zone: MacroZone }) {
   return (
-    <div
-      className={`inline-flex items-center gap-2 rounded-full border-l-4 bg-white px-4 py-2 shadow-sm ${ZONE_ACCENT[zone]}`}
-    >
-      <span className="font-medium text-cohort-ink-90">
+    <div className="inline-flex items-center gap-2 rounded-full bg-cohort-ink-05 px-3 py-1.5">
+      <span
+        aria-hidden="true"
+        className={`inline-block h-2 w-2 rounded-full ${ZONE_DOT[zone]}`}
+      />
+      <span className="text-sm font-medium text-cohort-ink-90">
         {ZONE_LABEL_KO[zone]}
       </span>
-      <span className="font-mono text-sm text-cohort-ink-70">({zone})</span>
+      <span className="font-mono text-xs text-cohort-ink-50">({zone})</span>
     </div>
   );
 }
 
 function CompositeCard({ composite }: { composite: MacroComposite }) {
   return (
-    <Card className={`border-l-4 ${ZONE_ACCENT[composite.zone]}`}>
+    <Card>
       <div className="flex flex-col gap-3">
         <p className="text-sm font-medium uppercase tracking-wider text-cohort-ink-70">
           Macro composite
@@ -169,24 +177,89 @@ function MacroUnavailable() {
   );
 }
 
+// W3 Mon Day 2 polish (브리프 §4.2 specific fix #7): signature mascot pair
+// in the header — visible Aurora + Vesper presence so the surface reads as
+// *Cohort* rather than "AI-generated dashboard template". Decorative pair,
+// alt-text per MascotAvatar SVG, no interaction (chat surface lives in the
+// FAB at bottom-right via (dashboard)/layout.tsx).
+function MascotSignature() {
+  return (
+    <div
+      className="flex shrink-0 items-center -space-x-1.5"
+      aria-label="Aurora 🕊 + Vesper 🦅 signature"
+    >
+      <MascotAvatar
+        character="aurora"
+        state="calm"
+        size={28}
+        className="rounded-full ring-2 ring-white"
+      />
+      <MascotAvatar
+        character="vesper"
+        state="calm"
+        size={28}
+        className="rounded-full ring-2 ring-white"
+      />
+    </div>
+  );
+}
+
+// W3 Mon Day 2 polish (브리프 §4.2 specific fix #3): Aurora narration is
+// demoted from top-dominant position to a bottom-of-page collapsible block.
+// Indicator data leads, framework narrative supports. Native <details> for
+// zero-JS accessibility + keyboard navigation; `group-open:` Tailwind
+// variant (v3.4+) swaps the affordance label. Reduced-motion respected via
+// MascotChatBubble's own transitions (no animation here).
+function NarrationBlock({ composite }: { composite: MacroComposite }) {
+  return (
+    <details className="group overflow-hidden rounded-2xl bg-white shadow-sm sm:shadow">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+        <span className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-aurora-calm">
+          <span aria-hidden="true">🕊</span> Aurora morning brief
+        </span>
+        <span className="font-mono text-xs text-cohort-ink-70">
+          <span className="group-open:hidden">펼치기 ▾</span>
+          <span className="hidden group-open:inline">접기 ▴</span>
+        </span>
+      </summary>
+      <div className="border-t border-cohort-ink-05 bg-aurora-calm/[0.04] p-4 sm:p-6">
+        <AuroraNarrationBody composite={composite} />
+      </div>
+    </details>
+  );
+}
+
 async function MacroBody() {
   try {
     const { composite, fetchedAt } = await getMacroSnapshot();
     return (
-      <div className="flex flex-col gap-4">
-        <header className="flex flex-col gap-1">
-          <p className="font-mono text-sm text-cohort-ink-70">
-            기준일 {formatAsOf(composite.asOfDate)} · 갱신{' '}
-            {formatKst(fetchedAt)} KST
-          </p>
-          <h1 className="break-keep text-2xl font-medium text-cohort-ink-90 sm:text-3xl">
-            오늘의 cohort.
-          </h1>
+      <div className="flex flex-col gap-6">
+        <header className="flex items-end justify-between gap-4">
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="font-mono text-sm text-cohort-ink-70">
+              기준일 {formatAsOf(composite.asOfDate)} · 갱신{' '}
+              {formatKst(fetchedAt)} KST
+            </p>
+            <h1 className="break-keep text-2xl font-medium text-cohort-ink-90 sm:text-3xl">
+              오늘의 cohort.
+            </h1>
+          </div>
+          <MascotSignature />
         </header>
-        <CompositeCard composite={composite} />
-        <AuroraNarrationCard composite={composite} />
-        <KeyDriverCard composite={composite} />
+        {/* Composite (primary) + Key driver (secondary) — single row on
+            ≥sm. CompositeCard takes 2/3 width to keep the score figure
+            the visual anchor; KeyDriver fills the remaining 1/3. */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="sm:col-span-2">
+            <CompositeCard composite={composite} />
+          </div>
+          <KeyDriverCard composite={composite} />
+        </div>
+        {/* Indicators lead (브리프 §4.2: density-first, TradingView-inspired
+            multi-indicator at-a-glance). */}
         <IndicatorGrid composite={composite} />
+        {/* Aurora narration demoted to bottom collapsible block. */}
+        <NarrationBlock composite={composite} />
       </div>
     );
   } catch {

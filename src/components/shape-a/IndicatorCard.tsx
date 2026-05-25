@@ -94,14 +94,20 @@ export function formatDelta(delta: number | null, unit: string): string | null {
 }
 
 /**
- * Contribution-sign tinted left-border accent token (state-color rule:
- * border-only, never on body text). Threshold ±0.5 keeps weak-signal
- * indicators visually neutral — avoids alarming visuals on noisy contributions.
+ * Contribution-sign tinted chip background + text token (W3 Mon Day 1
+ * polish): the previous `border-l-4` left-border accent (사장님 "카드 좌측
+ * 보더" verbatim complaint) is retired. Signal is preserved through a
+ * compact subtle-bg chip on the contribution figure. State-color rule
+ * (42 §2.3) still honored — `bg-*-05` tints are UI elements (3:1 contrast
+ * floor), body text remains cohort-ink-{50,70,90}. Threshold ±0.5 keeps
+ * weak-signal indicators visually neutral.
  */
-export function contributionAccent(contribution: number): string {
-  if (contribution >= 0.5) return 'border-l-cohort-success';
-  if (contribution <= -0.5) return 'border-l-cohort-danger';
-  return 'border-l-cohort-ink-30';
+export function contributionChip(contribution: number): string {
+  if (contribution >= 0.5)
+    return 'bg-cohort-success/10 text-cohort-success';
+  if (contribution <= -0.5)
+    return 'bg-cohort-danger/10 text-cohort-danger';
+  return 'bg-cohort-ink-05 text-cohort-ink-70';
 }
 
 function Sparkline({
@@ -180,10 +186,10 @@ export default function IndicatorCard({ indicator }: Props) {
     [data, unit],
   );
 
-  const accentClass = contributionAccent(contribution);
+  const chipClass = contributionChip(contribution);
 
   return (
-    <Card className={`border-l-4 ${accentClass}`}>
+    <Card>
       <div className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between gap-3">
           <span className="break-keep font-medium text-cohort-ink-90">
@@ -215,7 +221,12 @@ export default function IndicatorCard({ indicator }: Props) {
         )}
         <div className="flex items-baseline justify-between gap-3 font-mono text-xs text-cohort-ink-70">
           <span>가중 {(weight * 100).toFixed(0)}%</span>
-          <span>기여 {contribution.toFixed(2)}</span>
+          <span
+            className={`inline-flex items-baseline rounded-sm px-1.5 py-0.5 text-sm ${chipClass}`}
+          >
+            기여 {contribution >= 0 ? '+' : ''}
+            {contribution.toFixed(2)}
+          </span>
         </div>
       </div>
     </Card>

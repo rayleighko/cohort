@@ -111,7 +111,14 @@ function NarrationBody({ text }: { text: string }) {
   );
 }
 
-export default function AuroraNarrationCard({ composite }: Props) {
+/**
+ * AuroraNarrationBody — bare narration content (no Card wrapper, no label).
+ * Used by dashboard's NarrationBlock (W3 Mon Day 2) which provides its own
+ * collapsible <details> shell + summary label. Default export below wraps
+ * this body in the standalone Card-styled callout for any consumer that
+ * still wants the boxed presentation.
+ */
+export function AuroraNarrationBody({ composite }: Props) {
   const { data, error, isLoading } = useSWR<NarrationResponse, NarrationError>(
     ['/api/aurora/narration', composite.computedAt],
     () => fetchNarration(composite),
@@ -125,25 +132,39 @@ export default function AuroraNarrationCard({ composite }: Props) {
 
   const fallbackText = error?.serverText ?? FALLBACK_KO;
 
+  if (isLoading) {
+    return <NarrationSkeleton />;
+  }
+  if (error || !data) {
+    return (
+      <p
+        role="status"
+        aria-live="polite"
+        className="break-keep text-cohort-ink-50"
+      >
+        {fallbackText}
+      </p>
+    );
+  }
+  return <NarrationBody key={data.text} text={data.text} />;
+}
+
+/**
+ * AuroraNarrationCard — standalone Card-wrapped narration (legacy/standalone
+ * surfaces). W3 Mon Day 1 polish — Notion callout block aesthetic. Previous
+ * left-border accent (border-l-4 border-l-aurora-calm) retired per 사장님
+ * "카드 좌측 보더" complaint. Aurora signal now lives in (a) subtle
+ * aurora-tinted background, (b) explicit 🕊 + name label, (c)
+ * shadow-mascot-aurora glow (tokenized in tailwind.config.ts).
+ */
+export default function AuroraNarrationCard({ composite }: Props) {
   return (
-    <Card className="border-l-4 border-l-aurora-calm">
+    <Card className="bg-aurora-calm/[0.04] shadow-mascot-aurora">
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium uppercase tracking-wider text-cohort-ink-70">
+        <p className="text-sm font-medium uppercase tracking-wider text-aurora-calm">
           <span aria-hidden="true">🕊</span> Aurora morning brief
         </p>
-        {isLoading ? (
-          <NarrationSkeleton />
-        ) : error || !data ? (
-          <p
-            role="status"
-            aria-live="polite"
-            className="break-keep text-cohort-ink-50"
-          >
-            {fallbackText}
-          </p>
-        ) : (
-          <NarrationBody key={data.text} text={data.text} />
-        )}
+        <AuroraNarrationBody composite={composite} />
       </div>
     </Card>
   );

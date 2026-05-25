@@ -7,9 +7,12 @@
  * accent), assistant messages are left-aligned with the Aurora sigil as a
  * placeholder avatar (Pre-W5 illustrator commissioning per 43-mascot-brief).
  *
- * The `triggered` flag is a quiet visual marker — a thin left border in the
- * info color, never alarming, never apology-tone. The user already saw the
+ * The `triggered` flag is a quiet visual marker — a subtle info-tinted
+ * background, never alarming, never apology-tone. The user already saw the
  * redirect text; the marker is only a subtle "this was the safety boundary".
+ * W3 Mon Day 1: migrated from `border-l-4 border-l-cohort-info` to a
+ * `bg-cohort-info/[0.06]` tint for consistency with the dashboard-wide
+ * Notion-block aesthetic (사장님 "카드 좌측 보더" complaint).
  *
  * Korean body uses `break-keep` to preserve Korean cluster word boundaries.
  * No markdown rendering — Aurora's system prompt forbids markdown by contract
@@ -45,8 +48,8 @@ export default function ChatMessage({
         <span>🕊</span>
       </div>
       <div
-        className={`max-w-[80%] rounded-2xl rounded-tl-md bg-white px-4 py-2 shadow-sm ${
-          triggered ? 'border-l-4 border-l-cohort-info' : ''
+        className={`max-w-[80%] rounded-2xl rounded-tl-md px-4 py-2 shadow-sm ${
+          triggered ? 'bg-cohort-info/[0.06]' : 'bg-white'
         }`}
       >
         <p className="break-keep text-sm leading-relaxed text-cohort-ink-90">

@@ -5,7 +5,7 @@ import {
   SERIES_FETCHABLE,
   SPARKLINE_STROKE,
   formatDelta,
-  contributionAccent,
+  contributionChip,
 } from '@/components/shape-a/IndicatorCard';
 
 // IndicatorCard's React rendering is verified manually on /dashboard
@@ -104,34 +104,62 @@ describe('formatDelta', () => {
   });
 });
 
-describe('contributionAccent (state-color rule: border-only)', () => {
-  it('returns success border for contribution ≥ +0.5 (dovish leg)', () => {
-    expect(contributionAccent(0.5)).toBe('border-l-cohort-success');
-    expect(contributionAccent(2.4)).toBe('border-l-cohort-success');
-    expect(contributionAccent(10)).toBe('border-l-cohort-success');
+describe('contributionChip (W3 Mon Day 1 polish: bg-tint chip replaces border-l accent)', () => {
+  // The previous `contributionAccent` function returned `border-l-cohort-*`
+  // strings consumed as a 4px left-border on the card surface — retired in
+  // W3 Mon polish per 사장님 "카드 좌측 보더" complaint. Replacement is a
+  // compact chip rendered around the contribution figure: subtle state-tint
+  // background + state-colored text. Body-text token restriction (42 §2.3 +
+  // AD-1) — state-warning text on body is still banned; success/danger as
+  // chip text is permitted because the chip bg is near-white (`bg-*-/10`
+  // composites over Card's white surface ⇒ contrast vs. text holds AA).
+  it('returns success-tinted chip for contribution ≥ +0.5 (dovish leg)', () => {
+    expect(contributionChip(0.5)).toBe(
+      'bg-cohort-success/10 text-cohort-success',
+    );
+    expect(contributionChip(2.4)).toBe(
+      'bg-cohort-success/10 text-cohort-success',
+    );
+    expect(contributionChip(10)).toBe(
+      'bg-cohort-success/10 text-cohort-success',
+    );
   });
 
-  it('returns danger border for contribution ≤ −0.5 (hawkish leg)', () => {
-    expect(contributionAccent(-0.5)).toBe('border-l-cohort-danger');
-    expect(contributionAccent(-4.4)).toBe('border-l-cohort-danger');
-    expect(contributionAccent(-10)).toBe('border-l-cohort-danger');
+  it('returns danger-tinted chip for contribution ≤ −0.5 (hawkish leg)', () => {
+    expect(contributionChip(-0.5)).toBe(
+      'bg-cohort-danger/10 text-cohort-danger',
+    );
+    expect(contributionChip(-4.4)).toBe(
+      'bg-cohort-danger/10 text-cohort-danger',
+    );
+    expect(contributionChip(-10)).toBe(
+      'bg-cohort-danger/10 text-cohort-danger',
+    );
   });
 
-  it('returns neutral ink-30 border for weak signals (|contribution| < 0.5)', () => {
-    expect(contributionAccent(0)).toBe('border-l-cohort-ink-30');
-    expect(contributionAccent(0.49)).toBe('border-l-cohort-ink-30');
-    expect(contributionAccent(-0.49)).toBe('border-l-cohort-ink-30');
+  it('returns neutral ink chip for weak signals (|contribution| < 0.5)', () => {
+    expect(contributionChip(0)).toBe('bg-cohort-ink-05 text-cohort-ink-70');
+    expect(contributionChip(0.49)).toBe('bg-cohort-ink-05 text-cohort-ink-70');
+    expect(contributionChip(-0.49)).toBe(
+      'bg-cohort-ink-05 text-cohort-ink-70',
+    );
   });
 
-  it('never returns a body-text token (state-color rule compliance)', () => {
+  it('never emits state-warning as body text (42 §2.3 hard rule + C-5 anti-pattern)', () => {
     const samples = [-10, -1, 0, 0.3, 2.5, 10];
     for (const c of samples) {
-      const out = contributionAccent(c);
-      expect(out).toMatch(/^border-l-cohort-/);
-      // body-text-restricted tokens must never appear:
-      expect(out).not.toContain('text-cohort-success');
+      const out = contributionChip(c);
+      // state-warning text on body still BANNED (3.6:1 fails AA). Success
+      // and danger chip text are allowed on bg-*-/10 (near-white) backings.
       expect(out).not.toContain('text-cohort-warning');
-      expect(out).not.toContain('text-cohort-danger');
+    }
+  });
+
+  it('never emits a border-l-* class (border-l accent is retired in W3 Mon)', () => {
+    const samples = [-10, -1, 0, 0.3, 2.5, 10];
+    for (const c of samples) {
+      const out = contributionChip(c);
+      expect(out).not.toContain('border-l-');
     }
   });
 });
