@@ -107,3 +107,75 @@ export interface TriggerEvaluationResult {
   reason?: string;
   evaluatedAt: Date;
 }
+
+// ── Shape C behavioral pattern detection types (W4 Wed) ─────────────────────
+
+export interface PanicSellAction {
+  ticker: string;
+  amount_krw: number;
+  planned: boolean;
+  sold_at: Date;
+}
+
+export interface PanicContext {
+  userId: string;
+  now: Date;
+  recentSells: PanicSellAction[];
+  planTotalKrw: number;
+  macroCompositeScore: number;
+}
+
+export interface PanicResult {
+  detected: boolean;
+  severity: 'low' | 'medium' | 'high';
+  reason: string;
+  evidence: {
+    unplannedSellCountGte2: boolean;
+    sellRatioGte20Pct: boolean;
+    hawkishMacroAndSingleSellGte30Pct: boolean;
+  };
+}
+
+export interface FomoBuyAction {
+  ticker: string;
+  amount_krw: number;
+  in_watchlist: boolean;
+  bought_at: Date;
+}
+
+export interface FomoContext {
+  userId: string;
+  now: Date;
+  recentBuys: FomoBuyAction[];
+  planTotalKrw: number;
+  macroCompositeScore: number;
+}
+
+export interface FomoResult {
+  detected: boolean;
+  severity: 'low' | 'medium' | 'high';
+  reason: string;
+  evidence: {
+    outsideWatchlistBuyExists: boolean;
+    buyRatioGte150Pct: boolean;
+    dovishMacroAndOutsideWatchlistBuy: boolean;
+  };
+}
+
+// ── Cooldown enforcement types (W4 Wed) ──────────────────────────────────────
+
+export interface ShapeCTriggerRow {
+  cooldown_minutes: number | null;
+  last_fired_at: string | null;
+}
+
+export interface EnforceCooldownResult {
+  allowed: boolean;
+  reason:
+    | 'never_fired'
+    | 'cooldown_expired'
+    | 'cooldown_active'
+    | 'no_cooldown_configured';
+  remainingMs: number | null;
+  nextEligibleAt: Date | null;
+}
