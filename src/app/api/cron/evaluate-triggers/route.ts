@@ -5,7 +5,8 @@
  * Auth: Authorization: Bearer $CRON_SECRET
  *
  * V1 active:   macro_composite evaluation only
- * V1 deferred: price_drop (needs real price feed), behavioral_event insert, Aurora nudge
+ * V1 deferred: price_drop (needs real price feed), Aurora nudge
+ * V1 deferred: detectPanic/detectFOMO invocation (caller routing in user-action path)
  *
  * Vault refs: vault 62 §2, vault 56 D9
  */
@@ -13,8 +14,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { evaluateTrigger } from '@/lib/trigger/engine';
+import { enforceCooldown } from '@/lib/trigger/cooldown';
 import { getMacroSnapshot } from '@/lib/macro/snapshot';
-import type { ShapeCTrigger } from '@/types/trigger';
+import type {
+  EnforceCooldownResult,
+  ShapeCTrigger,
+  ShapeCTriggerRow,
+} from '@/types/trigger';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -75,6 +81,28 @@ export async function GET(req: NextRequest) {
   const firedIds: string[] = [];
 
   for (const rawTrigger of (triggers as unknown as ShapeCTrigger[])) {
+    const cooldownRow: ShapeCTriggerRow = {
+      cooldown_minutes:
+        (rawTrigger as ShapeCTrigger & { cooldown_minutes?: number | null })
+          .cooldown_minutes ??
+        (typeof rawTrigger.cooldown_hours === 'number'
+          ? rawTrigger.cooldown_hours * 60
+          : null),
+      last_fired_at: rawTrigger.last_fired_at,
+    };
+    const cooldownResult: EnforceCooldownResult = enforceCooldown({
+      trigger: cooldownRow,
+      now,
+    });
+
+    if (!cooldownResult.allowed) {
+      console.debug(
+        `[cron/evaluate-triggers] cooldown skip for ${rawTrigger.id}: ${cooldownResult.reason}`,
+      );
+      skipped++;
+      continue;
+    }
+
     const result = evaluateTrigger(rawTrigger, ctx);
 
     if (!result.fired) {
@@ -100,7 +128,28 @@ export async function GET(req: NextRequest) {
     fired++;
     firedIds.push(rawTrigger.id);
 
-    // V1 deferred: behavioral_event insert + Aurora nudge
+    // 5. Persist behavioral_event audit log (non-fatal)
+    const { error: eventInsertError } = await supabase.from('behavioral_event').insert({
+      user_id: rawTrigger.user_id,
+      trigger_id: rawTrigger.id,
+      event_type: 'trigger_fired',
+      severity: 'info',
+      context_jsonb: {
+        trigger_type: rawTrigger.trigger_type,
+        macro_composite_score: ctx.macroCompositeScore ?? null,
+        cooldown_reason: cooldownResult.reason,
+        fired_at: now.toISOString(),
+      },
+    });
+
+    if (eventInsertError) {
+      console.error(
+        `[cron/evaluate-triggers] behavioral_event insert failed for ${rawTrigger.id}:`,
+        eventInsertError.message,
+      );
+    }
+
+    // V1 deferred: Aurora nudge dispatch
   }
 
   return NextResponse.json({
