@@ -111,6 +111,51 @@ export type Database = {
         }
         Relationships: []
       }
+      behavioral_event: {
+        Row: {
+          context_jsonb: Json
+          created_at: string
+          event_type: string
+          id: string
+          severity: string
+          trigger_id: string | null
+          user_id: string
+        }
+        Insert: {
+          context_jsonb?: Json
+          created_at?: string
+          event_type: string
+          id?: string
+          severity?: string
+          trigger_id?: string | null
+          user_id: string
+        }
+        Update: {
+          context_jsonb?: Json
+          created_at?: string
+          event_type?: string
+          id?: string
+          severity?: string
+          trigger_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "behavioral_event_trigger_id_fkey"
+            columns: ["trigger_id"]
+            isOneToOne: false
+            referencedRelation: "shape_c_triggers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "behavioral_event_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_quota_usage: {
         Row: {
           created_at: string
