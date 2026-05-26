@@ -408,6 +408,45 @@ export type Database = {
         }
         Relationships: []
       }
+      shape_c_triggers: {
+        Row: {
+          condition_params: Json
+          cooldown_hours: number
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string | null
+          last_fired_at: string | null
+          trigger_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          condition_params: Json
+          cooldown_hours?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          last_fired_at?: string | null
+          trigger_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          condition_params?: Json
+          cooldown_hours?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          last_fired_at?: string | null
+          trigger_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trigger_config: {
         Row: {
           active: boolean | null
