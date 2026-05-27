@@ -57,7 +57,7 @@ describe('registerServiceWorker', () => {
     const { registerServiceWorker } = await import('../sw-register');
     const res = await registerServiceWorker();
     expect(res).toBe(registration);
-    expect(register).toHaveBeenCalledWith('/sw.js', { scope: '/' });
+    expect(register).toHaveBeenCalledWith('/service-worker.js', { scope: '/' });
   });
 
   it('returns null on register reject and logs error', async () => {
