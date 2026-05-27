@@ -85,7 +85,12 @@ export function Footer() {
           </nav>
         </div>
 
+        {/* Option B disclaimer (vault 38 §1.2 Strategic Decision 0) */}
         <div className="mt-8 break-keep border-t border-cohort-ink-10 pt-6 text-xs text-cohort-ink-50">
+          본 서비스는 정보 제공 + 의사결정 지원 도구이며, 투자 자문 서비스가 아닙니다. 모든 투자 결정과 손익은 사용자 본인의 책임입니다.
+        </div>
+
+        <div className="mt-6 break-keep text-xs text-cohort-ink-50">
           <div className="flex flex-wrap gap-x-4 gap-y-1">
             <span>
               상호명:{' '}

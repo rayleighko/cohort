@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import BottomNav from '@/components/ui/BottomNav';
-import { DisclaimerFooter } from '@/components/ui/Disclaimer';
 import MascotChatBubble from '@/components/aurora/MascotChatBubble';
 
 /**
@@ -26,7 +25,6 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col pb-16">
       {children}
-      <DisclaimerFooter />
       <BottomNav />
       <MascotChatBubble />
     </div>

@@ -9,7 +9,6 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import MascotAvatar from '@/components/mascot/MascotAvatar';
-import { DisclaimerFooter } from '@/components/ui/Disclaimer';
 import { posthog } from '@/lib/analytics/posthog';
 import { COHORT_EVENTS } from '@/lib/analytics/events';
 import { getAbVariant } from '@/lib/analytics/ab';
@@ -104,7 +103,7 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col break-keep bg-cohort-ivory px-6 pb-28">
+    <main className="mx-auto flex min-h-screen max-w-md flex-col break-keep bg-cohort-ivory px-6 pb-24 md:pb-28">
       {/* Brand mark */}
       <header className="flex items-center gap-2 pt-12">
         <MascotAvatar character="aurora" state="calm" size={36} />
@@ -201,8 +200,6 @@ export default function LandingPage() {
           </p>
         </div>
       </Reveal>
-
-      <DisclaimerFooter />
 
       {/* Bottom-fixed CTA */}
       <div className="fixed inset-x-0 bottom-0 border-t border-cohort-ink-10 bg-cohort-ivory/95 px-6 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 backdrop-blur">
