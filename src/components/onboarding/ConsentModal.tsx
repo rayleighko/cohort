@@ -29,6 +29,9 @@ interface ConsentModalProps {
 const CHECK_ROW =
   'flex min-h-[44px] cursor-pointer items-start gap-3 py-1 text-sm leading-relaxed text-cohort-charcoal';
 
+const CHECKBOX_CLASS =
+  'mt-0.5 h-5 w-5 min-h-[20px] min-w-[20px] flex-shrink-0 accent-cohort-primary';
+
 export default function ConsentModal({ userId }: ConsentModalProps) {
   const router = useRouter();
 
@@ -51,17 +54,20 @@ export default function ConsentModal({ userId }: ConsentModalProps) {
     setError(null);
 
     const supabase = createClient();
-    const { error: updateError } = await supabase
+    const { error: upsertError } = await supabase
       .from('user_profile')
-      .update({
-        consent_analytics: agreePrivacy,
-        consent_interview: agreeInterview,
-        consent_kakao_notification: agreeMarketing,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', userId);
+      .upsert(
+        {
+          id: userId,
+          consent_analytics: agreePrivacy,
+          consent_interview: agreeInterview,
+          consent_kakao_notification: agreeMarketing,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'id' },
+      );
 
-    if (updateError) {
+    if (upsertError) {
       setError('동의 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
       setSubmitting(false);
       return;
@@ -131,7 +137,7 @@ export default function ConsentModal({ userId }: ConsentModalProps) {
             type="checkbox"
             checked={agreePrivacy}
             onChange={(e) => setAgreePrivacy(e.target.checked)}
-            className="mt-0.5 h-5 w-5 accent-cohort-primary"
+            className={CHECKBOX_CLASS}
           />
           <span>
             <strong>(필수)</strong> 개인정보 처리방침을 확인했고, 개인정보
@@ -143,7 +149,7 @@ export default function ConsentModal({ userId }: ConsentModalProps) {
             type="checkbox"
             checked={agreeAge}
             onChange={(e) => setAgreeAge(e.target.checked)}
-            className="mt-0.5 h-5 w-5 accent-cohort-primary"
+            className={CHECKBOX_CLASS}
           />
           <span>
             <strong>(필수)</strong> 만 14세 이상입니다.
@@ -154,7 +160,7 @@ export default function ConsentModal({ userId }: ConsentModalProps) {
             type="checkbox"
             checked={agreeNotAdvisory}
             onChange={(e) => setAgreeNotAdvisory(e.target.checked)}
-            className="mt-0.5 h-5 w-5 accent-cohort-primary"
+            className={CHECKBOX_CLASS}
           />
           <span>
             <strong>(필수)</strong> 본 서비스가 자본시장법상 정보 제공·의사결정
@@ -170,7 +176,7 @@ export default function ConsentModal({ userId }: ConsentModalProps) {
             type="checkbox"
             checked={agreeInterview}
             onChange={(e) => setAgreeInterview(e.target.checked)}
-            className="mt-0.5 h-5 w-5 accent-cohort-primary"
+            className={CHECKBOX_CLASS}
           />
           <span>
             <strong>(선택)</strong> 서비스 개선을 위한 1:1 인터뷰(30-60분) 초대
@@ -182,7 +188,7 @@ export default function ConsentModal({ userId }: ConsentModalProps) {
             type="checkbox"
             checked={agreeMarketing}
             onChange={(e) => setAgreeMarketing(e.target.checked)}
-            className="mt-0.5 h-5 w-5 accent-cohort-primary"
+            className={CHECKBOX_CLASS}
           />
           <span>
             <strong>(선택)</strong> 신규 기능·이벤트 등 마케팅·알림 메시지 수신에
