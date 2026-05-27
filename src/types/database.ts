@@ -300,6 +300,82 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_log: {
+        Row: {
+          behavioral_event_id: string | null
+          body: string
+          category: string
+          channel: string
+          created_at: string
+          error_message: string | null
+          id: string
+          payload_jsonb: Json
+          provider_message_id: string | null
+          retry_count: number
+          sent_at: string | null
+          status: string
+          trigger_id: string | null
+          user_id: string
+          voice: string
+        }
+        Insert: {
+          behavioral_event_id?: string | null
+          body: string
+          category: string
+          channel: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload_jsonb?: Json
+          provider_message_id?: string | null
+          retry_count?: number
+          sent_at?: string | null
+          status?: string
+          trigger_id?: string | null
+          user_id: string
+          voice: string
+        }
+        Update: {
+          behavioral_event_id?: string | null
+          body?: string
+          category?: string
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload_jsonb?: Json
+          provider_message_id?: string | null
+          retry_count?: number
+          sent_at?: string | null
+          status?: string
+          trigger_id?: string | null
+          user_id?: string
+          voice?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_log_behavioral_event_id_fkey"
+            columns: ["behavioral_event_id"]
+            isOneToOne: false
+            referencedRelation: "behavioral_event"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_log_trigger_id_fkey"
+            columns: ["trigger_id"]
+            isOneToOne: false
+            referencedRelation: "shape_c_triggers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_response: {
         Row: {
           account_irp: boolean | null
@@ -527,6 +603,50 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      user_notification_preference: {
+        Row: {
+          channels: string[]
+          created_at: string
+          kakao_user_id: string | null
+          opt_out: boolean
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          updated_at: string
+          user_id: string
+          web_push_subscription: Json | null
+        }
+        Insert: {
+          channels?: string[]
+          created_at?: string
+          kakao_user_id?: string | null
+          opt_out?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id: string
+          web_push_subscription?: Json | null
+        }
+        Update: {
+          channels?: string[]
+          created_at?: string
+          kakao_user_id?: string | null
+          opt_out?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id?: string
+          web_push_subscription?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_preference_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_profile: {
         Row: {
