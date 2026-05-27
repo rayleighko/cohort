@@ -3,7 +3,7 @@ import Link from 'next/link';
 export function Footer() {
   return (
     <footer
-      className="mt-auto border-t border-cohort-ink-10 bg-cohort-ivory"
+      className="mt-auto border-t border-cohort-ink-10 bg-cohort-ivory pb-20 md:pb-24"
       aria-label="사이트 푸터"
     >
       <div className="mx-auto max-w-5xl px-4 py-8 md:py-10">
