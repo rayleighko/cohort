@@ -1,5 +1,6 @@
 import { loadTierState } from '@/lib/payment/tier-gating';
 import SubscriptionPanel from '@/components/settings/SubscriptionPanel';
+import { NotificationOptIn } from '@/components/notification/NotificationOptIn';
 
 /**
  * Settings — subscription + account + PIPA + 데이터 관리.
@@ -34,6 +35,14 @@ export default async function SettingsPage({
           rawTier={tier.rawTier}
           renewalAt={tier.subscriptionRenewalAt}
         />
+      </div>
+
+      {/* Notifications — W5 Mon */}
+      <h2 className="mt-8 text-sm font-semibold uppercase tracking-wide text-cohort-charcoal/45">
+        알림
+      </h2>
+      <div className="mt-2">
+        <NotificationOptIn />
       </div>
 
       {/* Account — W5 scaffold */}
