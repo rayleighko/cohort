@@ -23,7 +23,7 @@ export default function DashboardLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col pb-16">
+    <div className="flex min-h-screen flex-col pb-20 md:pb-24">
       {children}
       <BottomNav />
       <MascotChatBubble />
