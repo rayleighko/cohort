@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/nextjs';
 import '@/styles/globals.css';
 import PostHogProvider from '@/components/analytics/PostHogProvider';
 import ServiceWorkerRegister from '@/components/pwa/ServiceWorkerRegister';
-import { Footer } from '@/components/layout/Footer';
+import { ConditionalFooter } from '@/components/layout/ConditionalFooter';
 
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? 'Cohort';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cohort.co.kr';
@@ -68,7 +68,7 @@ export default function RootLayout({
         <PostHogProvider>
           <div className="flex min-h-screen flex-col">
             <div className="flex-1">{children}</div>
-            <Footer />
+            <ConditionalFooter />
           </div>
         </PostHogProvider>
         <ServiceWorkerRegister />
