@@ -1,6 +1,5 @@
-// W4 Thu notification module — dispatcher skeleton
-// Voice routing + body templating land in ST2; channel-specific providers in ST3-4;
-// cron wiring + send execution in ST5. ST1 establishes the DB scaffolding path only.
+// W4 Thu notification module — dispatcher
+// Channel-specific providers wire up in ST3-4; cron + send execution in ST5.
 // Refs: vault 62 §2 Q3 (4-category routing), vault 56 D9 (2-track channels)
 
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -12,8 +11,8 @@ import type {
   NotificationCategory,
   NotificationChannel,
   NotificationPayload,
-  VoicePersona,
 } from './types';
+import { generateBody, selectVoice, type TemplateContext } from './voice';
 
 type ShapeCTriggerRow = Database['public']['Tables']['shape_c_triggers']['Row'];
 type BehavioralEventRow = Database['public']['Tables']['behavioral_event']['Row'];
@@ -35,14 +34,24 @@ const EMPTY_RESULT: DispatcherDispatchResult = {
   notification_log_ids: [],
 };
 
-// Placeholder voice resolver — real Aurora/Vesper category mapping lands in ST2.
-function resolveVoice(_category: NotificationCategory): VoicePersona {
-  return 'aurora';
-}
+const VALID_STANCES = new Set(['hawkish', 'dovish', 'neutral']);
 
-// Placeholder body generator — real templated copy lands in ST2.
-function generateBody(_payload: Omit<NotificationPayload, 'body'>): string {
-  return 'TODO ST2';
+function deriveTemplateContext(input: DispatchInput): TemplateContext {
+  const ctx = input.context_jsonb ?? {};
+  const stanceRaw = ctx.stance;
+  return {
+    score: typeof ctx.macro_composite_score === 'number'
+      ? ctx.macro_composite_score
+      : undefined,
+    stance: typeof stanceRaw === 'string' && VALID_STANCES.has(stanceRaw)
+      ? (stanceRaw as 'hawkish' | 'dovish' | 'neutral')
+      : undefined,
+    trigger_label: input.trigger?.label ?? undefined,
+    count: typeof ctx.count === 'number' ? ctx.count : undefined,
+    plan_summary: typeof ctx.plan_summary === 'string'
+      ? ctx.plan_summary
+      : undefined,
+  };
 }
 
 function resolveTargets(
@@ -95,20 +104,19 @@ export async function dispatch(
   const targets = resolveTargets(pref, registry);
   if (targets.length === 0) return EMPTY_RESULT;
 
-  const voice = resolveVoice(input.category);
-  const partial: Omit<NotificationPayload, 'body'> = {
+  const voice = selectVoice({ category: input.category });
+  const ctx = deriveTemplateContext(input);
+  const body = generateBody({ category: input.category, voice, ctx });
+  const payload: NotificationPayload = {
     user_id: input.user_id,
     category: input.category,
     voice,
+    body,
     deep_link: undefined,
     trigger_id: input.trigger?.id ?? null,
     behavioral_event_id: input.behavioral_event?.id ?? null,
     metadata: input.context_jsonb ?? {},
     priority: 'normal',
-  };
-  const payload: NotificationPayload = {
-    ...partial,
-    body: generateBody(partial),
   };
 
   const logIds: string[] = [];
