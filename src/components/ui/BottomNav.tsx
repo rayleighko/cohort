@@ -122,10 +122,16 @@ const TABS: Tab[] = [
 export default function BottomNav() {
   const pathname = usePathname() ?? '';
   return (
-    <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-cohort-ink-10 bg-cohort-ivory/95 backdrop-blur"
-      aria-label="주요 네비게이션"
-    >
+    <>
+      {/* Inline-flow spacer — reserves vertical space equal to the fixed
+          nav so Footer (root layout sibling) is not occluded. h-20 mobile /
+          md:h-24 desktop matches BottomNav's intrinsic height + safe-area
+          inset. aria-hidden so screen readers skip the empty element. */}
+      <div aria-hidden="true" className="h-20 md:h-24" />
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-cohort-ink-10 bg-cohort-ivory/95 backdrop-blur"
+        aria-label="주요 네비게이션"
+      >
       <ul className="mx-auto flex max-w-3xl items-stretch justify-around">
         {TABS.map((tab) => {
           const active = tab.match(pathname);
@@ -147,6 +153,7 @@ export default function BottomNav() {
           );
         })}
       </ul>
-    </nav>
+      </nav>
+    </>
   );
 }

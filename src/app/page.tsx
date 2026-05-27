@@ -201,6 +201,11 @@ export default function LandingPage() {
         </div>
       </Reveal>
 
+      {/* Inline-flow spacer — reserves vertical space equal to the fixed
+          CTA so Footer (root layout sibling) is not occluded. Matches the
+          BottomNav spacer pattern (Hotfix #3, 2026-05-27). */}
+      <div aria-hidden="true" className="h-20 md:h-24" />
+
       {/* Bottom-fixed CTA */}
       <div className="fixed inset-x-0 bottom-0 border-t border-cohort-ink-10 bg-cohort-ivory/95 px-6 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 backdrop-blur">
         <div className="mx-auto max-w-md">
