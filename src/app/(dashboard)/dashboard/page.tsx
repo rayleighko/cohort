@@ -4,6 +4,10 @@ import { AuroraNarrationBody } from '@/components/aurora/AuroraNarrationCard';
 import IndicatorCard from '@/components/shape-a/IndicatorCard';
 import MascotAvatar from '@/components/mascot/MascotAvatar';
 import { getMacroSnapshot } from '@/lib/macro/snapshot';
+import {
+  getLatestNarration,
+  type LatestNarration,
+} from '@/lib/aurora/get-latest-narration';
 import type { MacroComposite, MacroZone } from '@/lib/macro/composite';
 
 // Strategic Decision 0 Option B: zone label uses neutral monetary register
@@ -210,7 +214,13 @@ function MascotSignature() {
 // zero-JS accessibility + keyboard navigation; `group-open:` Tailwind
 // variant (v3.4+) swaps the affordance label. Reduced-motion respected via
 // MascotChatBubble's own transitions (no animation here).
-function NarrationBlock({ composite }: { composite: MacroComposite }) {
+function NarrationBlock({
+  composite,
+  initialArchive,
+}: {
+  composite: MacroComposite;
+  initialArchive: LatestNarration | null;
+}) {
   return (
     <details className="group overflow-hidden rounded-2xl bg-white shadow-sm sm:shadow">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
@@ -223,7 +233,10 @@ function NarrationBlock({ composite }: { composite: MacroComposite }) {
         </span>
       </summary>
       <div className="border-t border-cohort-ink-05 bg-aurora-calm/[0.04] p-4 sm:p-6">
-        <AuroraNarrationBody composite={composite} />
+        <AuroraNarrationBody
+          composite={composite}
+          initialArchive={initialArchive}
+        />
       </div>
     </details>
   );
@@ -231,7 +244,10 @@ function NarrationBlock({ composite }: { composite: MacroComposite }) {
 
 async function MacroBody() {
   try {
-    const { composite, fetchedAt } = await getMacroSnapshot();
+    const [{ composite, fetchedAt }, initialArchive] = await Promise.all([
+      getMacroSnapshot(),
+      getLatestNarration(),
+    ]);
     return (
       <div className="flex flex-col gap-6">
         <header className="flex items-end justify-between gap-4">
@@ -259,7 +275,7 @@ async function MacroBody() {
             multi-indicator at-a-glance). */}
         <IndicatorGrid composite={composite} />
         {/* Aurora narration demoted to bottom collapsible block. */}
-        <NarrationBlock composite={composite} />
+        <NarrationBlock composite={composite} initialArchive={initialArchive} />
       </div>
     );
   } catch {
