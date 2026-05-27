@@ -66,6 +66,8 @@ Methodology:
 - AO-4 `--no-verify` push → BANNED. Fix hook root cause instead.
 - AO-5 CLAUDE.md drift → vault 38-brief = SoT, CLAUDE.md = working summary, vault wins if conflict
 - AO-10 Persona inconsistency → cohort-product sub-agent before mascot copy commit
+- AO-16 Vault SoT Stale Assumption → Cowork가 vault 작성 시 git status verify 의무 (vault 62 §3 W3 Thu race condition first occurrence). Mitigation: vault 작성 전 *last verified commit hash* 명시 + commit 후 vault 작성.
+- AO-17 CEO Spec-Reality Disconnect (Speculative concern without implementation verify) → CEO Cowork가 vault SoT spec만 know + production code verify 안 한 상태에서 concern raise → false positive. Mitigation: CEO feedback에 boundary 자동 명시 의무 — "✓ vault SoT 정합" (spec verified) / "✓ direct verify" (Chrome MCP 또는 operator dogfooding 확인) / "⚠ verify 필요 — implementation 직접 검증 X" (speculative, CTO ping 의무). Healthy mechanism: CTO verify reply 후 false positive withdraw + narrow refined ping. First case 2026-05-27 ECOS/FRED raw fetch misjudgment.
 
 Design system (40/41/42/43 vault — bootstrap 2026-05-22):
 - AD-1 Raw hex/px in component → cohort-token-keeper skill BLOCKS
