@@ -24,6 +24,11 @@ const INPUT_CLASS =
 const CHECK_ROW =
   'flex min-h-[44px] cursor-pointer items-start gap-3 py-1 text-sm leading-relaxed text-cohort-ink-70';
 
+// Hotfix #7: min-h/min-w + flex-shrink-0 to prevent the long-form Korean
+// consent label from squashing the checkbox down. Mirrors ConsentModal.
+const CHECKBOX_CLASS =
+  'mt-0.5 h-5 w-5 min-h-[20px] min-w-[20px] flex-shrink-0 accent-cohort-primary';
+
 export default function WaitlistPage() {
   const [email, setEmail] = useState('');
   const [consentPipa, setConsentPipa] = useState(false);
@@ -158,7 +163,7 @@ export default function WaitlistPage() {
               type="checkbox"
               checked={consentPipa}
               onChange={(e) => setConsentPipa(e.target.checked)}
-              className="mt-0.5 h-5 w-5 accent-cohort-primary"
+              className={CHECKBOX_CLASS}
             />
             <span>
               <strong>(필수)</strong> 개인정보 수집·이용 동의 — 수집 항목:
@@ -171,7 +176,7 @@ export default function WaitlistPage() {
               type="checkbox"
               checked={consentMarketing}
               onChange={(e) => setConsentMarketing(e.target.checked)}
-              className="mt-0.5 h-5 w-5 accent-cohort-primary"
+              className={CHECKBOX_CLASS}
             />
             <span>
               <strong>(선택)</strong> 마케팅 메시지 수신 — launch 후 신규

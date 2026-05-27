@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import * as Sentry from '@sentry/nextjs';
 import { createClient } from '@/lib/supabase/client';
 import MascotAvatar from '@/components/mascot/MascotAvatar';
 
@@ -68,7 +69,30 @@ export default function ConsentModal({ userId }: ConsentModalProps) {
       );
 
     if (upsertError) {
-      setError('동의 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      // supabase-js wraps PostgREST errors in a returned object instead of
+      // throwing, so without explicit logging this fails silently in Sentry.
+      // Surface code/details to console + Sentry + the visible error string
+      // so the operator can diagnose RLS/network/PIPA storage failures.
+      console.error('[onboarding] consent upsert failed', {
+        code: upsertError.code,
+        message: upsertError.message,
+        details: upsertError.details,
+        hint: upsertError.hint,
+        userId,
+      });
+      Sentry.captureException(upsertError, {
+        tags: { surface: 'onboarding_consent' },
+        extra: {
+          userId,
+          code: upsertError.code,
+          details: upsertError.details,
+          hint: upsertError.hint,
+        },
+      });
+      const codeSuffix = upsertError.code ? ` (${upsertError.code})` : '';
+      setError(
+        `동의 저장에 실패했습니다${codeSuffix}. 새로고침 후 다시 시도하거나 운영자에게 문의해주세요.`,
+      );
       setSubmitting(false);
       return;
     }
