@@ -6,6 +6,7 @@ const createAdminClientMock = vi.fn(() => ({
   from: fromMock,
 }));
 const getMacroSnapshotMock = vi.fn();
+const dispatchMock = vi.fn();
 
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => createAdminClientMock(),
@@ -13,6 +14,10 @@ vi.mock('@/lib/supabase/admin', () => ({
 
 vi.mock('@/lib/macro/snapshot', () => ({
   getMacroSnapshot: () => getMacroSnapshotMock(),
+}));
+
+vi.mock('@/lib/notification/dispatcher', () => ({
+  dispatch: (...args: unknown[]) => dispatchMock(...args),
 }));
 
 function makeReq(authHeader?: string) {
@@ -41,11 +46,14 @@ function makeTrigger(overrides: Record<string, unknown> = {}) {
 function setupSupabaseMock({
   selectResult = { data: [], error: null },
   updateResult = { error: null },
-  insertResult = { error: null },
+  insertResult = { data: { id: 'event-uuid-1' }, error: null },
 }: {
   selectResult?: { data: unknown[] | null; error: { message: string } | null };
   updateResult?: { error: { message: string } | null };
-  insertResult?: { error: { message: string } | null };
+  insertResult?: {
+    data?: { id: string } | null;
+    error: { message: string } | null;
+  };
 } = {}) {
   const shapeUpdateEqMock = vi.fn().mockResolvedValue(updateResult);
   const shapeUpdateMock = vi.fn().mockReturnValue({ eq: shapeUpdateEqMock });
@@ -58,7 +66,13 @@ function setupSupabaseMock({
     update: shapeUpdateMock,
   };
 
-  const behavioralInsertMock = vi.fn().mockResolvedValue(insertResult);
+  const behavioralSingleMock = vi.fn().mockResolvedValue({
+    data: insertResult.data ?? null,
+    error: insertResult.error ?? null,
+  });
+  const behavioralInsertMock = vi.fn().mockReturnValue({
+    select: vi.fn().mockReturnValue({ single: behavioralSingleMock }),
+  });
   const behavioralEventChain = {
     insert: behavioralInsertMock,
   };
@@ -74,6 +88,7 @@ function setupSupabaseMock({
     shapeUpdateMock,
     shapeUpdateEqMock,
     behavioralInsertMock,
+    behavioralSingleMock,
   };
 }
 
@@ -90,6 +105,13 @@ describe('/api/cron/evaluate-triggers', () => {
     vi.setSystemTime(new Date('2026-05-26T10:00:00.000Z'));
     process.env.CRON_SECRET = 'test-secret';
     getMacroSnapshotMock.mockResolvedValue({ composite: { score: 35 } });
+    dispatchMock.mockReset();
+    dispatchMock.mockResolvedValue({
+      dispatched: [],
+      succeeded: 0,
+      failed: 0,
+      notification_log_ids: [],
+    });
   });
 
   afterEach(() => {
@@ -190,7 +212,7 @@ describe('/api/cron/evaluate-triggers', () => {
     const { behavioralInsertMock } = setupSupabaseMock({
       selectResult: { data: [trigger], error: null },
       updateResult: { error: null },
-      insertResult: { error: { message: 'insert failed' } },
+      insertResult: { data: null, error: { message: 'insert failed' } },
     });
     getMacroSnapshotMock.mockResolvedValue({ composite: { score: 25 } });
 
@@ -207,5 +229,95 @@ describe('/api/cron/evaluate-triggers', () => {
     expect(behavioralInsertMock).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
     consoleErrorSpy.mockRestore();
+  });
+
+  it('dispatches Aurora/Vesper nudge after a trigger fires with trigger_alert category', async () => {
+    const trigger = makeTrigger({
+      id: 'trigger-uuid-5',
+      user_id: 'user-uuid-5',
+      condition_params: { direction: 'below', threshold: 50 },
+      cooldown_minutes: 5,
+      last_fired_at: null,
+    });
+    setupSupabaseMock({
+      selectResult: { data: [trigger], error: null },
+      updateResult: { error: null },
+      insertResult: { data: { id: 'event-uuid-5' }, error: null },
+    });
+    getMacroSnapshotMock.mockResolvedValue({ composite: { score: -3.0 } });
+
+    const res = await callGET(makeReq('Bearer test-secret'));
+    expect(res.status).toBe(200);
+
+    expect(dispatchMock).toHaveBeenCalledTimes(1);
+    const dispatchArg = dispatchMock.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(dispatchArg.user_id).toBe('user-uuid-5');
+    expect(dispatchArg.category).toBe('trigger_alert');
+    expect((dispatchArg.trigger as { id: string }).id).toBe('trigger-uuid-5');
+    expect(
+      (dispatchArg.behavioral_event as { id: string } | null)?.id,
+    ).toBe('event-uuid-5');
+    const ctxJsonb = dispatchArg.context_jsonb as Record<string, unknown>;
+    expect(ctxJsonb.macro_composite_score).toBe(-3.0);
+    expect(ctxJsonb.stance).toBe('hawkish');
+    expect(ctxJsonb.trigger_type).toBe('macro_composite');
+    expect(ctxJsonb.cooldown_reason).toBeDefined();
+  });
+
+  it('keeps response non-fatal when dispatch throws', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const trigger = makeTrigger({
+      id: 'trigger-uuid-6',
+      condition_params: { direction: 'below', threshold: 50 },
+      cooldown_minutes: 5,
+      last_fired_at: null,
+    });
+    setupSupabaseMock({
+      selectResult: { data: [trigger], error: null },
+      updateResult: { error: null },
+      insertResult: { data: { id: 'event-uuid-6' }, error: null },
+    });
+    getMacroSnapshotMock.mockResolvedValue({ composite: { score: 30 } });
+    dispatchMock.mockRejectedValueOnce(new Error('dispatch boom'));
+
+    const res = await callGET(makeReq('Bearer test-secret'));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({
+      evaluated: 1,
+      fired: 1,
+      skipped: 0,
+      firedIds: ['trigger-uuid-6'],
+    });
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
+  });
+});
+
+describe('deriveStance', () => {
+  it('returns hawkish when score ≤ -2.0', async () => {
+    const { deriveStance } = await import('../evaluate-triggers/route');
+    expect(deriveStance(-2.0)).toBe('hawkish');
+    expect(deriveStance(-5)).toBe('hawkish');
+  });
+
+  it('returns dovish when score ≥ 2.5', async () => {
+    const { deriveStance } = await import('../evaluate-triggers/route');
+    expect(deriveStance(2.5)).toBe('dovish');
+    expect(deriveStance(10)).toBe('dovish');
+  });
+
+  it('returns neutral in the middle range', async () => {
+    const { deriveStance } = await import('../evaluate-triggers/route');
+    expect(deriveStance(0)).toBe('neutral');
+    expect(deriveStance(-1.99)).toBe('neutral');
+    expect(deriveStance(2.49)).toBe('neutral');
+  });
+
+  it('returns undefined when score is missing', async () => {
+    const { deriveStance } = await import('../evaluate-triggers/route');
+    expect(deriveStance(undefined)).toBeUndefined();
+    expect(deriveStance(null)).toBeUndefined();
   });
 });
