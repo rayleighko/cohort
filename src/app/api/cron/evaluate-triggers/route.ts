@@ -5,7 +5,8 @@
  * Auth: Authorization: Bearer $CRON_SECRET
  *
  * V1 active:   macro_composite evaluation only
- * V1 deferred: price_drop (needs real price feed), Aurora nudge
+ * V1 active:   Aurora/Vesper nudge dispatched via @/lib/notification/dispatcher (W4 Thu wire-up)
+ * V1 deferred: price_drop (needs real price feed)
  * V1 deferred: detectPanic/detectFOMO invocation (caller routing in user-action path)
  *
  * Vault refs: vault 62 §2, vault 56 D9
@@ -16,11 +17,24 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { evaluateTrigger } from '@/lib/trigger/engine';
 import { enforceCooldown } from '@/lib/trigger/cooldown';
 import { getMacroSnapshot } from '@/lib/macro/snapshot';
+import { dispatch } from '@/lib/notification/dispatcher';
+import type { Database } from '@/types/database';
 import type {
   EnforceCooldownResult,
   ShapeCTrigger,
   ShapeCTriggerRow,
 } from '@/types/trigger';
+
+type ShapeCTriggerDbRow = Database['public']['Tables']['shape_c_triggers']['Row'];
+
+export function deriveStance(
+  score: number | undefined | null,
+): 'hawkish' | 'dovish' | 'neutral' | undefined {
+  if (typeof score !== 'number') return undefined;
+  if (score <= -2.0) return 'hawkish';
+  if (score >= 2.5) return 'dovish';
+  return 'neutral';
+}
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -128,19 +142,24 @@ export async function GET(req: NextRequest) {
     fired++;
     firedIds.push(rawTrigger.id);
 
-    // 5. Persist behavioral_event audit log (non-fatal)
-    const { error: eventInsertError } = await supabase.from('behavioral_event').insert({
-      user_id: rawTrigger.user_id,
-      trigger_id: rawTrigger.id,
-      event_type: 'trigger_fired',
-      severity: 'info',
-      context_jsonb: {
-        trigger_type: rawTrigger.trigger_type,
-        macro_composite_score: ctx.macroCompositeScore ?? null,
-        cooldown_reason: cooldownResult.reason,
-        fired_at: now.toISOString(),
-      },
-    });
+    // 5. Persist behavioral_event audit log (non-fatal). Capture the inserted
+    //    row so the dispatcher can reference behavioral_event_id downstream.
+    const { data: insertedEvent, error: eventInsertError } = await supabase
+      .from('behavioral_event')
+      .insert({
+        user_id: rawTrigger.user_id,
+        trigger_id: rawTrigger.id,
+        event_type: 'trigger_fired',
+        severity: 'info',
+        context_jsonb: {
+          trigger_type: rawTrigger.trigger_type,
+          macro_composite_score: ctx.macroCompositeScore ?? null,
+          cooldown_reason: cooldownResult.reason,
+          fired_at: now.toISOString(),
+        },
+      })
+      .select()
+      .single();
 
     if (eventInsertError) {
       console.error(
@@ -149,7 +168,26 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // V1 deferred: Aurora nudge dispatch
+    // 6. W4 Thu wire-up: dispatch Aurora/Vesper nudge (non-fatal).
+    try {
+      await dispatch({
+        user_id: rawTrigger.user_id,
+        trigger: rawTrigger as unknown as ShapeCTriggerDbRow,
+        behavioral_event: insertedEvent ?? null,
+        category: 'trigger_alert',
+        context_jsonb: {
+          macro_composite_score: ctx.macroCompositeScore ?? null,
+          stance: deriveStance(ctx.macroCompositeScore),
+          cooldown_reason: cooldownResult.reason,
+          trigger_type: rawTrigger.trigger_type,
+        },
+      });
+    } catch (dispatchErr) {
+      console.error(
+        `[cron/evaluate-triggers] dispatch failed for trigger ${rawTrigger.id}:`,
+        dispatchErr,
+      );
+    }
   }
 
   return NextResponse.json({
