@@ -297,26 +297,26 @@ describe('/api/cron/evaluate-triggers', () => {
 
 describe('deriveStance', () => {
   it('returns hawkish when score ≤ -2.0', async () => {
-    const { deriveStance } = await import('../evaluate-triggers/route');
+    const { deriveStance } = await import('@/lib/trigger/stance');
     expect(deriveStance(-2.0)).toBe('hawkish');
     expect(deriveStance(-5)).toBe('hawkish');
   });
 
   it('returns dovish when score ≥ 2.5', async () => {
-    const { deriveStance } = await import('../evaluate-triggers/route');
+    const { deriveStance } = await import('@/lib/trigger/stance');
     expect(deriveStance(2.5)).toBe('dovish');
     expect(deriveStance(10)).toBe('dovish');
   });
 
   it('returns neutral in the middle range', async () => {
-    const { deriveStance } = await import('../evaluate-triggers/route');
+    const { deriveStance } = await import('@/lib/trigger/stance');
     expect(deriveStance(0)).toBe('neutral');
     expect(deriveStance(-1.99)).toBe('neutral');
     expect(deriveStance(2.49)).toBe('neutral');
   });
 
   it('returns undefined when score is missing', async () => {
-    const { deriveStance } = await import('../evaluate-triggers/route');
+    const { deriveStance } = await import('@/lib/trigger/stance');
     expect(deriveStance(undefined)).toBeUndefined();
     expect(deriveStance(null)).toBeUndefined();
   });

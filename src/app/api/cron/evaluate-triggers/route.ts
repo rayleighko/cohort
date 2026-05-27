@@ -16,6 +16,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { evaluateTrigger } from '@/lib/trigger/engine';
 import { enforceCooldown } from '@/lib/trigger/cooldown';
+import { deriveStance } from '@/lib/trigger/stance';
 import { getMacroSnapshot } from '@/lib/macro/snapshot';
 import { dispatch } from '@/lib/notification/dispatcher';
 import type { Database } from '@/types/database';
@@ -26,15 +27,6 @@ import type {
 } from '@/types/trigger';
 
 type ShapeCTriggerDbRow = Database['public']['Tables']['shape_c_triggers']['Row'];
-
-export function deriveStance(
-  score: number | undefined | null,
-): 'hawkish' | 'dovish' | 'neutral' | undefined {
-  if (typeof score !== 'number') return undefined;
-  if (score <= -2.0) return 'hawkish';
-  if (score >= 2.5) return 'dovish';
-  return 'neutral';
-}
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
