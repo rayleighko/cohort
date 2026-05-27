@@ -121,6 +121,36 @@ feat(w1-day4): implement Aurora + Vesper dual persona + safety filter 3-layer
 Co-reviewed-by: cohort-product (PASS)
 ```
 
+## Sub-agent Workflow Discipline (LOCKED 2026-05-27, agent-agnostic)
+
+### Single Commit Scope per Sub-task
+- 한 sub-task = 한 logical commit. 여러 concerns 섞지 말 것.
+- Sub-task scope에 명시된 파일만 stage. 다른 파일 변경분이 working tree에 있으면 STOP + 사용자 보고.
+
+### Auto-commit at Sub-task End
+- 모든 sub-task의 마지막 단계는 sub-agent (Cursor Composer / Claude Code / 등)가 직접 수행:
+  1. `npx tsc --noEmit` 통과 확인
+  2. 명시된 파일들만 `git add`
+  3. `git commit` (제공된 메시지 사용)
+  4. pre-commit hook 전부 통과 (실패 시 STOP, 절대 `--no-verify` 사용 금지 — AO-4 BANNED)
+  5. commit hash + `git status --short` 보고
+
+### Auto-push at Batch End
+- 다중 sub-task batch (W4 Wed, W4 Thu 등)의 마지막 sub-task에서만 push 수행:
+  1. 위 commit 단계 완료 후
+  2. `git push origin main` (force-push BANNED, `--force-with-lease` BANNED)
+  3. Push 실패 (non-fast-forward, remote diverged) 시 STOP + 사용자 manual
+  4. Push 성공 후 remote ref hash 보고
+- Mid-batch sub-task는 push 절대 수행하지 말 것.
+
+### 권한 정의
+- `git push origin main`만 자동화 대상. 다른 branch / remote는 사용자 manual.
+- Force operation 전체 BANNED: `--force`, `--force-with-lease`, `push --delete` 등.
+- Pre-push hook (있다면) 통과 필수. Bypass BANNED.
+
+### Agent-agnostic Applicability
+이 discipline은 어떤 AI 에이전트가 cohort 코드를 변경하든 동일하게 적용된다. .cursor/rules/main.mdc에도 동일 mirror가 존재한다. 만약 두 파일이 drift하면 .cursor/rules/main.mdc가 SoT. Cowork가 작성하는 prompt는 agent-agnostic 형식을 따른다.
+
 ## Vault references (key files)
 
 | Topic | File |
