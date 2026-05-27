@@ -35,7 +35,9 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     return null;
   }
   try {
-    return await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    return await navigator.serviceWorker.register('/service-worker.js', {
+      scope: '/',
+    });
   } catch (err) {
     console.error('[sw-register] registration failed:', err);
     return null;
