@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -15,12 +16,19 @@ export async function GET(request: NextRequest) {
   const redirectTo = searchParams.get('redirect') ?? '/onboarding';
 
   if (!code) {
+    Sentry.captureMessage('auth callback missing code', {
+      level: 'warning',
+      tags: { surface: 'auth_callback', stage: 'missing_code' },
+    });
     return NextResponse.redirect(`${origin}/login?error=missing_code`);
   }
 
   const supabase = createClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
+    Sentry.captureException(error, {
+      tags: { surface: 'auth_callback', stage: 'exchange_code' },
+    });
     return NextResponse.redirect(`${origin}/login?error=auth_callback`);
   }
 
@@ -31,9 +39,15 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (user) {
     const admin = createAdminClient();
-    await admin
+    const { error: upsertError } = await admin
       .from('user_profile')
       .upsert({ id: user.id }, { onConflict: 'id', ignoreDuplicates: true });
+    if (upsertError) {
+      Sentry.captureException(upsertError, {
+        tags: { surface: 'auth_callback', stage: 'profile_upsert' },
+        extra: { userId: user.id, code: upsertError.code },
+      });
+    }
   }
 
   return NextResponse.redirect(`${origin}${redirectTo}`);
