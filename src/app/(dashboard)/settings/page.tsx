@@ -3,11 +3,12 @@ import { loadTierState } from '@/lib/payment/tier-gating';
 import SubscriptionPanel from '@/components/settings/SubscriptionPanel';
 import { NotificationOptIn } from '@/components/notification/NotificationOptIn';
 import SignOutButton from '@/components/auth/SignOutButton';
+import DeleteAccountButton from '@/components/account/DeleteAccountButton';
 
 /**
- * Settings — subscription + 알림 + 계정 + 법적 고지.
+ * Settings — subscription + 알림 + 계정 + 법적 고지 + 데이터 관리.
  * Server component: resolves tier state, renders the subscription panel.
- * 데이터 관리 (PIPA 제36조 즉시 삭제) lands in a follow-up commit.
+ * 데이터 관리 = PIPA 제36조 본인 데이터 즉시 삭제 (launch blocker).
  */
 export default async function SettingsPage({
   searchParams,
@@ -101,12 +102,17 @@ export default async function SettingsPage({
         </div>
       </div>
 
-      {/* 데이터 관리 — W5 Thu ST3 follow-up commit */}
+      {/* PIPA 제36조 — 본인 데이터 즉시 삭제 */}
       <h2 className="mt-8 text-sm font-semibold uppercase tracking-wide text-cohort-charcoal/45">
         데이터 관리
       </h2>
-      <div className="mt-2 rounded-2xl bg-white p-5 text-sm text-cohort-charcoal/60">
-        TODO(W5): PIPA 동의 관리 · 본인 데이터 즉시 삭제 (제36조).
+      <div className="mt-2 rounded-2xl bg-white p-5 space-y-3">
+        <p className="text-xs leading-relaxed text-cohort-charcoal/55 break-keep">
+          개인정보보호법 제36조에 따라 본인 데이터의 즉시 삭제를 요청할 수
+          있습니다. 삭제 후에는 복구할 수 없으며, 가입 정보·온보딩·페이스·
+          체크포인트가 모두 영구 삭제됩니다.
+        </p>
+        <DeleteAccountButton />
       </div>
     </main>
   );
