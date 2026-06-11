@@ -34,7 +34,7 @@ const nextConfig = {
   },
 };
 
-// Sentry build-time wrapper. Org/project per plancy-dev. `silent` keeps build logs clean.
+// Sentry build-time wrapper (org: elevate-u2). `silent` keeps build logs clean.
 // SENTRY_AUTH_TOKEN env var enables source-map upload in CI/Vercel; safe to omit locally.
 export default withSentryConfig(nextConfig, {
   // For all available options, see:

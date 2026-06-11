@@ -9,7 +9,7 @@ import { Footer } from './Footer';
  * Authenticated dashboard surfaces (BottomNav owns navigation, MascotChatBubble
  * floats over the page) treat the Footer as redundant. Public marketing /
  * compliance pages (Landing, Privacy, Terms, signup, login, waitlist) keep it
- * for 전자상거래법 13조 사업자 정보 표시 + brand surface.
+ * for 운영자 정보 + 면책 고지 표시 + brand surface.
  *
  * Routes are matched by prefix; child routes (e.g. /settings/notifications)
  * inherit the hide rule. SSR fallback (no pathname yet) renders the Footer

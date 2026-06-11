@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '개인정보처리방침 | Cohort',
   description:
-    'Cohort 개인정보처리방침 — 플랜사이가 운영하는 Cohort 서비스의 개인정보 수집·처리·파기·이용자 권리 안내.',
+    'Cohort 개인정보처리방침 — 운영자가 운영하는 Cohort 서비스의 개인정보 수집·처리·파기·이용자 권리 안내.',
 };
 
 export default function PrivacyPage() {
@@ -20,9 +20,9 @@ export default function PrivacyPage() {
 
       <article className="break-keep text-base leading-relaxed text-cohort-ink-70">
         <p className="text-sm text-cohort-ink-70">
-          플랜사이(이하 &ldquo;회사&rdquo;)는 Cohort 서비스(이하 &ldquo;서비스&rdquo;)
-          이용자의 개인정보 보호를 위해 「개인정보 보호법」 및 관련 법령을 준수하며,
-          본 처리방침을 통해 개인정보의 처리 방침을 안내합니다.
+          Cohort 서비스(이하 &ldquo;서비스&rdquo;)를 운영하는 개인 운영자(이하
+          &ldquo;운영자&rdquo;)는 이용자의 개인정보 보호를 위해 「개인정보 보호법」 및
+          관련 법령을 준수하며, 본 처리방침을 통해 개인정보의 처리 방침을 안내합니다.
         </p>
 
         <section className="mt-10">
@@ -30,7 +30,7 @@ export default function PrivacyPage() {
             제1조 (개인정보의 처리 목적)
           </h2>
           <p className="mt-3">
-            회사는 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는
+            운영자는 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는
             개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며, 이용 목적이
             변경되는 경우에는 「개인정보 보호법」 제18조에 따라 별도의 동의를 받는 등
             필요한 조치를 이행합니다.
@@ -97,7 +97,7 @@ export default function PrivacyPage() {
           </ul>
 
           <p className="mt-5">
-            <strong className="text-cohort-ink-90">민감정보</strong>: 회사는 사상·신념,
+            <strong className="text-cohort-ink-90">민감정보</strong>: 운영자는 사상·신념,
             정치적 견해, 건강·성생활, 인종·민족, 유전정보, 범죄경력 등 「개인정보 보호법」
             제23조의 민감정보를 수집하지 않습니다.
           </p>
@@ -108,7 +108,7 @@ export default function PrivacyPage() {
             제3조 (개인정보의 처리 및 보유 기간)
           </h2>
           <p className="mt-3">
-            회사는 법령에 따른 개인정보 보유·이용 기간 또는 정보주체로부터 동의받은
+            운영자는 법령에 따른 개인정보 보유·이용 기간 또는 정보주체로부터 동의받은
             기간 내에서 개인정보를 처리·보유합니다.
           </p>
           <ul className="mt-4 list-disc space-y-2 pl-6">
@@ -134,12 +134,12 @@ export default function PrivacyPage() {
             제4조 (개인정보의 제3자 제공)
           </h2>
           <p className="mt-3">
-            회사는 정보주체의 동의 또는 「개인정보 보호법」 제17조·제18조에 해당하는
+            운영자는 정보주체의 동의 또는 「개인정보 보호법」 제17조·제18조에 해당하는
             경우에만 개인정보를 제3자에게 제공합니다.
           </p>
           <p className="mt-3">
             <strong className="text-cohort-ink-90">현재 제3자 제공 항목</strong>:
-            없음. 회사는 V1 시점 모든 개인정보를 외부 제3자에게 제공하지 않습니다.
+            없음. 운영자는 V1 시점 모든 개인정보를 외부 제3자에게 제공하지 않습니다.
           </p>
         </section>
 
@@ -148,7 +148,7 @@ export default function PrivacyPage() {
             제5조 (개인정보 처리 업무의 위탁)
           </h2>
           <p className="mt-3">
-            회사는 원활한 개인정보 업무처리를 위하여 다음과 같이 개인정보 처리 업무를
+            운영자는 원활한 개인정보 업무처리를 위하여 다음과 같이 개인정보 처리 업무를
             위탁합니다.
           </p>
           <div className="mt-4 overflow-x-auto">
@@ -222,12 +222,12 @@ export default function PrivacyPage() {
             위의 권리 행사는{' '}
             <a
               className="text-cohort-primary underline"
-              href="mailto:contact@cohort.co.kr"
+              href="mailto:gmj1197@gmail.com"
             >
-              contact@cohort.co.kr
+              gmj1197@gmail.com
             </a>{' '}
             또는 서비스 내 &ldquo;설정 &gt; 데이터 관리&rdquo; 메뉴를 통하여 하실 수
-            있으며, 회사는 이에 대해 지체 없이 조치합니다. 만 14세 미만 아동의
+            있으며, 운영자는 이에 대해 지체 없이 조치합니다. 만 14세 미만 아동의
             회원가입은 허용되지 않습니다.
           </p>
         </section>
@@ -237,7 +237,7 @@ export default function PrivacyPage() {
             제7조 (개인정보의 파기)
           </h2>
           <p className="mt-3">
-            회사는 개인정보 보유 기간의 경과, 처리목적 달성 등 개인정보가 불필요하게
+            운영자는 개인정보 보유 기간의 경과, 처리목적 달성 등 개인정보가 불필요하게
             되었을 때에는 지체 없이 해당 개인정보를 파기합니다.
           </p>
           <ul className="mt-3 list-disc space-y-1 pl-6">
@@ -279,7 +279,7 @@ export default function PrivacyPage() {
             제9조 (자동화된 의사결정에 관한 안내)
           </h2>
           <p className="mt-3">
-            회사는 Aurora 🕊 + Vesper 🦅 마스코트 AI 대화 서비스 제공을 위해 Anthropic
+            운영자는 Aurora 🕊 + Vesper 🦅 마스코트 AI 대화 서비스 제공을 위해 Anthropic
             Claude API를 활용합니다. 본 AI는 사용자의 대화 내용 + 본인 plan + 매크로
             score를 참조하여 응답을 생성합니다.
           </p>
@@ -306,7 +306,7 @@ export default function PrivacyPage() {
             제10조 (개인정보 보호책임자)
           </h2>
           <p className="mt-3">
-            회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 정보주체의 불만 처리
+            운영자는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 정보주체의 불만 처리
             및 피해 구제를 위하여 아래와 같이 개인정보 보호책임자를 지정합니다.
           </p>
           <div className="mt-4 rounded-2xl bg-cohort-ink-05 p-5 text-sm">
@@ -314,18 +314,16 @@ export default function PrivacyPage() {
               <strong className="text-cohort-ink-90">개인정보 보호책임자</strong>
             </p>
             <ul className="mt-2 space-y-1">
-              <li>성명: 조윤환</li>
-              <li>직책: 대표</li>
+              <li>지정: 운영자 (개인 운영 서비스)</li>
               <li>
                 연락처:{' '}
                 <a
                   className="text-cohort-primary underline"
-                  href="mailto:contact@cohort.co.kr"
+                  href="mailto:gmj1197@gmail.com"
                 >
-                  contact@cohort.co.kr
+                  gmj1197@gmail.com
                 </a>
               </li>
-              <li>유선: 010-4151-6626</li>
             </ul>
           </div>
           <p className="mt-4 text-sm">
@@ -349,13 +347,8 @@ export default function PrivacyPage() {
         <section className="mt-12 rounded-2xl border border-cohort-ink-10 bg-cohort-ivory p-6 text-sm">
           <h2 className="text-base font-semibold text-cohort-ink-90">운영 주체</h2>
           <ul className="mt-3 space-y-1 text-cohort-ink-70">
-            <li>상호명: 플랜사이</li>
-            <li>사업자등록번호: 157-04-02001</li>
-            <li>통신판매업신고번호: 2022-영등포-0450</li>
-            <li>대표자: 조윤환</li>
-            <li>사업장: 서울특별시 종로구 대학로 12길 61, 5층 501-87호</li>
-            <li>유선: 010-4151-6626</li>
-            <li>이메일: contact@cohort.co.kr</li>
+            <li>운영 형태: 개인 운영 서비스</li>
+            <li>이메일: gmj1197@gmail.com</li>
           </ul>
         </section>
       </article>

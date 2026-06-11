@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '이용약관 | Cohort',
   description:
-    'Cohort 이용약관 — 플랜사이가 제공하는 Cohort 서비스의 이용 권리·의무·환불·면책·분쟁 해결.',
+    'Cohort 이용약관 — 운영자가 제공하는 Cohort 서비스의 이용 권리·의무·환불·면책·분쟁 해결.',
 };
 
 export default function TermsPage() {
@@ -22,9 +22,9 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-cohort-ink-90">제1조 (목적)</h2>
           <p className="mt-3">
-            이 약관은 플랜사이(이하 &ldquo;회사&rdquo;)가 제공하는 Cohort 서비스
-            (이하 &ldquo;서비스&rdquo;)의 이용과 관련하여 회사와 이용자의 권리, 의무 및
-            책임사항을 규정함을 목적으로 합니다.
+            이 약관은 본 서비스를 운영하는 개인 운영자(이하 &ldquo;운영자&rdquo;)가
+            제공하는 Cohort 서비스 (이하 &ldquo;서비스&rdquo;)의 이용과 관련하여
+            운영자와 이용자의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.
           </p>
         </section>
 
@@ -39,10 +39,10 @@ export default function TermsPage() {
             </li>
             <li>
               <strong className="text-cohort-ink-90">&ldquo;이용자&rdquo;</strong>: 본
-              약관에 따라 회사가 제공하는 서비스를 이용하는 회원 및 비회원을 말합니다.
+              약관에 따라 운영자가 제공하는 서비스를 이용하는 회원 및 비회원을 말합니다.
             </li>
             <li>
-              <strong className="text-cohort-ink-90">&ldquo;회원&rdquo;</strong>: 회사와
+              <strong className="text-cohort-ink-90">&ldquo;회원&rdquo;</strong>: 운영자와
               서비스 이용계약을 체결하고 이용자 아이디(ID)를 부여받은 자를 말합니다.
             </li>
             <li>
@@ -58,8 +58,8 @@ export default function TermsPage() {
             제3조 (약관의 게시와 개정)
           </h2>
           <p className="mt-3">
-            회사는 본 약관의 내용을 이용자가 쉽게 알 수 있도록 서비스 초기 화면에
-            게시합니다. 회사는 「전자상거래 등에서의 소비자보호에 관한 법률」, 「약관의
+            운영자는 본 약관의 내용을 이용자가 쉽게 알 수 있도록 서비스 초기 화면에
+            게시합니다. 운영자는 「전자상거래 등에서의 소비자보호에 관한 법률」, 「약관의
             규제에 관한 법률」, 「전자문서 및 전자거래기본법」, 「전자금융거래법」,
             「개인정보 보호법」 등 관련 법령을 위배하지 않는 범위에서 본 약관을 개정할
             수 있습니다. 약관 개정 시 변경사항의 시행일자 및 사유를 명시하여 적용일자
@@ -73,14 +73,14 @@ export default function TermsPage() {
           </h2>
           <p className="mt-3">
             이용계약은 이용자가 본 약관 및 개인정보 처리방침에 동의한 후 회원 가입
-            신청을 하고, 회사가 이를 승낙함으로써 성립합니다. 회사는 다음 각 호에
+            신청을 하고, 운영자가 이를 승낙함으로써 성립합니다. 운영자는 다음 각 호에
             해당하는 신청에 대하여 승낙을 하지 아니하거나 사후에 이용계약을 해지할 수
             있습니다.
           </p>
           <ol className="mt-3 list-decimal space-y-1 pl-6">
             <li>만 14세 미만의 미성년자가 신청한 경우</li>
             <li>신청 내용에 허위, 기재누락, 오기가 있는 경우</li>
-            <li>기타 회사가 정한 이용신청 요건이 미비된 경우</li>
+            <li>기타 운영자가 정한 이용신청 요건이 미비된 경우</li>
           </ol>
         </section>
 
@@ -132,7 +132,7 @@ export default function TermsPage() {
           </div>
 
           <h3 className="mt-6 text-base font-semibold text-cohort-ink-90">
-            제6.1조 회사가 제공하는 영역
+            제6.1조 운영자가 제공하는 영역
           </h3>
           <ul className="mt-2 list-disc space-y-1 pl-6">
             <li>매크로 지표, 가격 데이터, 공시 정보 등 일반 정보 제공</li>
@@ -146,7 +146,7 @@ export default function TermsPage() {
           </ul>
 
           <h3 className="mt-6 text-base font-semibold text-cohort-ink-90">
-            제6.2조 회사가 제공하지 않는 영역
+            제6.2조 운영자가 제공하지 않는 영역
           </h3>
           <ul className="mt-2 list-disc space-y-1 pl-6">
             <li>개별 종목 매수/매도 추천 (&ldquo;X 종목을 사세요&rdquo; 등)</li>
@@ -166,7 +166,7 @@ export default function TermsPage() {
           <p className="mt-2">
             서비스에서 제공하는 모든 정보 + 도구 + 점수는 사용자의 의사결정을
             지원하기 위한 것입니다. 최종 투자 결정은 전적으로 사용자 본인의 책임이며,
-            회사는 사용자의 투자 결과에 대해 법적 책임을 부담하지 않습니다.
+            운영자는 사용자의 투자 결과에 대해 법적 책임을 부담하지 않습니다.
           </p>
         </section>
 
@@ -176,10 +176,10 @@ export default function TermsPage() {
           <ol className="mt-3 list-decimal space-y-1 pl-6">
             <li>신청 또는 변경 시 허위 내용의 등록</li>
             <li>타인의 정보 도용</li>
-            <li>회사가 게시한 정보의 변경</li>
-            <li>회사가 정한 정보 이외의 정보 송신 또는 게시</li>
-            <li>회사 또는 제3자의 저작권 등 지적재산권 침해</li>
-            <li>회사 또는 제3자의 명예 손상 및 업무 방해</li>
+            <li>운영자가 게시한 정보의 변경</li>
+            <li>운영자가 정한 정보 이외의 정보 송신 또는 게시</li>
+            <li>운영자 또는 제3자의 저작권 등 지적재산권 침해</li>
+            <li>운영자 또는 제3자의 명예 손상 및 업무 방해</li>
             <li>외설·폭력적 메시지 또는 공서양속에 반하는 정보의 공개·게시</li>
             <li>본 약관 또는 개인정보 처리방침 위반</li>
           </ol>
@@ -193,7 +193,7 @@ export default function TermsPage() {
           <p className="mt-2">
             Tier 2 Pro (월 24,900원) 또는 Tier 3 Premium (월 79,900원) 구독은
             토스페이먼츠(Toss Payments)를 통해 KRW로 결제됩니다. 결제 정보는
-            토스페이먼츠에 의해 처리되며 회사는 카드 정보를 직접 저장하지 않습니다.
+            토스페이먼츠에 의해 처리되며 운영자는 카드 정보를 직접 저장하지 않습니다.
           </p>
 
           <h3 className="mt-5 text-base font-semibold text-cohort-ink-90">
@@ -224,11 +224,11 @@ export default function TermsPage() {
             제9조 (서비스의 변경 및 중단)
           </h2>
           <p className="mt-3">
-            회사는 운영상, 기술상 필요에 따라 제공하고 있는 서비스를 변경할 수
+            운영자는 운영상, 기술상 필요에 따라 제공하고 있는 서비스를 변경할 수
             있습니다. 서비스 설비의 보수, 전기통신사업법상 기간통신사업자의 전기통신
             서비스 중지, 기타 불가항력 사유가 있는 경우 일시적으로 서비스 제공을 중단할
             수 있습니다. 서비스 중단으로 인하여 이용자 또는 제3자가 입은 손해에 대하여
-            회사는 배상하지 않습니다. 단 회사의 고의 또는 중과실이 있는 경우는
+            운영자는 배상하지 않습니다. 단 운영자의 고의 또는 중과실이 있는 경우는
             제외합니다.
           </p>
         </section>
@@ -240,7 +240,7 @@ export default function TermsPage() {
             제10.1조 투자 결과 면책
           </h3>
           <p className="mt-2">
-            회사는 본 서비스를 통해 제공되는 정보 + 도구 + 점수에 기반한 사용자의 투자
+            운영자는 본 서비스를 통해 제공되는 정보 + 도구 + 점수에 기반한 사용자의 투자
             결정 및 그 결과에 대해 책임을 부담하지 않습니다. 모든 투자 결정과 손익은
             사용자 본인의 책임입니다.
           </p>
@@ -249,7 +249,7 @@ export default function TermsPage() {
             제10.2조 데이터 정확성 면책
           </h3>
           <p className="mt-2">
-            회사는 매크로 지표, 가격 데이터, 공시 정보 등 외부 source에서 제공되는
+            운영자는 매크로 지표, 가격 데이터, 공시 정보 등 외부 source에서 제공되는
             데이터의 정확성을 위해 최선의 노력을 다하나, 외부 source의 오류·지연·누락에
             의한 손해에 대해 책임을 부담하지 않습니다.
           </p>
@@ -259,7 +259,7 @@ export default function TermsPage() {
           </h3>
           <p className="mt-2">
             Aurora · Vesper AI는 자본시장법상 자문업 회피를 위한 안전 필터가 활성화되어
-            있으나, AI의 한계로 인한 일부 부정확한 응답 발생 가능성에 대해 회사는
+            있으나, AI의 한계로 인한 일부 부정확한 응답 발생 가능성에 대해 운영자는
             책임을 부담하지 않습니다. 사용자는 AI 응답을 참고 정보로만 활용해야 합니다.
           </p>
 
@@ -268,8 +268,8 @@ export default function TermsPage() {
           </h3>
           <p className="mt-2">
             서비스 외부 채널 (텔레그램, 카톡 등)에서 발생하는 Cohort 또는 Aurora ·
-            Vesper 마스코트를 사칭하는 행위에 의한 피해에 대해 회사는 책임을 부담하지
-            않습니다. 회사의 공식 채널은 본 서비스 (cohort.co.kr)에 한정됩니다.
+            Vesper 마스코트를 사칭하는 행위에 의한 피해에 대해 운영자는 책임을 부담하지
+            않습니다. 운영자의 공식 채널은 본 서비스 (cohort.co.kr)에 한정됩니다.
           </p>
         </section>
 
@@ -279,7 +279,7 @@ export default function TermsPage() {
             본 약관에 명시되지 않은 사항은 「전자상거래 등에서의 소비자보호에 관한
             법률」, 「약관의 규제에 관한 법률」, 「자본시장과 금융투자업에 관한 법률」
             등 관계 법령 또는 상관례에 따릅니다. 본 약관 및 서비스 이용과 관련하여
-            분쟁이 발생한 경우, 회사와 이용자 간 협의를 통해 해결합니다. 협의로
+            분쟁이 발생한 경우, 운영자와 이용자 간 협의를 통해 해결합니다. 협의로
             해결되지 않은 경우 「민사소송법」 상의 관할 법원에 제소할 수 있으며, 1심
             관할 법원은 서울중앙지방법원으로 합니다.
           </p>
@@ -293,13 +293,8 @@ export default function TermsPage() {
         <section className="mt-12 rounded-2xl border border-cohort-ink-10 bg-cohort-ivory p-6 text-sm">
           <h2 className="text-base font-semibold text-cohort-ink-90">운영 주체</h2>
           <ul className="mt-3 space-y-1 text-cohort-ink-70">
-            <li>상호명: 플랜사이</li>
-            <li>사업자등록번호: 157-04-02001</li>
-            <li>통신판매업신고번호: 2022-영등포-0450</li>
-            <li>대표자: 조윤환</li>
-            <li>사업장: 서울특별시 종로구 대학로 12길 61, 5층 501-87호</li>
-            <li>유선: 010-4151-6626</li>
-            <li>이메일: contact@cohort.co.kr</li>
+            <li>운영 형태: 개인 운영 서비스</li>
+            <li>이메일: gmj1197@gmail.com</li>
           </ul>
         </section>
       </article>

@@ -85,20 +85,8 @@ export default async function SettingsPage({
         </ul>
 
         <div className="border-t border-cohort-charcoal/10 pt-3 text-xs leading-relaxed text-cohort-charcoal/55 break-keep">
-          <p>
-            상호명{' '}
-            <strong className="font-medium text-cohort-charcoal/80">
-              플랜사이
-            </strong>
-            {' · '}대표{' '}
-            <strong className="font-medium text-cohort-charcoal/80">
-              조윤환
-            </strong>
-          </p>
-          <p>
-            사업자등록번호 157-04-02001 · 통신판매업신고 2022-영등포-0450
-          </p>
-          <p>문의 contact@cohort.co.kr</p>
+          <p>개인 운영 서비스</p>
+          <p>문의 gmj1197@gmail.com</p>
         </div>
       </div>
 

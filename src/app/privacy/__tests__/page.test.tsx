@@ -21,25 +21,26 @@ describe('PrivacyPage', () => {
     expect(screen.getByText(/2026-06-15/)).toBeDefined();
   });
 
-  it('renders all operator (플랜사이) fields verbatim per vault 38 §1.4', () => {
+  it('renders 개인 운영자 identity and contains no 플랜사이 company info (2026-06-11 개인 프로젝트 전환)', () => {
     render(<PrivacyPage />);
-    expect(screen.getAllByText(/플랜사이/).length).toBeGreaterThan(0);
-    expect(screen.getByText(/157-04-02001/)).toBeDefined();
-    expect(screen.getByText(/2022-영등포-0450/)).toBeDefined();
-    expect(screen.getAllByText(/조윤환/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/개인 운영 서비스/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/gmj1197@gmail\.com/).length).toBeGreaterThan(0);
+    // Regression guard — company info must never reappear
+    expect(screen.queryByText(/플랜사이/)).toBeNull();
+    expect(screen.queryByText(/157-04-02001/)).toBeNull();
+    expect(screen.queryByText(/2022-영등포-0450/)).toBeNull();
+    expect(screen.queryByText(/조윤환/)).toBeNull();
     expect(
-      screen.getByText(/서울특별시 종로구 대학로 12길 61, 5층 501-87호/),
-    ).toBeDefined();
-    expect(screen.getAllByText(/010-4151-6626/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/contact@cohort\.co\.kr/).length).toBeGreaterThan(
-      0,
-    );
+      screen.queryByText(/서울특별시 종로구 대학로 12길 61, 5층 501-87호/),
+    ).toBeNull();
+    expect(screen.queryByText(/010-4151-6626/)).toBeNull();
+    expect(screen.queryByText(/contact@cohort\.co\.kr/)).toBeNull();
   });
 
-  it('renders 개인정보 보호책임자 with name and contact', () => {
+  it('renders 개인정보 보호책임자 with contact channel (PIPA 제31조)', () => {
     render(<PrivacyPage />);
     expect(screen.getAllByText(/개인정보 보호책임자/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/조윤환/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/gmj1197@gmail\.com/).length).toBeGreaterThan(0);
   });
 
   it('covers PIPA-mandated sections (purpose / retention / processors / rights)', () => {
