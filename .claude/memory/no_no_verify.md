@@ -15,4 +15,4 @@ metadata:
 - If hook itself is broken (false positive) → fix the hook script, commit that fix, then proceed.
 - Never `git commit --no-verify` even "just this once" — it's a habit that compounds.
 
-Related: [[claude-code-cli-handoff-pattern]]
+Related: [[claude_code_cli_handoff_pattern]]

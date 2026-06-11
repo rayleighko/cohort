@@ -36,6 +36,6 @@ Day 7은 3-gate defense-in-depth로 mitigate:
 3. containsForbiddenOutput extension (6 soft-phrasing patterns)
 4. regression test set 36 → 60+
 
-Full architectural detail: [[aurora-narration-assistant-mode-safety-filter-limit]] (project memory, Day 7 created)
+Full architectural detail: [[aurora_narration_assistant_mode_safety_filter_limit]] (project memory, Day 7 created)
 
-Related: [[strategic-decision-0-option-b]] [[aurora-narration-assistant-mode-safety-filter-limit]]
+Related: [[strategic_decision_0_option_b]] [[aurora_narration_assistant_mode_safety_filter_limit]]

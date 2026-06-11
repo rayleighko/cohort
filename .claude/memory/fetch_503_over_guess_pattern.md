@@ -116,9 +116,9 @@ Pattern proven across Day 11 sub-task 11 code-review.
 
 ## Cross-references
 
-- [[option-a-clean-break-w1-w2]] — defensive pattern philosophy (avoid silent failure)
-- [[aurora-chat-bidirectional-safety-filter]] — Day 11 chat route uses this pattern (sister memory)
-- [[anonymous-session-uuid-pattern]] — Day 11 sessionId validation (sister memory)
-- [[ao-5-vault-wins]] — verify before act philosophy
+- [[option_a_clean_break_w1_w2]] — defensive pattern philosophy (avoid silent failure)
+- [[aurora_chat_bidirectional_safety_filter]] — Day 11 chat route uses this pattern (sister memory)
+- [[anonymous_session_uuid_pattern]] — Day 11 sessionId validation (sister memory)
+- [[ao_5_vault_wins]] — verify before act philosophy
 
 Source commit: 309f6ca (Day 11 W3 Day 1 ship 2026-05-24)

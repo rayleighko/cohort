@@ -33,4 +33,4 @@ Every Day prompt sent from Cowork to Code CLI follows this skeleton (vault `~/Do
 
 **How to apply**: Never send Day prompt without all 8 sections. Code CLI must literally output A/B/C/D blocks at end (not paraphrase).
 
-Related: [[ao-5-vault-wins]] [[vault-sot-38-to-43]]
+Related: [[ao_5_vault_wins]] [[vault_sot_38_to_43]]

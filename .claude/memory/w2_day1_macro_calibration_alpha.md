@@ -38,4 +38,4 @@ Half-open intervals (lower-closed positive side, mirror on negative).
 
 **Drift catalog cross-ref**: vault_sot_priority light pointer Drift #6 (calibration 25-w1 §5.3 vs 24-seo Page 5). Resolved by Option α per 26-spec line 37 cross-reference + vault_sot_priority §4.4 evolution rule.
 
-Related: [[vault-sot-priority]] [[ao-5-vault-wins]]
+Related: [[vault_sot_priority]] [[ao_5_vault_wins]]

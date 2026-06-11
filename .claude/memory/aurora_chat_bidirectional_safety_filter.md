@@ -12,7 +12,7 @@ Day 11 (W3 Day 1) Aurora chat scaffold ship 시 architectural 결정: chat surfa
 
 ## Why bidirectional (Day 7 narration과 차이)
 
-- **Day 7 narration**: server → user 단방향. Assistant output only filter (defense-in-depth per [[aurora-narration-assistant-mode-safety-filter-limit]])
+- **Day 7 narration**: server → user 단방향. Assistant output only filter (defense-in-depth per [[aurora_narration_assistant_mode_safety_filter_limit]])
 - **Day 11 chat**: user → server → assistant 양방향. **User input ADVISORY_REQUEST + assistant output Option B compliance** 둘 다 filter 통과 의무
 
 User input filter는 **defensive safeguard가 아닌 architectural intent** — 14-arch §14.4 Layer 1 ADVISORY_TRIGGER_PATTERNS regex가 원래 user input 분류용으로 설계됨. Day 11 chat은 그 native intent 적용.
@@ -86,19 +86,19 @@ Net Sprint 0 Anthropic cost: Day 7 narration (1 call per page load per 1h SWR) +
 | Advisory ("지금 매수해야?") | Would-be redirect | Layer 1/2 catch input → redirect, no Claude call | ✅ ideal |
 | Safe edu | Aurora soft phrasing slip ("비중 늘려봐") | Layer 2/3 output catch → redirect | ✅ defense-in-depth |
 | Safe edu | False-positive on output | Aurora's neutral phrasing blocked → redirect template | ⚠ acceptable (never Option B leak) |
-| Advisory question, regex misses | Aurora answers advisory | ❌ leak | ❌ unacceptable — [[aurora-narration-assistant-mode-safety-filter-limit]] known limit, W4 safety-filter-tester re-run target |
+| Advisory question, regex misses | Aurora answers advisory | ❌ leak | ❌ unacceptable — [[aurora_narration_assistant_mode_safety_filter_limit]] known limit, W4 safety-filter-tester re-run target |
 
 ## Persistence contract
 
 `aurora_chat` table (migration 0005, Day 11 ship):
 - 2 rows per turn (user @ N + assistant @ N+1) atomic
 - UNIQUE(session_id, turn_index) constraint catches concurrent insert race
-- Best-effort persistence: if INSERT fails after Claude call, 503 over guess pattern (see [[fetch-503-over-guess-pattern]])
+- Best-effort persistence: if INSERT fails after Claude call, 503 over guess pattern (see [[fetch_503_over_guess_pattern]])
 - nullable user_id column (W5 Day 4 future-proof)
 
 ## W4 follow-up trigger
 
-Day 7 [[aurora-narration-assistant-mode-safety-filter-limit]] queue + Day 11 chat surface application:
+Day 7 [[aurora_narration_assistant_mode_safety_filter_limit]] queue + Day 11 chat surface application:
 1. safety-filter-tester sub-agent re-run — assistant-mode patterns + chat-specific patterns (turn-taking, multi-turn context)
 2. Layer 2 system prompt rewrite for assistant-mode classification + chat-context awareness
 3. containsForbiddenOutput extension (soft-phrasing + conversational patterns)
@@ -106,10 +106,10 @@ Day 7 [[aurora-narration-assistant-mode-safety-filter-limit]] queue + Day 11 cha
 
 ## Cross-references
 
-- [[dual-mascot-safety-filter]] — 3-gate base architecture (W1 Day 4 ship)
-- [[aurora-narration-assistant-mode-safety-filter-limit]] — Day 7 output-side limit, W4 closure queue
-- [[fetch-503-over-guess-pattern]] — Day 11 code-review surfaced pattern (sister memory)
-- [[anonymous-session-uuid-pattern]] — Day 11 sessionId scope (sister memory)
-- [[vault-sot-priority]] — Drift catalog #15/#16 (Day 11 ship)
+- [[dual_mascot_safety_filter]] — 3-gate base architecture (W1 Day 4 ship)
+- [[aurora_narration_assistant_mode_safety_filter_limit]] — Day 7 output-side limit, W4 closure queue
+- [[fetch_503_over_guess_pattern]] — Day 11 code-review surfaced pattern (sister memory)
+- [[anonymous_session_uuid_pattern]] — Day 11 sessionId scope (sister memory)
+- [[vault_sot_priority]] — Drift catalog #15/#16 (Day 11 ship)
 
 Source commit: 309f6ca (Day 11 W3 Day 1 ship 2026-05-24)

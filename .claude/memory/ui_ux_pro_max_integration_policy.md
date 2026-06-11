@@ -88,6 +88,6 @@ python3 ~/.claude/skills/ui-ux-pro-max/scripts/search.py "Korean fintech investi
 
 ## Cross-references
 
-Related: [[vault-sot-priority]] (§4.3 design system domain) · [[vault-sot-38-to-43]] (vault SoT map)
+Related: [[vault_sot_priority]] (§4.3 design system domain) · [[vault_sot_38_to_43]] (vault SoT map)
 Source commit: e00764e (Day 8 W2 Day 3 ship 2026-05-23)
 Tool: nextlevelbuilder/ui-ux-pro-max-skill v2.0 (GitHub)

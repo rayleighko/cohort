@@ -50,8 +50,8 @@ Cowork이 외부에서 prompt 작성 시 "deferred", "stale", "pending" 등 coho
 **Sub-task 1 HALT가 bridge**: empirical verify가 vault assumption vs reality gap을 prompt 진행 전에 catch. 0 line of no-op shipped + accurate commit message.
 
 **Related anti-patterns**:
-- [[ao-5-vault-wins]] — vault verbatim 의무 (paraphrase 금지)는 같은 family의 다른 측면 (vault read 시점 verbatim, 단 prompt drafting 시점은 cohort code state도 empirical verify)
-- [[option-a-clean-break-w1-w2]] — "Apply when ALL three conditions hold" — grep zero callers 같은 empirical verify와 같은 정신
+- [[ao_5_vault_wins]] — vault verbatim 의무 (paraphrase 금지)는 같은 family의 다른 측면 (vault read 시점 verbatim, 단 prompt drafting 시점은 cohort code state도 empirical verify)
+- [[option_a_clean_break_w1_w2]] — "Apply when ALL three conditions hold" — grep zero callers 같은 empirical verify와 같은 정신
 
 ## Day 10 catch result (verbatim)
 
@@ -104,5 +104,5 @@ Pattern이 future Cowork prompt drafting에서 stale assumption catch 지속 —
 
 향후 Day prompt마다 sub-task 1 HALT REPORT 유지 — pattern 진행 중.
 
-Related: [[ao-5-vault-wins]] [[option-a-clean-break-w1-w2]] [[claude-code-cli-handoff-pattern]]
+Related: [[ao_5_vault_wins]] [[option_a_clean_break_w1_w2]] [[claude_code_cli_handoff_pattern]]
 Source commit: b6d07dc (Day 10 W2-close cleanup 2026-05-24)

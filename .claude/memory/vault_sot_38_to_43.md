@@ -28,6 +28,6 @@ Vault location: `~/Documents/elevate-portfolio/`. These files are read-only SoT 
 | `42-typography-color-system.md` | Typography/color | Tokens |
 | `43-mascot-illustration-brief.md` | Illustrator commissioning | PRE-W5 |
 
-**Convention**: When referencing vault in Day prompts, use `§` notation: "per 38 §2.2", "per 42 §6.2 verbatim". Never paraphrase spec details — see [[ao-5-vault-wins]].
+**Convention**: When referencing vault in Day prompts, use `§` notation: "per 38 §2.2", "per 42 §6.2 verbatim". Never paraphrase spec details — see [[ao_5_vault_wins]].
 
-Related: [[ao-5-vault-wins]]
+Related: [[ao_5_vault_wins]]

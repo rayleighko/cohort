@@ -24,11 +24,12 @@ alwaysApply: true
 - `anonymous_session_uuid_pattern.md` (Day 11, RFC 4122 §4.4 + nullable user_id)
 
 ## Project — 2026-05-24 strategic decisions
-- `cohort_concept_pacemaker_not_advisory.md` — substance-based separation 페이스메이커 / 비서
-- `information_provision_safety_disclaimer.md` — 13F + News + SEC filing micro disclaimer
-- `app_rollout_strategy_3phase.md` — Web (현재) → 앱인토스 (Sprint 1+) → Native (Phase 3)
-- `legal_consultation_deferred.md` — 자문 X, lawyer-attachment future preservation
-- `apps_in_toss_vibecoding_challenge_2026_05_24.md` — B-2 패스 결정
+> ⚠ 아래 5개 memory file은 커밋된 적 없음 (2026-06-11 무결성 검증 — Task 3). 결정 요약은 이 인덱스의 한 줄 설명이 유일한 잔존 기록.
+- ~~`cohort_concept_pacemaker_not_advisory.md`~~ — substance-based separation 페이스메이커 / 비서
+- ~~`information_provision_safety_disclaimer.md`~~ — 13F + News + SEC filing micro disclaimer
+- ~~`app_rollout_strategy_3phase.md`~~ — Web (현재) → 앱인토스 (Sprint 1+) → Native (Phase 3)
+- ~~`legal_consultation_deferred.md`~~ — 자문 X, lawyer-attachment future preservation
+- ~~`apps_in_toss_vibecoding_challenge_2026_05_24.md`~~ — B-2 패스 결정
 
 ## Feedback (collaboration rules)
 - `ao_5_vault_wins.md`

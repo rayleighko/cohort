@@ -20,4 +20,4 @@ Payment provider pivoted Toss → Polar 2026-05-21 (Day 3) because Toss requires
 
 **W5 prereq**: PIPA 즉시 삭제 must purge polar_* columns + Polar API customer delete.
 
-Related: [[postgres-migration-history]]
+Related: [[postgres_migration_history]]

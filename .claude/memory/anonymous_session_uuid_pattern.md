@@ -155,9 +155,9 @@ Day 11 anonymous = `session_id` populated, `user_id` NULL. W5 Day 4 본격 chat 
 
 ## Cross-references
 
-- [[aurora-chat-bidirectional-safety-filter]] — Day 11 chat route uses sessionId (sister memory)
-- [[fetch-503-over-guess-pattern]] — Day 11 turn_index handling (sister memory)
-- [[strategic-decision-0-option-b]] — anonymous chat 이 PIPA + Option B 둘 다 정합
-- [[vault-sot-priority]] — Drift #15/#16 Day 11 ship reference
+- [[aurora_chat_bidirectional_safety_filter]] — Day 11 chat route uses sessionId (sister memory)
+- [[fetch_503_over_guess_pattern]] — Day 11 turn_index handling (sister memory)
+- [[strategic_decision_0_option_b]] — anonymous chat 이 PIPA + Option B 둘 다 정합
+- [[vault_sot_priority]] — Drift #15/#16 Day 11 ship reference
 
 Source commit: 309f6ca (Day 11 W3 Day 1 ship 2026-05-24)

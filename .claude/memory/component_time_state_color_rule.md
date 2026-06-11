@@ -22,4 +22,4 @@ State colors defined per vault 42 §6.2 are correct at the token level but fail 
 
 **Validation**: Day 5b enforced this for waitlist success/error states. Future component PRs MUST be reviewed by cohort-accessibility-auditor for state color usage compliance.
 
-Related: [[ao-5-vault-wins]] [[vault-sot-38-to-43]]
+Related: [[ao_5_vault_wins]] [[vault_sot_38_to_43]]

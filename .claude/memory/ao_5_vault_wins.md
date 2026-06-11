@@ -18,4 +18,4 @@ When information about Cohort exists in multiple places and they conflict, the r
 - Code CLI must HALT on conflict and ask, not silently follow either source.
 - If vault drift is found in CLAUDE.md or prompt, fix the lower-priority document, not vault.
 
-Related: [[vault-sot-38-to-43]] [[claude-code-cli-handoff-pattern]]
+Related: [[vault_sot_38_to_43]] [[claude_code_cli_handoff_pattern]]

@@ -18,7 +18,7 @@
 
 - Frontend: Next.js 14 + TypeScript + Tailwind + PWA (manifest + service worker)
 - Backend: Supabase (Postgres + Auth + RLS + Realtime + Storage)
-- Payment: Toss Payments KRW V1 (sandbox until 사업자 verify) + Polar USD Sprint 1+
+- Payment: Polar (MoR, USD — Pro $19 / Premium $59). Toss Payments는 코드에 미구현 (KRW 결제 전략은 오픈 퀘스천 — docs/handoff-20260611/cohort-ideation-2026-06.md §9)
 - AI: Claude API — `claude-haiku-4-5-20251001` (safety filter Layer 2) + `claude-sonnet-4-6` (Aurora/Vesper chat). `claude-opus-4-6` reserved.
 - Delivery: Resend (email) + Web Push API + 카카오 알림톡 (Tier 2+)
 - Analytics: PostHog + Sentry

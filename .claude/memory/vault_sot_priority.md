@@ -56,7 +56,7 @@ vault governance file은 vault file 간 meta-level conflict를 다룬다. 아래
 - `26-spec` Tier 0 UI sketch requires zone label + key driver + indicators[] — needs `MacroComposite { zone, keyDriver, indicators[], degraded }`.
 - `26-spec` line 96 cross-references `25-w1 §5.3` as template, but does NOT explicitly mark the signature as evolving.
 
-**Resolution (Day 6 ship commit 31b5f40, vault file Section 4.4 적용)**: W2 spec (26) supersedes W1 (25) when W2 evolves a signature. Sub-task 1.5 reconcile plan → **Option a (Clean break) 채택** — composite-score.ts 삭제, composite.ts 신규 (pure `computeMacroComposite`), MacroScores type 삭제. 신규 memory file [[option-a-clean-break-w1-w2]] (feedback) 등록.
+**Resolution (Day 6 ship commit 31b5f40, vault file Section 4.4 적용)**: W2 spec (26) supersedes W1 (25) when W2 evolves a signature. Sub-task 1.5 reconcile plan → **Option a (Clean break) 채택** — composite-score.ts 삭제, composite.ts 신규 (pure `computeMacroComposite`), MacroScores type 삭제. 신규 memory file [[option_a_clean_break_w1_w2]] (feedback) 등록.
 
 ### Drift #3 — 26-spec mascot naming (vault drift, 38 supersedes) — Cleanup pending
 
@@ -84,7 +84,7 @@ W2 Day 1 (Day 6) Code CLI가 sub-task 1 vault verbatim extraction 중 empirical 
 | VIX | 30 | 35 (asymmetric, lower slope) | (panic 35+) | over |
 | DXY | 120 | 110 | (BBDXY 95-110) | **2x 비현실적** |
 
-**Resolution (Day 6 ship commit 31b5f40)**: **Option α 채택** — 24-seo Page 5 calibration verbatim 적용 + KRW/VIX asymmetric piecewise linear normalize. 신규 memory file [[w2-day1-macro-calibration-alpha]] (project) 등록. 근거: 26-spec line 37이 24-seo Page 5를 formula source로 explicit cross-ref ("Composite macro score (per 24-seo Page 5 formula)"). 25-w1 §5.3 = template shape only, calibration이 아님. W2 종료 batch cleanup: 25-w1 §5.3에 inline annotation "calibration is illustrative; production calibration per 24-seo Page 5".
+**Resolution (Day 6 ship commit 31b5f40)**: **Option α 채택** — 24-seo Page 5 calibration verbatim 적용 + KRW/VIX asymmetric piecewise linear normalize. 신규 memory file [[w2_day1_macro_calibration_alpha]] (project) 등록. 근거: 26-spec line 37이 24-seo Page 5를 formula source로 explicit cross-ref ("Composite macro score (per 24-seo Page 5 formula)"). 25-w1 §5.3 = template shape only, calibration이 아님. W2 종료 batch cleanup: 25-w1 §5.3에 inline annotation "calibration is illustrative; production calibration per 24-seo Page 5".
 
 ### Drift #6 — /dashboard route path (26-spec vs Day 6 prompt, RESOLVED Day 6)
 
@@ -124,14 +124,14 @@ Day 7 사장님 결정 의식적 evolution. 26-spec line 114 verbatim: *"Impleme
 
 **Resolution**: Per vault_sot_priority §4.4 W2 evolution rule (Drift #2 / #5 / #7 family — W2 implementation legitimate evolution of W1/W2 stub). 26-spec line 114 annotation at W2 close: "Day 7 evolution per operator decision — sonnet-4-6 generation + 3-layer output safety filter; template-only was W2 prep version, superseded".
 
-**Architectural follow-up**: Layer 1/2 safety filter는 user input 용 설계이나 Day 7 assistant output에 적용. Defense-in-depth로 working but false-negative gap on soft phrasing — W4 safety-filter-tester re-run + Layer 2 prompt rewrite for assistant-mode queued. 신규 memory [[aurora-narration-assistant-mode-safety-filter-limit]] (project) 등록.
+**Architectural follow-up**: Layer 1/2 safety filter는 user input 용 설계이나 Day 7 assistant output에 적용. Defense-in-depth로 working but false-negative gap on soft phrasing — W4 safety-filter-tester re-run + Layer 2 prompt rewrite for assistant-mode queued. 신규 memory [[aurora_narration_assistant_mode_safety_filter_limit]] (project) 등록.
 
 ### Drift #11 — CompositeScoreCard naming (26-spec line 105 vs Day 6 ship inline, FULLY RESOLVED Day 10 ship b6d07dc)
 
 - `26-spec` line 105 명시: *"CompositeScoreCard.tsx — composite + 5-zone color coding (risk-off red → risk-on green)"*
 - Day 6 ship (commit 31b5f40): inline'd as `CompositeCard` inside `src/app/(dashboard)/dashboard/page.tsx` (별도 file 없음)
 - W1 stub `src/components/shape-a/CompositeScore.tsx` (`return null;` + TODO comment) — Day 6 sub-task 1.5 reconcile 시 untouched 유지
-- **Day 10 ship (commit b6d07dc, 2026-05-24)**: W1 stub `CompositeScore.tsx` deleted per [[option-a-clean-break-w1-w2]] (zero callers verified). cohort repo side fully resolved
+- **Day 10 ship (commit b6d07dc, 2026-05-24)**: W1 stub `CompositeScore.tsx` deleted per [[option_a_clean_break_w1_w2]] (zero callers verified). cohort repo side fully resolved
 
 **Resolution (cohort repo side ✅ complete)**: Day 10 cohort repo cleanup 완료. **vault annotation pending** (W2 종료 batch Cowork trace) — 26-spec line 105 annotation: *"Day 6 evolution — inline'd in page.tsx as CompositeCard; W1 stub deleted Day 10"*.
 
@@ -141,7 +141,7 @@ Day 7 사장님 결정 의식적 evolution. 26-spec line 114 verbatim: *"Impleme
 - Day 6 ship (commit 31b5f40): inline'd as `MacroBody` async function inside `src/app/(dashboard)/dashboard/page.tsx`
 - Day 8 polish (commit e00764e): 같은 page.tsx 안에서 `IndicatorList` → `IndicatorGrid` 패치 (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3` per 26-spec line 107)
 - W1 stub `src/components/shape-a/MacroDashboard.tsx` (`return null;` + TODO comment) — Day 6 sub-task 1.5 untouched
-- **Day 10 ship (commit b6d07dc, 2026-05-24)**: W1 stub `MacroDashboard.tsx` deleted per [[option-a-clean-break-w1-w2]] (zero callers verified). cohort repo side fully resolved
+- **Day 10 ship (commit b6d07dc, 2026-05-24)**: W1 stub `MacroDashboard.tsx` deleted per [[option_a_clean_break_w1_w2]] (zero callers verified). cohort repo side fully resolved
 
 **Resolution (cohort repo side ✅ complete)**: Day 10 cohort repo cleanup 완료. **vault annotation pending** (W2 종료 batch Cowork trace) — 26-spec line 103 annotation: *"Day 6 evolution — inline'd in page.tsx as MacroBody; W1 stub deleted Day 10. Day 8 IndicatorGrid responsive grid added (md/lg)"*.
 
@@ -159,9 +159,9 @@ Day 7 사장님 결정 의식적 evolution. 26-spec line 114 verbatim: *"Impleme
 - **Day 11 operator decision (2026-05-24)**: Pull W5 Day 4 chat scaffold forward 2 weeks → W3 Day 1 scaffold. Day 7-9 narration infra direct extension legitimate.
 - Day 11 ship: scaffold only (MascotChatBubble + ChatWindow + ChatMessage + /api/aurora/chat + aurora_chat 0005 + nullable user_id W5 future-proof). W5 Day 4 retains full-rewrite scope with Day 11 scaffold as baseline.
 
-**Resolution**: 2-week pull-forward legitimate evolution per [[option-a-clean-break-w1-w2]] §"W2 supersedes W1 when signature evolves" family (W3 Day 1 scaffold supersedes deferred plan, W5 Day 4 retains future expansion timing). **vault annotation pending** (W2 종료 batch Cowork trace) — 26-spec line 513-524 annotation: *"Day 11 scaffold pull-forward — MascotChatBubble + ChatWindow + ChatMessage + /api/aurora/chat + aurora_chat 0005 ship (joon→aurora naming Drift #3/#8 cleanup applied). W5 Day 4 scope: hydrate UI history on mount; focus trap + per-message SR speaker semantics; useScrollLock hook; FAB hide-on-modal; modal entry animation; auth-scoped chat (user_id population + RLS SELECT policy)"*.
+**Resolution**: 2-week pull-forward legitimate evolution per [[option_a_clean_break_w1_w2]] §"W2 supersedes W1 when signature evolves" family (W3 Day 1 scaffold supersedes deferred plan, W5 Day 4 retains future expansion timing). **vault annotation pending** (W2 종료 batch Cowork trace) — 26-spec line 513-524 annotation: *"Day 11 scaffold pull-forward — MascotChatBubble + ChatWindow + ChatMessage + /api/aurora/chat + aurora_chat 0005 ship (joon→aurora naming Drift #3/#8 cleanup applied). W5 Day 4 scope: hydrate UI history on mount; focus trap + per-message SR speaker semantics; useScrollLock hook; FAB hide-on-modal; modal entry animation; auth-scoped chat (user_id population + RLS SELECT policy)"*.
 
-**Sub-pattern note**: Code CLI sub-task 1 HALT REPORT가 prompt 자체의 stale assumption "W4 Day 4"를 정확히 catch ([[prompt-stale-assumption-verify-gate]] 2nd successful invocation, Day 10 2xl breakpoint 1st). Pattern proven durable across 2 consecutive Day prompts.
+**Sub-pattern note**: Code CLI sub-task 1 HALT REPORT가 prompt 자체의 stale assumption "W4 Day 4"를 정확히 catch ([[prompt_stale_assumption_verify_gate]] 2nd successful invocation, Day 10 2xl breakpoint 1st). Pattern proven durable across 2 consecutive Day prompts.
 
 ### Drift #13 — Favicon asset filename + manifest.json split-brain (RESOLVED Day 8 ship e00764e)
 
@@ -179,7 +179,7 @@ Day 7 사장님 결정 의식적 evolution. 26-spec line 114 verbatim: *"Impleme
 
 **Resolution (Drift #3/#8 brand-naming family)**: vault_sot_priority §4.1 brand domain hierarchy — 38 supersedes 26. Day 9 ship apply `morning_brief` to 4-category enum (`'morning_brief' | 'single_indicator_focus' | 'score_change' | 'weekly_summary'`). 26-spec line 112 annotation W2-close: *"macro_overview renamed morning_brief per 38 §2.2 brand alignment"*.
 
-**Architectural insight from Day 9**: 4 categories 채택 시 **단일 AURORA_NARRATION_SYSTEM + per-category user prompt branching** pattern 적용 — 4-way system prompt drift 회피 + register 일관성 자동 보장 + exhaustive switch never guard. 신규 memory [[aurora-narration-4-category-routing]] (project) 등록.
+**Architectural insight from Day 9**: 4 categories 채택 시 **단일 AURORA_NARRATION_SYSTEM + per-category user prompt branching** pattern 적용 — 4-way system prompt drift 회피 + register 일관성 자동 보장 + exhaustive switch never guard. 신규 memory [[aurora_narration_4_category_routing]] (project) 등록.
 
 ---
 
@@ -208,5 +208,5 @@ Day 7 사장님 결정 의식적 evolution. 26-spec line 114 verbatim: *"Impleme
 4. Matrix로 unresolved 시 → vault file Section 9 deferred decision 추가 + 23-batch-review-prep Section 10 안건 등록
 5. Block D drift entry 의무 (END_OF_TURN report 시)
 
-Related: [[ao-5-vault-wins]] [[vault-sot-38-to-43]] [[claude-code-cli-handoff-pattern]]
+Related: [[ao_5_vault_wins]] [[vault_sot_38_to_43]] [[claude_code_cli_handoff_pattern]]
 Vault governance master: `~/Documents/elevate-portfolio/vault_sot_priority.md` v0.1 DRAFT

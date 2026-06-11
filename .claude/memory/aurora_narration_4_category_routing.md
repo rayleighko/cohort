@@ -105,10 +105,10 @@ TypeScript exhaustive switch never guard가 #3 누락 시 compile error로 자�
 
 ## Cross-references
 
-- [[dual-mascot-safety-filter]] — 3-gate architecture, Day 9에 unchanged
-- [[aurora-narration-assistant-mode-safety-filter-limit]] — Day 7 known limit, Day 9 4-category expansion이 regression 안 함 (Layer 1/2 user-input filter 가정은 그대로, defense-in-depth)
-- [[option-a-clean-break-w1-w2]] — Day 6 W1 supersedes W2 pattern과 다른 영역 (Day 9는 W2 internal evolution, W1 supersede 아님)
-- [[vault-sot-priority]] — Drift #14 light pointer entry
+- [[dual_mascot_safety_filter]] — 3-gate architecture, Day 9에 unchanged
+- [[aurora_narration_assistant_mode_safety_filter_limit]] — Day 7 known limit, Day 9 4-category expansion이 regression 안 함 (Layer 1/2 user-input filter 가정은 그대로, defense-in-depth)
+- [[option_a_clean_break_w1_w2]] — Day 6 W1 supersedes W2 pattern과 다른 영역 (Day 9는 W2 internal evolution, W1 supersede 아님)
+- [[vault_sot_priority]] — Drift #14 light pointer entry
 
 ## W4 follow-up trigger
 

@@ -22,4 +22,4 @@ Sprint 0 is a hard 5-week timebox. Anything not in W1-W5 plan is V2.
 
 **How to apply**: Every feature ask gets "V1 or V2?" filter. If V2, log to V2 backlog and move on. Never expand V1 scope without explicit cap re-negotiation.
 
-Related: [[brand-lock-2026-05-21]] [[vault-sot-38-to-43]]
+Related: [[brand_lock_2026-05-21]] [[vault_sot_38_to_43]]

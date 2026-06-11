@@ -60,5 +60,5 @@ containsForbiddenOutput (Day 7 commit)은 일부 catch하지만 위 패턴들의
 - **Sprint 0 W4**: safety-filter-tester re-run (above 4-task) — Aurora chat surface (W5) 전에 강화
 - **V1.1**: Layer 2 dual-mode (user-input vs assistant-mode) 정식 architectural refactor
 
-Related: [[dual-mascot-safety-filter]] [[vault-sot-priority]]
+Related: [[dual_mascot_safety_filter]] [[vault_sot_priority]]
 Source commit: 1d05856 (Day 7 W2 Day 2 ship 2026-05-23)

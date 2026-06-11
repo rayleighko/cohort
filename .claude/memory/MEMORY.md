@@ -34,8 +34,8 @@ Working directory: `~/Development/cohort` · Vault SoT: `~/Documents/elevate-por
 - [**Vault SoT priority — working memory pointer**](vault_sot_priority.md) — light pointer to vault governance master `~/Documents/elevate-portfolio/vault_sot_priority.md` v0.1 DRAFT + Day-to-day implementation Drift catalog (#1-#16: cache / composite signature / mascot / payment / **Day 6 #5-#7: calibration α / route path / W2 file additions** / **Day 7 #8-#9: Aurora naming cleanup / Day 4 template→Claude evolution** / **Day 8 #11-#13: CompositeScoreCard naming / MacroDashboard naming / Favicon manifest split-brain** [**Day 10 #11-#12: cohort repo side resolved (W1 stub deletion b6d07dc)**] / **Day 9 #14: Aurora narration category naming macro_overview→morning_brief** / **Day 11 #15-#16: W1 outputs claim mismatch + 2-week chat scaffold pull-forward (commit 309f6ca)**) + Vault enhancement log (V1: vault 44 §3 brand logo system)
 - [Postgres migrations](postgres_migration_history.md)
 - [Connected MCPs](connected_mcps.md)
-- [Cohort 컨셉 — 페이스메이커 (자문업 X)](cohort_concept_pacemaker_not_advisory.md) — Substance-based separation. 페이스메이커 / 비서 framing 확정 2026-05-24
-- [정보 제공 면책 disclaimer 패턴](information_provision_safety_disclaimer.md) — 13F + News + SEC filing micro disclaimer (Claude.ai 모델)
-- [앱 출시 3-Phase 전략](app_rollout_strategy_3phase.md) — Web (현재) → 앱인토스 (Sprint 1+) → Native (Phase 3, 현금흐름 후)
-- [변호사 자문 deferred](legal_consultation_deferred.md) — 자문 굳이 X. lawyer-attachment 1-5 future trigger 시 preservation
-- [앱인토스 바이브코딩 챌린지 2026-05-24](apps_in_toss_vibecoding_challenge_2026_05_24.md) — B-2 패스 결정. 다음 챌린지 대기
+
+> Index integrity note (2026-06-11): 5 entries removed — cohort_concept_pacemaker_not_advisory,
+> information_provision_safety_disclaimer, app_rollout_strategy_3phase, legal_consultation_deferred,
+> apps_in_toss_vibecoding_challenge_2026_05_24. Files were referenced but never committed and no
+> local copies exist. Decisions summary survives in .cursor/rules/memory-index.mdc descriptions.

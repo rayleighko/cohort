@@ -15,9 +15,9 @@ Cohort operates strictly as Information + Tool + Decision Support. The product n
 **Why**: Solo founder + no 자문업 license. Even one advisory output → regulatory exposure + product credibility collapse. This is the single hardest constraint and supersedes UX convenience.
 
 **How to apply**:
-- Every Aurora/Vesper output passes 3-layer safety filter ([[dual-mascot-safety-filter]]).
+- Every Aurora/Vesper output passes 3-layer safety filter ([[dual_mascot_safety_filter]]).
 - Every UI label, error message, microcopy passes cohort-ux-copy skill check.
 - Every marketing copy passes brand-review.
 - When in doubt, redirect to COHORT_FALLBACK_REDIRECT template.
 
-Related: [[dual-mascot-safety-filter]] [[brand-lock-2026-05-21]]
+Related: [[dual_mascot_safety_filter]] [[brand_lock_2026-05-21]]

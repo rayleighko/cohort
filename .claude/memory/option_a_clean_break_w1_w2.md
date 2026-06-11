@@ -30,4 +30,4 @@ When W2 spec evolves a W1 signature with a genuine progression, prefer **clean b
 
 **Sub-task 1.5 pattern** (Cowork-introduced 2026-05-23): When Day prompt requires new code that overlaps existing W1 stubs, insert "reconcile plan REPORT ONLY" sub-task before any implementation. Empirically verify caller inventory + test impact + reconcile option (a/b/c). HALT for operator approval. Prevents Day 5a-style silent breaking changes.
 
-Related: [[vault-sot-priority]] [[ao-5-vault-wins]] [[claude-code-cli-handoff-pattern]]
+Related: [[vault_sot_priority]] [[ao_5_vault_wins]] [[claude_code_cli_handoff_pattern]]
