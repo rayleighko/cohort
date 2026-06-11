@@ -1,0 +1,68 @@
+# Cohort CI — promotion of .claude/hooks/pre-push.sh 5-stage gate to a machine gate.
+# Local hook remains for fast feedback; this workflow is the source of truth gate.
+# Refs: docs/handoff-20260611/CURSOR-HANDOFF.md Task 2, cohort-ai-setup-audit.md §P2
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # version resolved from package.json "packageManager"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: "[1/5] Brand mapping scan (legacy 준/Joon references)"
+        run: |
+          LEGACY_REFS=$(grep -rn -E "(준\s|Joon[^a-z]|joon-mate|joon_chat|JoonAvatar|JoonChatBubble|JoonNarration|joon-prompt)" src/ 2>/dev/null | grep -v "// HISTORICAL" | grep -v "// LEGACY" || true)
+          if [ -n "$LEGACY_REFS" ]; then
+            echo "FAIL — Legacy brand references found in src/:"
+            echo "$LEGACY_REFS" | head -10
+            echo "All 준/Joon references must be mapped to Cohort/Aurora/Vesper (vault 38 §7)."
+            exit 1
+          fi
+          echo "PASS — No legacy brand references"
+
+      - name: "[2/5] Strategic Decision 0 Option B compliance scan"
+        # Exclusions (Ray-approved 2026-06-11): test files contain forbidden phrases
+        # as adversarial safety-filter inputs; privacy/terms pages quote them in legal
+        # disclaimers; enforcement-layer files (safety-filter regex + persona prompts)
+        # quote them in NEVER-say instructions (behavior gated by the 76 safety-filter
+        # tests in step 5/5); OPTION-B-ALLOWED marks vetted negation/educational copy.
+        run: |
+          FORBIDDEN=$(grep -rn -E "(추천|권장|매수하세요|파세요|비중\s*[0-9]+%|지금\s*매수|timing입니다)" src/ \
+            --exclude-dir=__tests__ --exclude='*.test.ts' --exclude='*.test.tsx' 2>/dev/null \
+            | grep -v "src/app/privacy/" | grep -v "src/app/terms/" \
+            | grep -v "src/lib/claude/safety-filter.ts" | grep -v "src/lib/claude/vesper-prompt.ts" \
+            | grep -v "src/lib/aurora/aurora-prompt.ts" | grep -v "src/lib/aurora/chat-prompt.ts" \
+            | grep -v "OPTION-B-ALLOWED" | grep -v "// EXAMPLE" | grep -v "// FORBIDDEN" || true)
+          if [ -n "$FORBIDDEN" ]; then
+            echo "FAIL — Option B forbidden phrases found:"
+            echo "$FORBIDDEN" | head -10
+            echo "Strategic Decision 0 LOCKED to Option B (Information + Tool + Decision Support)."
+            exit 1
+          fi
+          echo "PASS — No forbidden advisory phrases"
+
+      - name: "[3/5] TypeScript typecheck"
+        run: pnpm typecheck
+
+      - name: "[4/5] ESLint"
+        run: pnpm lint
+
+      - name: "[5/5] Safety filter unit tests"
+        run: pnpm vitest run src/lib/claude/__tests__/safety-filter.test.ts

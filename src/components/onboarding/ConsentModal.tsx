@@ -127,7 +127,7 @@ export default function ConsentModal({ userId }: ConsentModalProps) {
         <li>· Aurora 🕊가 매일 macro를 정리합니다.</li>
         <li>· Vesper 🦅가 본인 trigger 신호를 정리합니다.</li>
         <li>
-          · 본인 plan에 대한 <strong>추천·권장은 하지 않습니다</strong> (정보
+          · 본인 plan에 대한 <strong>추천·권장은 하지 않습니다</strong> (정보{/* OPTION-B-ALLOWED: 부정형 고지 */}
           제공 + 의사결정 지원 도구).
         </li>
       </ul>

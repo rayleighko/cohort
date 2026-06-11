@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         fit: false,
         redirect: 'graceful_exit',
         message:
-          'Cohort 영역 fit X. Valley/이효석아카데미/김단테 영역 학습 영역 추천 영역. ' +
+          'Cohort 영역 fit X. Valley/이효석아카데미/김단테 영역 학습 영역 추천 영역. ' + // OPTION-B-ALLOWED: 학습 리소스 안내 (교육 콘텐츠 — 투자 추천 아님)
           '단 학습 끝난 후 다시 와주세요.',
       },
       { headers: { 'Cache-Control': 'no-store' } },

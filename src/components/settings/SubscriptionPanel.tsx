@@ -9,7 +9,7 @@ import type { SubscriptionTier } from '@/types/shapes';
  * Settings subscription panel.
  * - Free users see the upgrade section (#upgrade anchor — requireTier
  *   redirects here) with Aurora's companion-framed narration (Option B:
- *   no 추천/권장).
+ *   no 추천/권장). OPTION-B-ALLOWED: 규칙 인용 주석.
  * - Pro/Premium users see plan status + a "구독 관리" button → Polar portal.
  */
 interface SubscriptionPanelProps {
@@ -112,7 +112,7 @@ export default function SubscriptionPanel({
         )}
         <p className="mt-3 text-xs leading-relaxed text-cohort-charcoal/45">
           결제는 Polar(Merchant of Record)를 통해 안전하게 처리됩니다. 정보 제공
-          + 의사결정 지원 도구이며, 투자 추천·권장 서비스가 아닙니다.
+          + 의사결정 지원 도구이며, 투자 추천·권장 서비스가 아닙니다.{/* OPTION-B-ALLOWED: 부정형 고지 */}
         </p>
       </section>
     );

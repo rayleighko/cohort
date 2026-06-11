@@ -8,7 +8,7 @@
  * appropriate), a Recharts sparkline of the 30-day series, and the
  * contribution badge (-10..+10 weighted) tagged with the source.
  *
- * Strategic Decision 0 Option B: never says "비중/매수/매도/timing/추천".
+ * Strategic Decision 0 Option B: never says "비중/매수/매도/timing/추천". OPTION-B-ALLOWED: 규칙 인용 주석.
  * Surfaces values + dates + neutral source labels only.
  *
  * Token discipline (AD-1): cohort/aurora tokens only — no raw hex/px

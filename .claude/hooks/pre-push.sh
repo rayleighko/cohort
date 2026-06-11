@@ -40,7 +40,17 @@ echo ""
 echo "[2/5] Strategic Decision 0 Option B compliance scan..."
 
 if [ -d "src" ]; then
-  FORBIDDEN=$(grep -rn -E "(추천|권장|매수하세요|파세요|비중\s*[0-9]+%|지금\s*매수|timing입니다)" src/ 2>/dev/null | grep -v "// EXAMPLE" | grep -v "// FORBIDDEN" || true)
+  # Exclusions (Ray-approved 2026-06-11, mirrored in .github/workflows/ci.yml):
+  # test files = adversarial safety-filter inputs; privacy/terms = legal disclaimer
+  # quotes; enforcement-layer files (safety-filter regex + persona prompts) quote
+  # them in NEVER-say instructions (behavior gated by safety-filter tests in 5/5);
+  # OPTION-B-ALLOWED = vetted negation/educational copy.
+  FORBIDDEN=$(grep -rn -E "(추천|권장|매수하세요|파세요|비중\s*[0-9]+%|지금\s*매수|timing입니다)" src/ \
+    --exclude-dir=__tests__ --exclude='*.test.ts' --exclude='*.test.tsx' 2>/dev/null \
+    | grep -v "src/app/privacy/" | grep -v "src/app/terms/" \
+    | grep -v "src/lib/claude/safety-filter.ts" | grep -v "src/lib/claude/vesper-prompt.ts" \
+    | grep -v "src/lib/aurora/aurora-prompt.ts" | grep -v "src/lib/aurora/chat-prompt.ts" \
+    | grep -v "OPTION-B-ALLOWED" | grep -v "// EXAMPLE" | grep -v "// FORBIDDEN" || true)
   if [ -n "$FORBIDDEN" ]; then
     echo "  FAIL — Option B forbidden phrases found:"
     echo "$FORBIDDEN" | head -10
@@ -81,7 +91,7 @@ echo ""
 echo "[5/5] Safety filter unit tests..."
 
 if [ -f "src/lib/claude/safety-filter.ts" ] && [ -f "src/lib/claude/__tests__/safety-filter.test.ts" ]; then
-  pnpm test src/lib/claude/__tests__/safety-filter.test.ts || { echo "  FAIL — Safety filter regression"; exit 1; }
+  pnpm vitest run src/lib/claude/__tests__/safety-filter.test.ts || { echo "  FAIL — Safety filter regression"; exit 1; }
   echo "  PASS — Safety filter tests pass"
 else
   echo "  SKIP — safety-filter.ts or tests not yet implemented (W4+ phase)"

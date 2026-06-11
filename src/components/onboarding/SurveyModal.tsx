@@ -208,7 +208,7 @@ function GracefulExitScreen({
           <strong className="text-cohort-ink-90">
             Valley / 이효석아카데미 / 김단테
           </strong>{' '}
-          채널을 추천 영역에서 말씀드립니다. 학습을 마치신 후 다시 방문해 주세요.
+          채널을 추천 영역에서 말씀드립니다. 학습을 마치신 후 다시 방문해 주세요.{/* OPTION-B-ALLOWED: 학습 리소스 안내 (교육 콘텐츠 — 투자 추천 아님) */}
         </p>
       </div>
 
