@@ -147,13 +147,6 @@ export type Database = {
             referencedRelation: "shape_c_triggers"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "behavioral_event_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       chat_quota_usage: {
@@ -367,13 +360,6 @@ export type Database = {
             referencedRelation: "shape_c_triggers"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "notification_log_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       onboarding_response: {
@@ -543,7 +529,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          condition_params: Json
+          condition_params?: Json
           cooldown_hours?: number
           created_at?: string
           id?: string
@@ -604,6 +590,81 @@ export type Database = {
         }
         Relationships: []
       }
+      user_investment_profile: {
+        Row: {
+          asset_goal_5y: string | null
+          classification_confidence: number | null
+          cluster_b_sub_classification: string | null
+          created_at: string
+          emotional_decision_count_12m: string | null
+          framework_affinity: string[] | null
+          framework_affinity_inferred: string[] | null
+          framework_self_described: string | null
+          info_sources: string[] | null
+          last_updated_at: string
+          macro_watching_freq: string | null
+          payment_willingness_ceiling_krw: number | null
+          plan_formalization: string | null
+          portfolio_composition_pct: Json | null
+          service_expectations: string[] | null
+          shape_c_trigger_presets: Json | null
+          split_buy_enforcement: string | null
+          time_horizon: string | null
+          user_id: string
+          user_stage: string | null
+          user_stage_self_referred_valley: boolean | null
+          weakness_self_assessment: string | null
+        }
+        Insert: {
+          asset_goal_5y?: string | null
+          classification_confidence?: number | null
+          cluster_b_sub_classification?: string | null
+          created_at?: string
+          emotional_decision_count_12m?: string | null
+          framework_affinity?: string[] | null
+          framework_affinity_inferred?: string[] | null
+          framework_self_described?: string | null
+          info_sources?: string[] | null
+          last_updated_at?: string
+          macro_watching_freq?: string | null
+          payment_willingness_ceiling_krw?: number | null
+          plan_formalization?: string | null
+          portfolio_composition_pct?: Json | null
+          service_expectations?: string[] | null
+          shape_c_trigger_presets?: Json | null
+          split_buy_enforcement?: string | null
+          time_horizon?: string | null
+          user_id: string
+          user_stage?: string | null
+          user_stage_self_referred_valley?: boolean | null
+          weakness_self_assessment?: string | null
+        }
+        Update: {
+          asset_goal_5y?: string | null
+          classification_confidence?: number | null
+          cluster_b_sub_classification?: string | null
+          created_at?: string
+          emotional_decision_count_12m?: string | null
+          framework_affinity?: string[] | null
+          framework_affinity_inferred?: string[] | null
+          framework_self_described?: string | null
+          info_sources?: string[] | null
+          last_updated_at?: string
+          macro_watching_freq?: string | null
+          payment_willingness_ceiling_krw?: number | null
+          plan_formalization?: string | null
+          portfolio_composition_pct?: Json | null
+          service_expectations?: string[] | null
+          shape_c_trigger_presets?: Json | null
+          split_buy_enforcement?: string | null
+          time_horizon?: string | null
+          user_id?: string
+          user_stage?: string | null
+          user_stage_self_referred_valley?: boolean | null
+          weakness_self_assessment?: string | null
+        }
+        Relationships: []
+      }
       user_notification_preference: {
         Row: {
           channels: string[]
@@ -638,15 +699,7 @@ export type Database = {
           user_id?: string
           web_push_subscription?: Json | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_notification_preference_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_profile: {
         Row: {
