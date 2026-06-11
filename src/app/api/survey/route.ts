@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { PROFILE_VERSION_GLRTS } from '@/lib/profile/gl-rts-questions';
+import { validateGlRtsAnswers } from '@/lib/profile/validate-gl-rts-answers';
 import { redactPortfolioCompositionPct } from '@/lib/pipa-redact';
 
 const VALID_FRAMEWORK_VALUES = [
@@ -26,6 +28,7 @@ type SurveyBody = {
   q9_weakness_self_assessment?: string;
   q10_target_outcome?: string;
   q11_framework_self_described?: string;
+  gl_rts_answers?: Record<string, string>;
 };
 
 export async function POST(request: NextRequest) {
@@ -127,7 +130,21 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Cast 정합 (vault 62 §2.4) — `as never` escape hatch (line ~67 정합)
+  const glRtsAnswers = validateGlRtsAnswers(body.gl_rts_answers);
+  if (!glRtsAnswers) {
+    return NextResponse.json(
+      {
+        error: 'invalid_gl_rts_answers',
+        detail: 'All 13 GL-RTS questions (q1–q13) with valid options are required',
+      },
+      { status: 400 },
+    );
+  }
+
+  const serviceExpectations = body.q10_target_outcome?.trim()
+    ? [body.q10_target_outcome.trim()]
+    : null;
+
   const { error: upsertError } = await admin.from('user_investment_profile' as never).upsert({
     user_id: userId,
     user_stage: body.q0_user_stage,
@@ -140,7 +157,10 @@ export async function POST(request: NextRequest) {
     emotional_decision_count_12m: body.q7_emotional_decision_count_12m,
     framework_affinity: body.q8_framework_affinity,
     weakness_self_assessment: body.q9_weakness_self_assessment,
+    service_expectations: serviceExpectations,
     framework_self_described: body.q11_framework_self_described,
+    gl_rts_answers: glRtsAnswers,
+    profile_version: PROFILE_VERSION_GLRTS,
   } as never);
 
   if (upsertError) {

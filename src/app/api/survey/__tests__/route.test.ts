@@ -37,6 +37,25 @@ vi.mock('@/lib/pipa-redact', () => ({
 
 import { POST } from '../route';
 
+/** Minimal valid GL-RTS payload for fit-user survey tests */
+function validGlRtsPayload() {
+  return {
+    q1: 'a',
+    q2: 'a',
+    q3: 'a',
+    q4: 'a',
+    q5: 'a',
+    q6: 'a',
+    q7: 'a',
+    q8: 'a',
+    q9: 'a',
+    q10: 'a',
+    q11: 'a',
+    q12: 'a',
+    q13: 'a',
+  };
+}
+
 function makeRequest(body: unknown): Request {
   return new Request('http://localhost/api/survey', {
     method: 'POST',
@@ -88,6 +107,7 @@ describe('POST /api/survey — Q0 narrow filter (vault 61 D16)', () => {
   it('Q0 = "post_learning_planned" → fit ✓, Q1-Q10 upserted', async () => {
     const req = makeRequest({
       q0_user_stage: 'post_learning_planned',
+      gl_rts_answers: validGlRtsPayload(),
       q1_time_horizon: '10y+',
       q8_framework_affinity: ['buffett_index_value'],
     });
@@ -105,7 +125,10 @@ describe('POST /api/survey — Q0 narrow filter (vault 61 D16)', () => {
   });
 
   it('Q0 = "active_investor_enforcement" → fit ✓✓ primary', async () => {
-    const req = makeRequest({ q0_user_stage: 'active_investor_enforcement' });
+    const req = makeRequest({
+      q0_user_stage: 'active_investor_enforcement',
+      gl_rts_answers: validGlRtsPayload(),
+    });
     const res = await POST(req as never);
     expect(res.status).toBe(200);
     const json = await res.json();
@@ -134,6 +157,7 @@ describe('POST /api/survey — PIPA Q2 portfolio composition', () => {
   it('Q2 sum 95-105% → accepted', async () => {
     const req = makeRequest({
       q0_user_stage: 'post_learning_planned',
+      gl_rts_answers: validGlRtsPayload(),
       q2_portfolio_composition_pct: { KOSPI: 60, US: 30, cash: 10 },
     });
     const res = await POST(req as never);
@@ -145,6 +169,7 @@ describe('POST /api/survey — PIPA Q2 portfolio composition', () => {
   it('PIPA — Q2 portfolio sum < 95% → 400 invalid_portfolio_composition', async () => {
     const req = makeRequest({
       q0_user_stage: 'post_learning_planned',
+      gl_rts_answers: validGlRtsPayload(),
       q2_portfolio_composition_pct: { KOSPI: 50, US: 30 },
     });
     const res = await POST(req as never);
@@ -157,6 +182,7 @@ describe('POST /api/survey — PIPA Q2 portfolio composition', () => {
   it('PIPA — Q2 absolute amount sniff (value > 100) → 400 pipa_violation_absolute_amount', async () => {
     const req = makeRequest({
       q0_user_stage: 'post_learning_planned',
+      gl_rts_answers: validGlRtsPayload(),
       q2_portfolio_composition_pct: { KOSPI: 50000000, cash: 10 },
     });
     const res = await POST(req as never);
@@ -169,6 +195,7 @@ describe('POST /api/survey — PIPA Q2 portfolio composition', () => {
   it('PIPA — Q2 sum > 105% → 400 invalid_portfolio_composition', async () => {
     const req = makeRequest({
       q0_user_stage: 'post_learning_planned',
+      gl_rts_answers: validGlRtsPayload(),
       q2_portfolio_composition_pct: { KOSPI: 70, US: 40 },
     });
     const res = await POST(req as never);
@@ -182,6 +209,7 @@ describe('POST /api/survey — Q8 framework_affinity 7 categories (vault 57 §3 
   it('valid 7-category values + unsure → insert success', async () => {
     const req = makeRequest({
       q0_user_stage: 'active_investor_enforcement',
+      gl_rts_answers: validGlRtsPayload(),
       q8_framework_affinity: ['druckenmiller_macro_13f', 'unsure'],
     });
     const res = await POST(req as never);
@@ -193,6 +221,7 @@ describe('POST /api/survey — Q8 framework_affinity 7 categories (vault 57 §3 
   it('all 7 valid framework values accepted', async () => {
     const req = makeRequest({
       q0_user_stage: 'active_investor_enforcement',
+      gl_rts_answers: validGlRtsPayload(),
       q8_framework_affinity: [
         'druckenmiller_macro_13f',
         'kimdante_macro_korea_us',
@@ -234,11 +263,40 @@ describe('POST /api/survey — Q8 framework_affinity 7 categories (vault 57 §3 
 describe('POST /api/survey — DB error handling', () => {
   it('upsert DB error → 500 db_error', async () => {
     mockedUpsert.mockResolvedValue({ error: { message: 'DB constraint violation' } });
-    const req = makeRequest({ q0_user_stage: 'post_learning_planned' });
+    const req = makeRequest({
+      q0_user_stage: 'post_learning_planned',
+      gl_rts_answers: validGlRtsPayload(),
+    });
     const res = await POST(req as never);
     expect(res.status).toBe(500);
     const json = await res.json();
     expect(json.error).toBe('db_error');
+  });
+});
+
+describe('POST /api/survey — GL-RTS integration (Task 4)', () => {
+  it('missing gl_rts_answers → 400 invalid_gl_rts_answers', async () => {
+    const req = makeRequest({ q0_user_stage: 'post_learning_planned' });
+    const res = await POST(req as never);
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toBe('invalid_gl_rts_answers');
+  });
+
+  it('q10_target_outcome → stored as service_expectations array', async () => {
+    const req = makeRequest({
+      q0_user_stage: 'post_learning_planned',
+      gl_rts_answers: validGlRtsPayload(),
+      q10_target_outcome: '매크로 변화를 놓치지 않고 plan대로 집행',
+    });
+    const res = await POST(req as never);
+    expect(res.status).toBe(200);
+    expect(mockedUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        service_expectations: ['매크로 변화를 놓치지 않고 plan대로 집행'],
+        profile_version: 'glrts-ko-v0.1',
+      }),
+    );
   });
 });
 

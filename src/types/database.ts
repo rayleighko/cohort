@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       aurora_chat: {
@@ -600,12 +575,14 @@ export type Database = {
           framework_affinity: string[] | null
           framework_affinity_inferred: string[] | null
           framework_self_described: string | null
+          gl_rts_answers: Json | null
           info_sources: string[] | null
           last_updated_at: string
           macro_watching_freq: string | null
           payment_willingness_ceiling_krw: number | null
           plan_formalization: string | null
           portfolio_composition_pct: Json | null
+          profile_version: string
           service_expectations: string[] | null
           shape_c_trigger_presets: Json | null
           split_buy_enforcement: string | null
@@ -624,12 +601,14 @@ export type Database = {
           framework_affinity?: string[] | null
           framework_affinity_inferred?: string[] | null
           framework_self_described?: string | null
+          gl_rts_answers?: Json | null
           info_sources?: string[] | null
           last_updated_at?: string
           macro_watching_freq?: string | null
           payment_willingness_ceiling_krw?: number | null
           plan_formalization?: string | null
           portfolio_composition_pct?: Json | null
+          profile_version?: string
           service_expectations?: string[] | null
           shape_c_trigger_presets?: Json | null
           split_buy_enforcement?: string | null
@@ -648,12 +627,14 @@ export type Database = {
           framework_affinity?: string[] | null
           framework_affinity_inferred?: string[] | null
           framework_self_described?: string | null
+          gl_rts_answers?: Json | null
           info_sources?: string[] | null
           last_updated_at?: string
           macro_watching_freq?: string | null
           payment_willingness_ceiling_krw?: number | null
           plan_formalization?: string | null
           portfolio_composition_pct?: Json | null
+          profile_version?: string
           service_expectations?: string[] | null
           shape_c_trigger_presets?: Json | null
           split_buy_enforcement?: string | null
@@ -958,9 +939,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
