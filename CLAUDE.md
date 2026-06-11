@@ -12,7 +12,7 @@
 - **Visual**: 석류 (Pomegranate) — multi-seed unifier
 - **Colors**: `#A8243F` primary (pomegranate red) · `#E8A33D` amber (Vesper) · `#F8F4ED` ivory · `#1A1A1A` charcoal
 - **Domain**: cohort.co.kr (Korean V1, Vercel DNS) · cohort.fund/.app deferred Sprint 1+
-- **Repo**: plancy-dev/cohort (private)
+- **Repo**: rayleighko/cohort (public)
 
 ## Stack
 
