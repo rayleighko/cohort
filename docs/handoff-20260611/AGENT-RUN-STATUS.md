@@ -1,8 +1,8 @@
 # Agent Run Status — 아침 진행률 대시보드
 
-> **마지막 갱신:** 2026-06-12 KST (Cursor — commit/push 세션)  
-> **원격 `main`:** _(push 후 갱신)_  
-> **Overnight automation:** **보류** (Cloud Agent 별도 과금 — Ray 결정)
+> **마지막 갱신:** 2026-06-12 KST  
+> **원격 `main`:** `27d2cef` (`d31b7e4` product + handoff docs)  
+> **Overnight automation:** **보류** (Cloud Agent 별도 과금)
 
 ---
 
@@ -29,7 +29,7 @@
 
 | Batch | 설명 | 진행 |
 |-------|------|------|
-| **A** | 배포 묶음 commit/push | 🔄 |
+| **A** | 배포 묶음 commit/push | ✅ `d31b7e4` + `27d2cef` |
 | **B** | CI·문서 위생 | ⬜ |
 | **C** | IPS, Toss lab, scoring | ⬜ |
 | **D** | 보안 filter-repo | 🚫 Ray 승인 |
@@ -54,7 +54,8 @@
 | ID | Done (KST) | Commit | Notes |
 |----|------------|--------|-------|
 | A2 | 2026-06-11 | — | roadmap + queue |
-| dash-dates | 2026-06-12 | _(pending)_ | observationDate + series latest_date |
+| dash-dates | 2026-06-12 | d31b7e4 | observationDate + series latest_date |
+| A-push | 2026-06-12 | 27d2cef | handoff docs |
 
 ---
 
