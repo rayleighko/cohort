@@ -62,3 +62,99 @@ supabase gen types typescript --linked > src/types/database.ts  # diff 확인
 - 각 Task 시작 전 관련 파일을 실제로 읽고 현황을 1문단으로 보고 → 진행. 끝나면 commit hash + `git status --short` 보고.
 - 모호하면 추측하지 말고 Ray에게 물어라. 특히: filter-repo 실행, Supabase project-ref, 기존 데이터 이관 여부, Task 4 매핑 표 승인.
 - "이건 ADR감인가?"를 결정마다 물어라. 후보: CI 도입, 성향 진단 체계 선정(초안이 design 문서 §6에 있음), 익명 결과 서명 토큰 패턴.
+
+---
+
+## 세션 상태 (2026-06-11 Cursor — **배포 전, 로컬 미커밋**)
+
+> **진행률 SoT (아침 질문용):** `AGENT-RUN-STATUS.md` · **작업 큐:** `AGENT-QUEUE.md` · **4단+단중장기:** `portfolio-tool-roadmap.md`  
+> **원격 `main` 최신:** `6a190a6` (onboarding survey wired + PostHog funnel)  
+> **아래 변경분은 로컬 working tree에만 있음 — commit/push 전까지 프로덕션에 반영 안 됨.**
+
+### 이번 Cursor 세션에서 완료 (로컬)
+
+| 영역 | 상태 | 메모 |
+|------|------|------|
+| 매크로/Aurora 갱신 | ✅ 로컬 | KST 날짜, 15min cache, asOfDate narration, tests 237 pass |
+| 랜딩·설문·한국어 | ✅ 로컬 | 모바일 설문, Q0 disabled, user-facing KO |
+| 구독 → 프로젝트 지원 | ✅ 로컬 | 기능 공개, 후원형 카피, shape-a/b/c 게이트 제거 |
+| Privacy/ToS 한국어 | ✅ 로컬 | page tests pass |
+| PostHog funnel | ✅ 원격 | `6a190a6` |
+| Task 0–4 handoff | ✅ 원격 | 이전 세션 |
+| Task 5 scoreGlRts Green | ⬜ Ray | Red tests만 |
+| Toss Open API | ⬜ | `.env.local` 키만 — **로컬 lab** (C4 in AGENT-QUEUE) |
+| GitHub CI | ⬜ | Task 2 / Batch B1 |
+| 로드맵·에이전트 큐 | ✅ 로컬 | portfolio-tool-roadmap, AGENT-QUEUE, AGENT-RUN-STATUS |
+
+### 배포 후 Ray 테스트 체크리스트
+
+1. **랜딩** — 「무료로 시작하기」→ `/signup`, `/waitlist` → `/signup` redirect
+2. **가입 → 온보딩** — consent 3필수 → 설문 Q0 (a) grayed out → GL-RTS 13 → factual Q1–Q10 → `/dashboard`
+3. **모바일 설문** — 전체 화면, 중간만 스크롤, 하단 nav 가려짐, 다음/이전 한 줄
+4. **설정** — 「투자 프로필 다시 설정」→ `settings_retest` 설문 재진입
+5. **PostHog** (US host) — `survey_opened`, `survey_step_viewed`, `survey_submit_success` 퍼널 확인
+6. **한국어** — Q0 (c), Q8, 랜딩 hero, 프로/프리미엄 라벨
+
+### Ray 수동 (배포 전/후)
+
+- [ ] 로컬 변경 **commit + push** (아래 파일 묶음 — 한 logical commit 또는 2~3개로 분리)
+- [ ] Vercel env: Supabase keys, `NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com`, `NEXT_PUBLIC_APP_URL`
+- [ ] Vercel redeploy after push
+- [ ] GitHub branch protection on `ci` workflow (Task 2 잔여)
+- [ ] `scoreGlRts` Green 구현 (Task 5 — Ray typing)
+
+### 로컬 미커밋 파일 (2026-06-11 기준)
+
+```
+ M next.config.mjs
+ M src/app/(auth)/login/page.tsx
+ M src/app/(dashboard)/dashboard/page.tsx
+ M src/app/(dashboard)/settings/page.tsx
+ M src/app/api/survey/__tests__/route.test.ts
+ M src/app/api/survey/route.ts
+ M src/app/page.tsx
+ M src/components/onboarding/ConsentModal.tsx
+ M src/components/onboarding/OnboardingFlow.tsx
+ M src/components/onboarding/SurveyModal.tsx
+ M src/components/onboarding/survey/GlRtsQuestionStep.tsx
+ M src/components/settings/SubscriptionPanel.tsx
+ M src/lib/polar/plans.ts
+ M src/lib/profile/survey-factual-options.ts
+ M src/middleware.ts
+?? src/components/settings/ProfileSettingsPanel.tsx
+```
+
+### 다음 세션 우선순위 (AGENT-QUEUE Batch A→B→C)
+
+1. **A1** — tsc + vitest → **Ray A4 commit/push**
+2. **배포 테스트** — 체크리스트 above
+3. **B1** — GitHub CI
+4. **C1** — Task 5 Green (Ray)
+5. **C4** — Toss lab read-only (로컬)
+
+### 아침 진행률 질문 (Cursor)
+
+```
+@docs/handoff-20260611/AGENT-RUN-STATUS.md 진행 보고해줘
+```
+
+### Overnight 자동화 (Hermes vs Cursor)
+
+| 방식 | PC 꺼도 됨? | 내일 아침 보고 |
+|------|-------------|----------------|
+| **Composer 채팅** | ❌ 세션 종료 시 중단 | 불가 |
+| **`/loop` (로컬)** | ❌ Cursor 열어둬야 함 | 불가 |
+| **Cloud Agent** | ✅ | [cursor.com/agents](https://cursor.com/agents) + PR |
+| **Cursor Automations (cron)** | ✅ | Automations run history + `AGENT-RUN-STATUS.md` commit |
+| **Hermes (별도 제품)** | ✅ (자체 호스트) | Cursor 네이티브 아님 |
+
+**권장:** 자기 전 Cloud Agent 또는 Automation에 `AGENT-QUEUE.md`의 Overnight 프롬프트 붙여넣기 → **push 후** 실행. 아침에는 RUN-STATUS + git log 확인.
+
+### 참고 문서
+
+- `docs/handoff-20260611/portfolio-tool-roadmap.md` — 4단 L1–L4 + 단·중·장기
+- `docs/handoff-20260611/AGENT-QUEUE.md` — 순차 task·서브에이전트·overnight 프롬프트
+- `docs/handoff-20260611/AGENT-RUN-STATUS.md` — 진행률 대시보드
+- `docs/handoff-20260611/task5-scoring-explained.md` — 채점 구현 가이드
+- `docs/handoff-20260611/survey-funnel-posthog-spec.md` — PostHog 이벤트 스펙
+- `docs/handoff-20260611/survey-merge-map.md` — Q0–Q15 ↔ GL-RTS 매핑 (승인됨)
