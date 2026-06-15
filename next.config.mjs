@@ -40,7 +40,7 @@ const nextConfig = {
   },
 };
 
-// Sentry build-time wrapper (org: elevate-u2). `silent` keeps build logs clean.
+// Sentry build-time wrapper. `org` is the Sentry.io organization slug (legacy name).
 // SENTRY_AUTH_TOKEN env var enables source-map upload in CI/Vercel; safe to omit locally.
 export default withSentryConfig(nextConfig, {
   // For all available options, see:

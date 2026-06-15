@@ -31,8 +31,7 @@ const SAMPLE_ARCHIVE: LatestNarration = {
   isArchive: true,
 };
 
-const ARCHIVE_ANNOTATION =
-  '오늘의 cohort — 어제 morning brief 표시 중 · 새 brief 준비 중…';
+const ARCHIVE_ANNOTATION = '오늘 brief 생성 중…';
 
 beforeEach(() => {
   swrMock.mockReset();
@@ -190,6 +189,30 @@ describe('AuroraNarrationBody — D25 archive fallback', () => {
     };
     expect(swrConfig.fallbackData?.text).toBe(SAMPLE_ARCHIVE.text);
     expect(swrConfig.revalidateOnMount).toBe(true);
+  });
+
+  it('shows stale-day annotation when archive asOfDate differs from composite', () => {
+    swrMock.mockReturnValue({
+      data: {
+        character: 'aurora',
+        text: SAMPLE_ARCHIVE.text,
+        triggered: false,
+        zone: SAMPLE_ARCHIVE.zone,
+      },
+      error: undefined,
+      isLoading: false,
+      isValidating: false,
+    });
+    const staleArchive = { ...SAMPLE_ARCHIVE, asOfDate: '2026-05-20' };
+    render(
+      <AuroraNarrationBody
+        composite={SAMPLE_COMPOSITE}
+        initialArchive={staleArchive}
+      />,
+    );
+    expect(
+      screen.getByText(/저장된 brief \(기준일 2026-05-20\)/),
+    ).toBeDefined();
   });
 
   it('omits fallbackData when initialArchive is null', () => {

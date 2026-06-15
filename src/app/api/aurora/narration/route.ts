@@ -87,7 +87,9 @@ function isIndicator(v: unknown): v is MacroIndicator {
     typeof o.weight === 'number' &&
     Number.isFinite(o.weight) &&
     typeof o.contribution === 'number' &&
-    Number.isFinite(o.contribution)
+    Number.isFinite(o.contribution) &&
+    typeof o.observationDate === 'string' &&
+    o.observationDate.length > 0
   );
 }
 

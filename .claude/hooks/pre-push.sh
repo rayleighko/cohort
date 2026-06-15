@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Cohort pre-push hook — enforce brand consistency + safety + lint before push
-# Per ~/Documents/elevate-portfolio/39-claude-orchestration-methodology.md §5
+# Per cohort repo conventions (see CLAUDE.md, docs/handoff-20260611/)
 #
 # Install: ensure this file is chmod +x. To wire as actual git pre-push:
 #   ln -sf ~/Development/cohort/.claude/hooks/pre-push.sh ~/Development/cohort/.git/hooks/pre-push
@@ -25,7 +25,7 @@ if [ -d "src" ]; then
     echo "  FAIL — Legacy brand references found in src/:"
     echo "$LEGACY_REFS" | head -10
     echo ""
-    echo "  Per ~/Documents/elevate-portfolio/38-brand-architecture-brief.md §7,"
+    echo "  Per cohort brand rules (CLAUDE.md, vault 38-brief if available locally),"
     echo "  all 준/Joon references must be mapped to Cohort/Aurora/Vesper."
     echo "  If intentional HISTORICAL comment, add // HISTORICAL marker."
     exit 1

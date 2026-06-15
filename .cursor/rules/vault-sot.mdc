@@ -3,7 +3,10 @@ description: Vault SoT references — full path map for vault 38-62 + Drift cata
 alwaysApply: true
 ---
 
-# Vault SoT References (`~/Documents/elevate-portfolio/`)
+# Vault SoT References (operator-local, optional)
+
+> **Repo-first:** `docs/handoff-20260611/`, `CLAUDE.md`, `.cursor/rules/` — agents cloning the repo use these without external vault access.  
+> **Operator vault** (if present on your machine): `~/Documents/elevate-portfolio/` — legacy path name; content is Cohort spec archive.
 
 ## Brand + Architecture
 - `38-brand-architecture-brief.md` (LOCKED 2026-05-21) — Aurora + Vesper + 석류

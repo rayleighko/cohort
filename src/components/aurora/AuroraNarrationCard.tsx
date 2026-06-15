@@ -43,10 +43,23 @@ interface NarrationError extends Error {
   serverText?: string;
 }
 
-const FALLBACK_KO = '[Aurora가 morning brief를 준비 중입니다]';
+const FALLBACK_KO =
+  '오로라 브리핑을 불러오지 못했어요. 잠시 후 다시 펼쳐 보세요.';
 const NARRATION_REFRESH_MS = 5 * 60 * 1000;
-const ARCHIVE_ANNOTATION_KO =
-  '오늘의 cohort — 어제 morning brief 표시 중 · 새 brief 준비 중…';
+
+function archiveAnnotation(
+  archiveAsOf: string | null | undefined,
+  compositeAsOf: string,
+  revalidating: boolean,
+): string {
+  if (archiveAsOf && archiveAsOf !== compositeAsOf) {
+    return `저장된 brief (기준일 ${archiveAsOf}) · 오늘 ${compositeAsOf} brief 생성 중…`;
+  }
+  if (revalidating) {
+    return '오늘 brief 생성 중…';
+  }
+  return '저장된 brief 표시 중';
+}
 
 async function fetchNarration(
   composite: MacroComposite,
@@ -60,10 +73,13 @@ async function fetchNarration(
     const err = new Error(`narration_http_${res.status}`) as NarrationError;
     // Server crafts a Korean fallback `text` field on 503 — surface it to the
     // user instead of the generic loading-state copy.
-    try {
-      const body = (await res.json()) as { text?: string };
+  try {
+      const body = (await res.json()) as { text?: string; error?: string };
       if (typeof body.text === 'string' && body.text.length > 0) {
         err.serverText = body.text;
+      } else if (body.error === 'invalid_composite') {
+        err.serverText =
+          '매크로 데이터 형식이 맞지 않아 brief를 생성할 수 없어요. 새로고침 후 다시 시도해주세요.';
       }
     } catch {
       // Body wasn't JSON — keep generic fallback.
@@ -99,7 +115,7 @@ function NarrationSkeleton() {
   );
 }
 
-function ArchiveAnnotation() {
+function ArchiveAnnotation({ message }: { message: string }) {
   return (
     <div
       role="status"
@@ -107,7 +123,7 @@ function ArchiveAnnotation() {
       data-testid="aurora-archive-annotation"
       className="flex items-center gap-2 break-keep text-xs text-cohort-ink-50"
     >
-      <span>{ARCHIVE_ANNOTATION_KO}</span>
+      <span>{message}</span>
       <span aria-hidden="true" className="motion-safe:animate-pulse">
         ●
       </span>
@@ -179,16 +195,19 @@ export function AuroraNarrationBody({ composite, initialArchive }: Props) {
 
   const fallbackText = error?.serverText ?? FALLBACK_KO;
 
-  // Archive showing iff we seeded with archive AND SWR has not yet swapped
-  // in a fresh response. SWR returns fallbackData as `data` during the
-  // initial revalidation window — compare against the archive text to
-  // detect whether the live fetch has completed.
+  const isArchiveContent = Boolean(
+    archiveFallback && data && data.text === archiveFallback.text,
+  );
+  const archiveIsStale =
+    initialArchive?.asOfDate != null &&
+    initialArchive.asOfDate !== composite.asOfDate;
   const showingArchive = Boolean(
-    archiveFallback &&
-      initialArchive?.asOfDate === composite.asOfDate &&
-      data &&
-      data.text === archiveFallback.text &&
-      isValidating,
+    isArchiveContent && (isValidating || archiveIsStale),
+  );
+  const archiveMessage = archiveAnnotation(
+    initialArchive?.asOfDate,
+    composite.asOfDate,
+    isValidating,
   );
 
   if (isLoading && !archiveFallback) {
@@ -207,7 +226,7 @@ export function AuroraNarrationBody({ composite, initialArchive }: Props) {
   }
   return (
     <div className="flex flex-col gap-2">
-      {showingArchive ? <ArchiveAnnotation /> : null}
+      {showingArchive ? <ArchiveAnnotation message={archiveMessage} /> : null}
       <NarrationBody
         key={data.text}
         text={data.text}

@@ -1,6 +1,6 @@
 /**
  * User investment profile + Shape C trigger types — shared between
- * `/api/survey` (write), `/api/aurora/chat` + `/api/cron/evaluate-triggers`
+ * `/api/survey` (write), `/api/aurora/chat` + `/api/cron/cohort-shape-c-triggers`
  * (read), and `src/lib/aurora/chat-prompt.ts` (framework coach preamble).
  *
  * Sourced from vault 51 §2.3 (user_investment_profile schema) + vault 53

@@ -114,7 +114,7 @@ describe('getLatestNarration', () => {
     expect(result?.asOfDate).toBe('2026-06-10');
   });
 
-  it('returns null when preferredAsOfDate has no matching row (no stale cross-day archive)', async () => {
+  it('falls back to the most recent row when preferredAsOfDate has no exact match', async () => {
     setSupabaseResult({
       data: [
         {
@@ -128,7 +128,8 @@ describe('getLatestNarration', () => {
       error: null,
     });
     const result = await getLatestNarration('2026-06-11');
-    expect(result).toBeNull();
+    expect(result?.text).toBe('old brief');
+    expect(result?.asOfDate).toBe('2026-05-01');
   });
 
   it('defaults zone to "neutral" when composite_snapshot lacks a zone field', async () => {

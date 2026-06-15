@@ -1,7 +1,7 @@
 /**
- * D25 archive fallback — fetch morning_brief for the current macro asOfDate
- * from aurora_narration_log so AuroraNarrationCard can first-paint without
- * showing a stale brief from a prior data day.
+ * D25 archive fallback — morning_brief for dashboard first paint.
+ * Prefers exact macro asOfDate; falls back to most recent stored brief
+ * (stale-day annotation in UI) so the collapsible block is not empty.
  */
 import {
   fetchRecentMorningBriefs,
@@ -27,7 +27,9 @@ export async function getLatestNarration(
 
     if (preferredAsOfDate) {
       const match = findMorningBriefForAsOfDate(rows, preferredAsOfDate);
-      return match ? toLatestNarration(match) : null;
+      if (match) return toLatestNarration(match);
+      // Stale-day fallback — still paint archive while client POST generates today.
+      return toLatestNarration(rows[0]);
     }
 
     return toLatestNarration(rows[0]);

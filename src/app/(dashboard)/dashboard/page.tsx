@@ -220,7 +220,7 @@ function NarrationBlock({
   initialArchive: LatestNarration | null;
 }) {
   return (
-    <details className="group overflow-hidden rounded-2xl bg-white shadow-sm sm:shadow">
+    <details className="group overflow-hidden rounded-2xl bg-white shadow-sm sm:shadow" open>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <span className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-aurora-calm">
           <span aria-hidden="true">🕊</span> 오로라 아침 브리핑

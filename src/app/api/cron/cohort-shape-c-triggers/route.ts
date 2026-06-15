@@ -1,5 +1,5 @@
 /**
- * Vercel Cron — evaluate-triggers (W4 Tue Shape C)
+ * Vercel Cron — cohort-shape-c-triggers (Shape C macro triggers)
  *
  * Schedule: * * * * * (every minute via vercel.json)
  * Auth: Authorization: Bearer $CRON_SECRET
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
     .in('trigger_type', ['macro_composite']);
 
   if (fetchError) {
-    console.error('[cron/evaluate-triggers] fetch error:', fetchError.message);
+    console.error('[cron/cohort-shape-c-triggers] fetch error:', fetchError.message);
     return NextResponse.json({ error: 'db_fetch_failed' }, { status: 500 });
   }
 
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
     const snapshot = await getMacroSnapshot();
     macroCompositeScore = snapshot.composite.score;
   } catch (err) {
-    console.error('[cron/evaluate-triggers] macro snapshot error:', err);
+    console.error('[cron/cohort-shape-c-triggers] macro snapshot error:', err);
     // Non-fatal: macro_composite triggers will simply not fire this cycle
   }
 
@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
 
     if (!cooldownResult.allowed) {
       console.debug(
-        `[cron/evaluate-triggers] cooldown skip for ${rawTrigger.id}: ${cooldownResult.reason}`,
+        `[cron/cohort-shape-c-triggers] cooldown skip for ${rawTrigger.id}: ${cooldownResult.reason}`,
       );
       skipped++;
       continue;
@@ -124,7 +124,7 @@ export async function GET(req: NextRequest) {
 
     if (updateError) {
       console.error(
-        `[cron/evaluate-triggers] update failed for ${rawTrigger.id}:`,
+        `[cron/cohort-shape-c-triggers] update failed for ${rawTrigger.id}:`,
         updateError.message,
       );
       skipped++;
@@ -155,7 +155,7 @@ export async function GET(req: NextRequest) {
 
     if (eventInsertError) {
       console.error(
-        `[cron/evaluate-triggers] behavioral_event insert failed for ${rawTrigger.id}:`,
+        `[cron/cohort-shape-c-triggers] behavioral_event insert failed for ${rawTrigger.id}:`,
         eventInsertError.message,
       );
     }
@@ -176,7 +176,7 @@ export async function GET(req: NextRequest) {
       });
     } catch (dispatchErr) {
       console.error(
-        `[cron/evaluate-triggers] dispatch failed for trigger ${rawTrigger.id}:`,
+        `[cron/cohort-shape-c-triggers] dispatch failed for trigger ${rawTrigger.id}:`,
         dispatchErr,
       );
     }

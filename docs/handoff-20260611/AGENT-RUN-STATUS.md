@@ -16,7 +16,7 @@
 
 | 항목 | 값 |
 |------|-----|
-| `vercel.json` | `/api/cron/evaluate-triggers` — `* * * * *` (매분) |
+| `vercel.json` | `/api/cron/cohort-shape-c-triggers` — `* * * * *` (매분) |
 | 용도 | Shape C `macro_composite` 트리거 평가 + 알림 |
 | **매크로 대시보드** | cron **미사용** — 페이지/API 요청 시 ECOS·FRED live fetch |
 | stale 원인 (수정됨) | ISR 1h + UTC 날짜 + Aurora asOfDate mismatch |
@@ -59,7 +59,10 @@
 
 ---
 
-## Blocked / Ray
+## 다음 페이즈 (차트·시계열 UI — Ray 요청, 보류)
+
+- 지표별 **날짜·시간 축 차트** (30일+), legend, hover 값
+- L2 `portfolio-tool-roadmap.md` — drift 대시보드와 통합 검토
 
 - Task 5 scoreGlRts Green
 - filter-repo (D2)

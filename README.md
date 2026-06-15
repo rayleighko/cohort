@@ -48,4 +48,4 @@ Sprint 0 W1 — Foundation
 
 ## License
 
-Proprietary — Elevate Studio © 2026.
+Proprietary — Cohort (개인 운영) © 2026.

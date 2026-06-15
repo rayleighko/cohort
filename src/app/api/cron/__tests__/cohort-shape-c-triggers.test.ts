@@ -21,7 +21,7 @@ vi.mock('@/lib/notification/dispatcher', () => ({
 }));
 
 function makeReq(authHeader?: string) {
-  return new NextRequest('http://localhost/api/cron/evaluate-triggers', {
+  return new NextRequest('http://localhost/api/cron/cohort-shape-c-triggers', {
     method: 'GET',
     headers: authHeader ? { authorization: authHeader } : {},
   });
@@ -93,11 +93,11 @@ function setupSupabaseMock({
 }
 
 async function callGET(req: NextRequest) {
-  const { GET } = await import('../evaluate-triggers/route');
+  const { GET } = await import('../cohort-shape-c-triggers/route');
   return GET(req);
 }
 
-describe('/api/cron/evaluate-triggers', () => {
+describe('/api/cron/cohort-shape-c-triggers', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
