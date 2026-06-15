@@ -35,6 +35,13 @@ vi.mock('@/lib/pipa-redact', () => ({
   }),
 }));
 
+vi.mock('@/lib/analytics/posthog-server', () => ({
+  getServerPostHog: vi.fn(() => ({
+    capture: vi.fn(),
+    shutdown: vi.fn(async () => undefined),
+  })),
+}));
+
 import { POST } from '../route';
 
 /** Minimal valid GL-RTS payload for fit-user survey tests */

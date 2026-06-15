@@ -21,10 +21,13 @@ import MascotAvatar from '@/components/mascot/MascotAvatar';
  * 만 14세 확인 + 자본시장법 인지 are acknowledgement gates (no column;
  * stored-consent expansion deferred to W4 full survey).
  *
- * Full onboarding survey (Modals 2-6) is W4 — "다음" currently lands on /shape-a.
+ * Full onboarding survey follows consent in OnboardingFlow — default redirect
+ * to /shape-a when `onConsentComplete` is not provided.
  */
 interface ConsentModalProps {
   userId: string;
+  /** When set, runs after consent is saved instead of redirecting to /shape-a. */
+  onConsentComplete?: () => void;
 }
 
 const CHECK_ROW =
@@ -33,7 +36,7 @@ const CHECK_ROW =
 const CHECKBOX_CLASS =
   'mt-0.5 h-5 w-5 min-h-[20px] min-w-[20px] flex-shrink-0 accent-cohort-primary';
 
-export default function ConsentModal({ userId }: ConsentModalProps) {
+export default function ConsentModal({ userId, onConsentComplete }: ConsentModalProps) {
   const router = useRouter();
 
   // Required
@@ -97,7 +100,12 @@ export default function ConsentModal({ userId }: ConsentModalProps) {
       return;
     }
 
-    // W4 inserts the full survey (Modals 2-6) here; for now → authenticated home.
+    if (onConsentComplete) {
+      onConsentComplete();
+      setSubmitting(false);
+      return;
+    }
+
     router.push('/shape-a');
     router.refresh();
   }

@@ -12,14 +12,24 @@ interface GlRtsQuestionStepProps {
   question: GlRtsQuestion;
   value: GlRtsOptionId | '';
   onChange: (value: GlRtsOptionId) => void;
+  onRationaleToggle?: (expanded: boolean) => void;
 }
 
 export function GlRtsQuestionStep({
   question,
   value,
   onChange,
+  onRationaleToggle,
 }: GlRtsQuestionStepProps) {
   const [showRationale, setShowRationale] = useState(false);
+
+  const toggleRationale = () => {
+    setShowRationale((prev) => {
+      const next = !prev;
+      onRationaleToggle?.(next);
+      return next;
+    });
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -63,7 +73,7 @@ export function GlRtsQuestionStep({
 
       <button
         type="button"
-        onClick={() => setShowRationale((s) => !s)}
+        onClick={toggleRationale}
         className="flex min-h-[44px] items-center gap-1 text-xs text-cohort-ink-50 hover:text-cohort-primary"
         aria-expanded={showRationale}
       >

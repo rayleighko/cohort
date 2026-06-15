@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import Button from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -9,6 +9,12 @@ import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { GlRtsQuestionStep } from '@/components/onboarding/survey/GlRtsQuestionStep';
+import { COHORT_EVENTS } from '@/lib/analytics/events';
+import { posthog } from '@/lib/analytics/posthog';
+import {
+  getSurveyStepMeta,
+  SURVEY_LAST_STEP as SURVEY_TOTAL_STEPS,
+} from '@/lib/analytics/survey-step-meta';
 import {
   GL_RTS_QUESTIONS,
   type GlRtsAnswers,
@@ -62,6 +68,7 @@ interface SurveyModalProps {
   open: boolean;
   onClose: () => void;
   onComplete?: () => void;
+  entrySurface?: 'dashboard_modal' | 'onboarding_gate' | 'settings_retest';
 }
 
 /** step 0=Q0, 1–13=GL-RTS, 14–23=factual Q1–Q10 */
@@ -199,12 +206,45 @@ function FactualRadioStep({
 
 // ── Main ────────────────────────────────────────────────────────────────────
 
-export default function SurveyModal({ open, onClose, onComplete }: SurveyModalProps) {
+export default function SurveyModal({
+  open,
+  onClose,
+  onComplete,
+  entrySurface = 'onboarding_gate',
+}: SurveyModalProps) {
   const [step, setStep] = useState(0);
   const [gracefulExit, setGracefulExit] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [portfolioError, setPortfolioError] = useState<string | null>(null);
+  const openedAtRef = useRef<number | null>(null);
+  const stepStartedAtRef = useRef<number>(Date.now());
+  const submitAttemptedRef = useRef(false);
+
+  useEffect(() => {
+    if (!open) return;
+    openedAtRef.current = Date.now();
+    stepStartedAtRef.current = Date.now();
+    posthog.capture(COHORT_EVENTS.SURVEY_OPENED, {
+      total_steps: SURVEY_TOTAL_STEPS + 1,
+      entry_surface: entrySurface,
+    });
+    const meta = getSurveyStepMeta(0);
+    posthog.capture(COHORT_EVENTS.SURVEY_STEP_VIEWED, {
+      step_index: 0,
+      ...meta,
+    });
+  }, [open, entrySurface]);
+
+  useEffect(() => {
+    if (!open || step === 0) return;
+    stepStartedAtRef.current = Date.now();
+    const meta = getSurveyStepMeta(step);
+    posthog.capture(COHORT_EVENTS.SURVEY_STEP_VIEWED, {
+      step_index: step,
+      ...meta,
+    });
+  }, [open, step]);
 
   const [form, setForm] = useState<FormState>({
     q0_user_stage: '',
@@ -290,19 +330,52 @@ export default function SurveyModal({ open, onClose, onComplete }: SurveyModalPr
     if (!form.q0_user_stage) return;
     if (form.q0_user_stage === 'learning') {
       setGracefulExit(true);
+      posthog.capture(COHORT_EVENTS.SURVEY_Q0_LEARNING_EXIT, {
+        q0_user_stage: 'learning',
+      });
       void fetch('/api/survey', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ q0_user_stage: 'learning' }),
       });
     } else {
+      posthog.capture(COHORT_EVENTS.SURVEY_STEP_ADVANCED, {
+        from_step: 0,
+        to_step: GL_RTS_START,
+        from_question_id: 'q0_user_stage',
+        duration_ms: Date.now() - stepStartedAtRef.current,
+      });
       setStep(GL_RTS_START);
     }
+  };
+
+  const handleClose = () => {
+    if (!gracefulExit && !submitAttemptedRef.current) {
+      const meta = getSurveyStepMeta(step);
+      posthog.capture(COHORT_EVENTS.SURVEY_ABANDONED, {
+        last_step_index: step,
+        last_question_id: meta.question_id,
+        last_section: meta.section,
+        progress_pct: meta.progress_pct,
+      });
+    }
+    onClose();
   };
 
   const handleBack = () => {
     setError(null);
     setPortfolioError(null);
+    const fromMeta = getSurveyStepMeta(step);
+    let toStep = step;
+    if (step > GL_RTS_START) toStep = step - 1;
+    else if (step === GL_RTS_START) toStep = 0;
+    if (toStep !== step) {
+      posthog.capture(COHORT_EVENTS.SURVEY_STEP_BACK, {
+        from_step: step,
+        to_step: toStep,
+        from_question_id: fromMeta.question_id,
+      });
+    }
     if (step > GL_RTS_START) setStep((s) => s - 1);
     else if (step === GL_RTS_START) setStep(0);
   };
@@ -316,8 +389,39 @@ export default function SurveyModal({ open, onClose, onComplete }: SurveyModalPr
       }
       setPortfolioError(null);
     }
+
+    const fromMeta = getSurveyStepMeta(step);
+    const nextStep = step < LAST_STEP ? step + 1 : step;
+
+    if (step === 13) {
+      posthog.capture(COHORT_EVENTS.SURVEY_GL_RTS_SECTION_COMPLETE, {
+        step_index: 13,
+        gl_rts_item_count: 13,
+      });
+    }
+
+    if (step === LAST_STEP) {
+      submitAttemptedRef.current = true;
+      posthog.capture(COHORT_EVENTS.SURVEY_FACTUAL_SECTION_COMPLETE, {
+        has_q4_info_sources: form.q4_info_sources.length > 0,
+        has_q10_outcome: form.q10_target_outcome.trim().length > 0,
+        q2_asset_count: Object.values(form.q2_portfolio_composition_pct).filter(
+          (v) => v > 0,
+        ).length,
+        q8_framework_count: form.q8_framework_affinity.length,
+      });
+      void handleSubmit();
+      return;
+    }
+
+    posthog.capture(COHORT_EVENTS.SURVEY_STEP_ADVANCED, {
+      from_step: step,
+      to_step: nextStep,
+      from_question_id: fromMeta.question_id,
+      duration_ms: Date.now() - stepStartedAtRef.current,
+    });
+
     if (step < LAST_STEP) setStep((s) => s + 1);
-    else void handleSubmit();
   };
 
   const handleSubmit = async () => {
@@ -354,6 +458,13 @@ export default function SurveyModal({ open, onClose, onComplete }: SurveyModalPr
         setError(data.detail ?? data.error ?? '제출 중 오류가 발생했습니다.');
         return;
       }
+      posthog.capture(COHORT_EVENTS.SURVEY_COMPLETED, {
+        profile_version: 'glrts-ko-v0.1',
+        total_duration_ms: openedAtRef.current
+          ? Date.now() - openedAtRef.current
+          : undefined,
+      });
+      posthog.capture(COHORT_EVENTS.ONBOARDING_COMPLETE);
       onComplete?.();
       onClose();
     } catch {
@@ -384,7 +495,7 @@ export default function SurveyModal({ open, onClose, onComplete }: SurveyModalPr
             </p>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="flex h-[44px] w-[44px] items-center justify-center rounded-xl text-cohort-ink-50 hover:text-cohort-ink-90"
               aria-label="설문 닫기"
             >
@@ -432,6 +543,12 @@ export default function SurveyModal({ open, onClose, onComplete }: SurveyModalPr
               value={form.gl_rts[glRtsQuestion.id] ?? ''}
               onChange={(v) =>
                 set('gl_rts', { ...form.gl_rts, [glRtsQuestion.id]: v as GlRtsOptionId })
+              }
+              onRationaleToggle={(expanded) =>
+                posthog.capture(COHORT_EVENTS.SURVEY_GL_RTS_RATIONALE_TOGGLED, {
+                  question_id: glRtsQuestion.id,
+                  expanded,
+                })
               }
             />
           )}

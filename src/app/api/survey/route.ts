@@ -1,9 +1,22 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { COHORT_EVENTS } from '@/lib/analytics/events';
+import { getServerPostHog } from '@/lib/analytics/posthog-server';
 import { PROFILE_VERSION_GLRTS } from '@/lib/profile/gl-rts-questions';
 import { validateGlRtsAnswers } from '@/lib/profile/validate-gl-rts-answers';
 import { redactPortfolioCompositionPct } from '@/lib/pipa-redact';
+
+async function trackSurveySubmit(
+  distinctId: string,
+  event: (typeof COHORT_EVENTS)[keyof typeof COHORT_EVENTS],
+  properties: Record<string, unknown>,
+): Promise<void> {
+  const ph = getServerPostHog();
+  if (!ph) return;
+  ph.capture({ distinctId, event, properties });
+  await ph.shutdown();
+}
 
 const VALID_FRAMEWORK_VALUES = [
   'druckenmiller_macro_13f',
@@ -132,6 +145,10 @@ export async function POST(request: NextRequest) {
 
   const glRtsAnswers = validateGlRtsAnswers(body.gl_rts_answers);
   if (!glRtsAnswers) {
+    await trackSurveySubmit(userId, COHORT_EVENTS.SURVEY_SUBMIT_FAILED, {
+      error_code: 'invalid_gl_rts_answers',
+      http_status: 400,
+    });
     return NextResponse.json(
       {
         error: 'invalid_gl_rts_answers',
@@ -164,11 +181,23 @@ export async function POST(request: NextRequest) {
   } as never);
 
   if (upsertError) {
+    await trackSurveySubmit(userId, COHORT_EVENTS.SURVEY_SUBMIT_FAILED, {
+      error_code: 'db_error',
+      http_status: 500,
+    });
     return NextResponse.json(
       { error: 'db_error', detail: upsertError.message },
       { status: 500 },
     );
   }
+
+  await trackSurveySubmit(userId, COHORT_EVENTS.SURVEY_SUBMIT_SUCCESS, {
+    profile_version: PROFILE_VERSION_GLRTS,
+    q0_user_stage: body.q0_user_stage,
+    has_service_expectations: serviceExpectations !== null,
+    info_source_count: body.q4_info_sources?.length ?? 0,
+    gl_rts_complete: true,
+  });
 
   return NextResponse.json(
     { fit: true, next: 'dashboard_or_onboarding_continue' },
