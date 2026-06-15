@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '이용약관 | Cohort',
+  title: '이용약관 | 코호트',
   description:
-    'Cohort 이용약관 — 운영자가 제공하는 Cohort 서비스의 이용 권리·의무·환불·면책·분쟁 해결.',
+    '코호트 이용약관 — 운영자가 제공하는 코호트 서비스의 이용 권리·의무·환불·면책·분쟁 해결.',
 };
 
 export default function TermsPage() {
@@ -14,7 +14,7 @@ export default function TermsPage() {
           이용약관
         </h1>
         <p className="mt-3 break-keep text-sm text-cohort-ink-50">
-          시행일자: 2026-06-15 (V1 launch) · 최종 수정: 2026-05-27
+          시행일자: 2026-06-15 (V1 출시) · 최종 수정: 2026-05-27
         </p>
       </header>
 
@@ -23,7 +23,7 @@ export default function TermsPage() {
           <h2 className="text-xl font-semibold text-cohort-ink-90">제1조 (목적)</h2>
           <p className="mt-3">
             이 약관은 본 서비스를 운영하는 개인 운영자(이하 &ldquo;운영자&rdquo;)가
-            제공하는 Cohort 서비스 (이하 &ldquo;서비스&rdquo;)의 이용과 관련하여
+            제공하는 코호트 서비스(이하 &ldquo;서비스&rdquo;)의 이용과 관련하여
             운영자와 이용자의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.
           </p>
         </section>
@@ -32,8 +32,8 @@ export default function TermsPage() {
           <h2 className="text-xl font-semibold text-cohort-ink-90">제2조 (정의)</h2>
           <ol className="mt-3 list-decimal space-y-2 pl-6">
             <li>
-              <strong className="text-cohort-ink-90">&ldquo;서비스&rdquo;</strong>: Cohort가
-              제공하는 매크로 dashboard, 분할매수 의사결정 도구, custom trigger 알림,
+              <strong className="text-cohort-ink-90">&ldquo;서비스&rdquo;</strong>: 코호트가
+              제공하는 매크로 대시보드, 분할매수 의사결정 도구, 사용자 설정 조건 알림,
               Aurora 🕊 + Vesper 🦅 마스코트 AI 대화 등 정보 + 도구 + 의사결정 지원
               서비스를 의미합니다.
             </li>
@@ -43,12 +43,12 @@ export default function TermsPage() {
             </li>
             <li>
               <strong className="text-cohort-ink-90">&ldquo;회원&rdquo;</strong>: 운영자와
-              서비스 이용계약을 체결하고 이용자 아이디(ID)를 부여받은 자를 말합니다.
+              서비스 이용계약을 체결하고 이용자 아이디를 부여받은 자를 말합니다.
             </li>
             <li>
-              <strong className="text-cohort-ink-90">&ldquo;Tier&rdquo;</strong>: 서비스
-              기능 단계로서 무료 (Tier 0), 무료 체험 (Tier 1), Pro (Tier 2, 월
-              24,900원), Premium (Tier 3, 월 79,900원)으로 구분됩니다.
+              <strong className="text-cohort-ink-90">&ldquo;이용 등급&rdquo;</strong>: 서비스
+              기능 단계로서 무료(등급 0), 무료 체험(등급 1), 프로(등급 2, 월
+              24,900원), 프리미엄(등급 3, 월 79,900원)으로 구분됩니다.
             </li>
           </ol>
         </section>
@@ -88,29 +88,29 @@ export default function TermsPage() {
           <h2 className="text-xl font-semibold text-cohort-ink-90">제5조 (서비스의 제공)</h2>
           <ol className="mt-3 list-decimal space-y-2 pl-6">
             <li>
-              <strong className="text-cohort-ink-90">Tier 0 (무료)</strong>: 매크로
-              dashboard 핵심 지표, 일별 KOSPI/코스닥 heatmap, 일별 공시 list (지연
+              <strong className="text-cohort-ink-90">등급 0 (무료)</strong>: 매크로
+              대시보드 핵심 지표, 일별 KOSPI·코스닥 히트맵, 일별 공시 목록(지연
               데이터).
             </li>
             <li>
-              <strong className="text-cohort-ink-90">Tier 1 (무료 체험, 14일)</strong>:
-              Tier 0 + custom trigger 1개 + watchlist 5종목 + daily sentiment digest.
-              카드 등록 없이 시작하며 자동 결제 전환되지 않습니다.
+              <strong className="text-cohort-ink-90">등급 1 (무료 체험, 14일)</strong>:
+              등급 0 + 사용자 설정 조건 알림 1개 + 관심종목 5종목 + 일별 시장
+              심리 요약. 카드 등록 없이 시작하며 자동 결제 전환되지 않습니다.
             </li>
             <li>
-              <strong className="text-cohort-ink-90">Tier 2 Pro (월 24,900원)</strong>:
-              매크로 dashboard 확장 + custom widget + 분할매수 decision support
-              (3-score 통합) + custom trigger 알림 + behavioral guard + watchlist
-              30종목 + Aurora · Vesper 마스코트 in-app chat.
+              <strong className="text-cohort-ink-90">등급 2 프로 (월 24,900원)</strong>:
+              매크로 대시보드 확장 + 사용자 맞춤 위젯 + 분할매수 의사결정 지원
+              (3점수 통합) + 사용자 설정 조건 알림 + 행동 가드 + 관심종목
+              30종목 + Aurora · Vesper 마스코트 앱 내 대화.
             </li>
             <li>
-              <strong className="text-cohort-ink-90">Tier 3 Premium (월 79,900원)</strong>:
-              Tier 2 기능 + 더 빠른 알림 + 거장 framework 교육 시뮬레이션 (일반 투자
+              <strong className="text-cohort-ink-90">등급 3 프리미엄 (월 79,900원)</strong>:
+              등급 2 기능 + 더 빠른 알림 + 거장 투자 방식 교육 시뮬레이션(일반 투자
               교육 정보).
             </li>
           </ol>
           <p className="mt-4">
-            서비스 제공 시간: 연중무휴 24시간 (단 시스템 점검 및 외부 데이터 source 제공
+            서비스 제공 시간: 연중무휴 24시간 (단, 시스템 점검 및 외부 데이터 제공
             시간 제약 제외).
           </p>
         </section>
@@ -125,7 +125,7 @@ export default function TermsPage() {
               자본시장법 정합 — 중요 고지
             </p>
             <p className="mt-2 text-sm text-cohort-ink-70">
-              Cohort는 정보 제공 + 도구 + 의사결정 지원 서비스이며, 자본시장법상
+              코호트는 정보 제공 + 도구 + 의사결정 지원 서비스이며, 자본시장법상
               투자자문업 또는 투자일임업이 아닙니다. 본 서비스는 투자 권유 또는 추천을
               하지 않으며, 모든 투자 결정과 그 결과는 이용자 본인의 책임입니다.
             </p>
@@ -136,12 +136,12 @@ export default function TermsPage() {
           </h3>
           <ul className="mt-2 list-disc space-y-1 pl-6">
             <li>매크로 지표, 가격 데이터, 공시 정보 등 일반 정보 제공</li>
-            <li>사용자가 입력한 본인의 투자 plan reference 도구</li>
-            <li>매크로 + technical + sentiment 통합 score 영역 표시</li>
-            <li>사용자가 설정한 trigger 알림</li>
+            <li>사용자가 입력한 본인 투자 계획 참조 도구</li>
+            <li>매크로·기술·심리 통합 점수 영역 표시</li>
+            <li>사용자가 설정한 조건 알림</li>
             <li>
-              Aurora 🕊 + Vesper 🦅 마스코트 AI의 일반 투자 교육, 본인 plan reference,
-              멘탈 관리, 원칙 reinforcement 대화
+              Aurora 🕊 + Vesper 🦅 마스코트 AI의 일반 투자 교육, 본인 투자 계획 참조,
+              멘탈 관리, 원칙 강화 대화
             </li>
           </ul>
 
@@ -151,13 +151,13 @@ export default function TermsPage() {
           <ul className="mt-2 list-disc space-y-1 pl-6">
             <li>개별 종목 매수/매도 추천 (&ldquo;X 종목을 사세요&rdquo; 등)</li>
             <li>구체적 비중 권장 (&ldquo;비중 X%로 가세요&rdquo; 등)</li>
-            <li>timing 추천 (&ldquo;지금이 매수 시점입니다&rdquo; 등)</li>
+            <li>매매 시점 추천 (&ldquo;지금이 매수 시점입니다&rdquo; 등)</li>
             <li>자동 매매 (사용자 대신 매매 실행)</li>
             <li>개인 맞춤형 투자 자문 (자본시장법상 자문업 등록 후 가능 영역)</li>
           </ul>
           <p className="mt-3">
-            Aurora · Vesper AI는 위 영역의 질의에 대해 본인 plan 재점검 안내로
-            redirect됩니다.
+            Aurora · Vesper AI는 위 영역의 질의에 대해 본인 투자 계획 재점검 안내로
+            전환됩니다.
           </p>
 
           <h3 className="mt-6 text-base font-semibold text-cohort-ink-90">
@@ -191,8 +191,8 @@ export default function TermsPage() {
           </h2>
           <h3 className="mt-4 text-base font-semibold text-cohort-ink-90">제8.1조 결제</h3>
           <p className="mt-2">
-            Tier 2 Pro (월 24,900원) 또는 Tier 3 Premium (월 79,900원) 구독은
-            토스페이먼츠(Toss Payments)를 통해 KRW로 결제됩니다. 결제 정보는
+            등급 2 프로(월 24,900원) 또는 등급 3 프리미엄(월 79,900원) 구독은
+            토스페이먼츠를 통해 원화(KRW)로 결제됩니다. 결제 정보는
             토스페이먼츠에 의해 처리되며 운영자는 카드 정보를 직접 저장하지 않습니다.
           </p>
 
@@ -201,7 +201,7 @@ export default function TermsPage() {
           </h3>
           <ul className="mt-2 list-disc space-y-1 pl-6">
             <li>
-              <strong className="text-cohort-ink-90">무료 체험 (Tier 1, 14일)</strong>:
+              <strong className="text-cohort-ink-90">무료 체험 (등급 1, 14일)</strong>:
               카드 등록 불필요, 자동 결제 전환 없음.
             </li>
             <li>
@@ -249,8 +249,8 @@ export default function TermsPage() {
             제10.2조 데이터 정확성 면책
           </h3>
           <p className="mt-2">
-            운영자는 매크로 지표, 가격 데이터, 공시 정보 등 외부 source에서 제공되는
-            데이터의 정확성을 위해 최선의 노력을 다하나, 외부 source의 오류·지연·누락에
+            운영자는 매크로 지표, 가격 데이터, 공시 정보 등 외부 제공처에서 제공되는
+            데이터의 정확성을 위해 최선의 노력을 다하나, 외부 제공처의 오류·지연·누락에
             의한 손해에 대해 책임을 부담하지 않습니다.
           </p>
 
@@ -267,9 +267,9 @@ export default function TermsPage() {
             제10.4조 사칭 면책
           </h3>
           <p className="mt-2">
-            서비스 외부 채널 (텔레그램, 카톡 등)에서 발생하는 Cohort 또는 Aurora ·
+            서비스 외부 채널(텔레그램, 카카오톡 등)에서 발생하는 코호트 또는 Aurora ·
             Vesper 마스코트를 사칭하는 행위에 의한 피해에 대해 운영자는 책임을 부담하지
-            않습니다. 운영자의 공식 채널은 본 서비스 (cohort.co.kr)에 한정됩니다.
+            않습니다. 운영자의 공식 채널은 본 서비스(cohort.co.kr)에 한정됩니다.
           </p>
         </section>
 

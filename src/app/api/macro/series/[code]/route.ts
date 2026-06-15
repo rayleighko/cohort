@@ -17,9 +17,11 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getEcosSeries, EcosFetchError } from '@/lib/macro/ecos';
 import { getFredSeries, FredFetchError } from '@/lib/macro/fred';
+import { kstDaysAgoIso, kstTodayIso } from '@/lib/macro/kst-dates';
 
 export const runtime = 'nodejs';
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 type IndicatorSource = 'ecos' | 'fred';
 
@@ -48,23 +50,11 @@ interface SeriesResponse {
   source: IndicatorSource;
   observations: SeriesObservation[];
   latest: number | null;
+  /** YYYY-MM-DD of the latest observation in `observations`. */
+  latest_date: string | null;
+  /** YYYY-MM-DD used as the 7-day-ago comparator (within ±3d window). */
+  delta_reference_date: string | null;
   delta_7d: number | null;
-}
-
-function toIsoDate(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
-
-/**
- * Returns the UTC-midnight Date for the day N days before today. Normalizing
- * to midnight is required so that the 7-day delta comparator picks the
- * correctly-dated observation regardless of what hour the request fires.
- */
-function dateNDaysAgo(n: number): Date {
-  const d = new Date();
-  d.setUTCHours(0, 0, 0, 0);
-  d.setUTCDate(d.getUTCDate() - n);
-  return d;
 }
 
 function noStoreOnError(payload: unknown, status: number): NextResponse {
@@ -89,8 +79,8 @@ function pickClosestToOffset(
   maxDeltaDays = 3,
 ): SeriesObservation | undefined {
   if (observations.length === 0) return undefined;
-  const target = dateNDaysAgo(daysBack);
-  const targetMs = target.getTime();
+  const target = kstDaysAgoIso(daysBack);
+  const targetMs = new Date(`${target}T00:00:00Z`).getTime();
   const maxDeltaMs = maxDeltaDays * 24 * 60 * 60 * 1000;
   let best: SeriesObservation | undefined;
   let bestDelta = Infinity;
@@ -118,8 +108,8 @@ export async function GET(
   }
 
   const meta = SERIES_META[code];
-  const endDate = toIsoDate(new Date());
-  const startDate = toIsoDate(dateNDaysAgo(30));
+  const endDate = kstTodayIso();
+  const startDate = kstDaysAgoIso(30);
 
   let raw: SeriesObservation[];
   try {
@@ -153,9 +143,9 @@ export async function GET(
   // the last 30 entries.
   const sorted = [...raw].sort((a, b) => a.date.localeCompare(b.date));
   const observations = sorted.slice(-30);
-  const latest = observations.length > 0
-    ? observations[observations.length - 1].value
-    : null;
+  const latestObs =
+    observations.length > 0 ? observations[observations.length - 1] : undefined;
+  const latest = latestObs?.value ?? null;
   const sevenBack = pickClosestToOffset(observations, 7);
   const delta_7d =
     latest !== null && sevenBack ? latest - sevenBack.value : null;
@@ -165,6 +155,8 @@ export async function GET(
     source: meta.source,
     observations,
     latest,
+    latest_date: latestObs?.date ?? null,
+    delta_reference_date: sevenBack?.date ?? null,
     delta_7d,
   };
   return NextResponse.json(response);

@@ -4,7 +4,7 @@
  *
  * - Unauthenticated user hitting a (dashboard) route → redirect to /login
  *   (with ?redirect=<original path> so login can return them).
- * - Authenticated user hitting /login or /signup → redirect to /shape-a.
+ * - Authenticated user hitting /login or /signup → redirect to /dashboard.
  * - Tier 0 dashboard at / and marketing routes stay public.
  * - On the landing (/), assigns a sticky A/B variant cookie (W2 A/B prereq;
  *   Day 5b renders Version C regardless).
@@ -25,6 +25,7 @@ function assignAbVariant(): 'A' | 'B' | 'C' {
 
 /** Authenticated-only routes (the (dashboard) route group). */
 const PROTECTED_PREFIXES = [
+  '/dashboard',
   '/shape-a',
   '/shape-b',
   '/shape-c',
@@ -64,7 +65,7 @@ export async function middleware(request: NextRequest) {
   // Keep signed-in users out of the auth pages.
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = '/shape-a';
+    url.pathname = '/dashboard';
     url.search = '';
     return redirectWithCookies(url, response);
   }

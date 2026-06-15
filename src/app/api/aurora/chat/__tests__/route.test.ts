@@ -110,6 +110,7 @@ const SAMPLE_COMPOSITE: MacroComposite = {
       source: 'fred',
       code: 'KR_US_RATE_SPREAD',
       latest: 1.05,
+      observationDate: '2026-05-23',
       normalized: 1.6,
       weight: 0.25,
       contribution: 0.4,

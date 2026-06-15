@@ -65,6 +65,7 @@ describe('GET /api/macro/series/[code]', () => {
     expect(body.source).toBe('fred');
     expect(body.observations).toHaveLength(30);
     expect(body.latest).toBe(17.5);
+    expect(body.latest_date).toBeTruthy();
     expect(body.delta_7d).toBeCloseTo(2.5, 5);
     expect(mockedFred).toHaveBeenCalledWith(
       'VIXCLS',

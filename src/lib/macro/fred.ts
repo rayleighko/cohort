@@ -11,6 +11,9 @@
  *     &observation_start=YYYY-MM-DD&observation_end=YYYY-MM-DD
  */
 
+import { kstMacroDateRange } from './kst-dates';
+import { MACRO_FETCH_CACHE_TTL_SECONDS } from './revalidate';
+
 export interface FredObservation {
   date: string; // YYYY-MM-DD
   value: number;
@@ -31,8 +34,7 @@ const MAX_CONCURRENT = 3;
 const RETRY_BACKOFF_MS = [1000, 2000, 4000];
 
 function getCacheTtlMs(): number {
-  const sec = Number(process.env.FRED_CACHE_TTL_SECONDS ?? 3600);
-  return (Number.isFinite(sec) && sec > 0 ? sec : 3600) * 1000;
+  return MACRO_FETCH_CACHE_TTL_SECONDS() * 1000;
 }
 
 interface CacheEntry {
@@ -63,11 +65,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 function defaultDateRange(): { start: string; end: string } {
-  const end = new Date();
-  const start = new Date();
-  start.setDate(start.getDate() - 30);
-  const iso = (d: Date) => d.toISOString().slice(0, 10);
-  return { start: iso(start), end: iso(end) };
+  return kstMacroDateRange(30);
 }
 
 interface FredObservationRaw {

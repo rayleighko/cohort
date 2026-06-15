@@ -38,10 +38,13 @@ interface SeriesResponse {
   source: 'ecos' | 'fred';
   observations: Array<{ date: string; value: number }>;
   latest: number | null;
+  latest_date: string | null;
+  delta_reference_date: string | null;
   delta_7d: number | null;
 }
 
 const HOUR_MS = 3_600_000;
+const SERIES_REFRESH_MS = 5 * 60 * 1000;
 
 export const INDICATOR_LABEL_KO: Record<string, string> = {
   KR_US_RATE_SPREAD: '한미 금리차',
@@ -82,6 +85,18 @@ async function fetchSeries(code: string): Promise<SeriesResponse> {
     throw new Error(`series_http_${res.status}`);
   }
   return (await res.json()) as SeriesResponse;
+}
+
+export function formatObservationDate(iso: string): string {
+  try {
+    return new Intl.DateTimeFormat('ko-KR', {
+      timeZone: 'Asia/Seoul',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date(iso + 'T12:00:00'));
+  } catch {
+    return iso;
+  }
 }
 
 export function formatDelta(delta: number | null, unit: string): string | null {
@@ -163,7 +178,8 @@ function SparklineUnavailable() {
 }
 
 export default function IndicatorCard({ indicator }: Props) {
-  const { code, latest, weight, contribution, source } = indicator;
+  const { code, latest, weight, contribution, source, observationDate } =
+    indicator;
   const label = INDICATOR_LABEL_KO[code] ?? code;
   const unit = INDICATOR_UNIT[code] ?? '';
 
@@ -174,9 +190,9 @@ export default function IndicatorCard({ indicator }: Props) {
     swrKey,
     () => fetchSeries(code),
     {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: HOUR_MS,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: SERIES_REFRESH_MS,
       shouldRetryOnError: false,
     },
   );
@@ -185,6 +201,10 @@ export default function IndicatorCard({ indicator }: Props) {
     () => (data ? formatDelta(data.delta_7d, unit) : null),
     [data, unit],
   );
+
+  const displayDate =
+    data?.latest_date ?? observationDate ?? null;
+  const compareDate = data?.delta_reference_date ?? null;
 
   const chipClass = contributionChip(contribution);
 
@@ -199,6 +219,16 @@ export default function IndicatorCard({ indicator }: Props) {
             {source}
           </span>
         </div>
+        {displayDate ? (
+          <p className="font-mono text-xs text-cohort-ink-50">
+            관측 {formatObservationDate(displayDate)}
+            {compareDate && deltaText
+              ? ` · 7일 전(${formatObservationDate(compareDate)}) 대비`
+              : deltaText
+                ? ' · 7일 전 대비'
+                : ''}
+          </p>
+        ) : null}
         <div className="flex items-baseline gap-3">
           <span className="font-mono text-2xl font-medium text-cohort-ink-90">
             {latest.toFixed(2)}

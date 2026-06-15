@@ -14,7 +14,9 @@ import { COHORT_EVENTS } from '@/lib/analytics/events';
 import { getAbVariant } from '@/lib/analytics/ab';
 
 /**
- * Landing — Version C (pre-launch).
+ * Landing — Version C (production funnel).
+ *
+ * Public CTA → /signup (Tier 0 free). Waitlist retired from landing.
  *
  * Tokens sourced (per cohort-token-keeper):
  * - Colors: text-cohort-ink-90/70/50, bg-cohort-ivory, bg-white, bg-cohort-primary
@@ -73,12 +75,12 @@ const VALUE_PROPS = [
   },
   {
     label: '도구',
-    title: '본인 plan 그대로, 분할매수 페이스',
-    body: 'composite score로 본인이 정한 분할매수 단계를 같이 점검합니다. plan은 늘 본인의 것.',
+    title: '본인 계획 그대로, 분할매수 페이스',
+    body: '종합 점수로 본인이 정한 분할매수 단계를 같이 점검합니다. 계획은 늘 본인의 것.',
   },
   {
     label: '의사결정 지원',
-    title: '본인이 정한 trigger, 시장이 닿을 때',
+    title: '본인이 정한 신호, 시장이 닿을 때',
     body: '본인이 설정한 신호 임계에 시장이 닿으면 알려드려요. 결정은 늘 본인의 몫입니다.',
   },
 ];
@@ -97,13 +99,18 @@ export default function LandingPage() {
 
   function handleCtaClick() {
     posthog.capture(COHORT_EVENTS.CTA_CLICK, {
-      cta_label: '사전 신청하기',
+      cta_label: '무료로 시작하기',
+      cta_destination: '/signup',
+      ab_variant: getAbVariant(),
+    });
+    posthog.capture(COHORT_EVENTS.SIGNUP_START, {
+      entry_surface: 'landing_cta',
       ab_variant: getAbVariant(),
     });
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col break-keep bg-cohort-ivory px-6 pb-24 md:pb-28">
+    <main className="mx-auto flex min-h-screen max-w-md flex-col break-keep bg-cohort-ivory px-6 pb-32 md:pb-36">
       {/* Brand mark */}
       <header className="flex items-center gap-2 pt-12">
         <MascotAvatar character="aurora" state="calm" size={36} />
@@ -120,10 +127,10 @@ export default function LandingPage() {
         }`}
       >
         <h1 className="break-keep text-3xl font-medium text-cohort-ink-90 sm:text-4xl lg:text-5xl">
-          본인 plan과 cohort — 흔들리지 않는 페이스.
+          본인 계획과 코호트 — 흔들리지 않는 페이스.
         </h1>
         <p className="mt-4 break-keep text-base text-cohort-ink-70 sm:text-lg">
-          학습 commit X. 일 1분. 본인 plan 영역 페이스 영역만.
+          별도 학습 없이, 하루 1분. 본인 계획·페이스에만 집중.
         </p>
       </section>
 
@@ -137,7 +144,7 @@ export default function LandingPage() {
           priority={false}
         />
         <p className="mt-3 text-center text-sm leading-relaxed text-cohort-ink-70">
-          한 열매 안의 여러 씨앗처럼 — 같은 페이스를 걷는 cohort.
+          한 열매 안의 여러 씨앗처럼 — 같은 페이스를 걷는 코호트.
         </p>
       </Reveal>
 
@@ -172,7 +179,7 @@ export default function LandingPage() {
             <MascotAvatar character="aurora" state="calm" size={44} />
             <p className="text-base leading-relaxed text-cohort-ink-70">
               <span className="font-semibold text-cohort-ink-90">Aurora</span>{' '}
-              — 차분한 동행. 매일 아침 macro를 같이 정리하고, 본인 plan 페이스를
+              — 차분한 동행. 매일 아침 매크로를 같이 정리하고, 본인 계획 페이스를
               같이 호흡합니다.
             </p>
           </div>
@@ -180,23 +187,24 @@ export default function LandingPage() {
             <MascotAvatar character="vesper" state="calm" size={44} />
             <p className="text-base leading-relaxed text-cohort-ink-70">
               <span className="font-semibold text-cohort-ink-90">Vesper</span>{' '}
-              — 또렷한 신호. 본인이 정한 trigger가 발동하면 가장 먼저
+              — 또렷한 신호. 본인이 정한 조건이 발동하면 가장 먼저
               알려드립니다.
             </p>
           </div>
         </div>
       </Reveal>
 
-      {/* Tier preview — single line, no comparison table (W2+) */}
+      {/* Tier preview — support framing, no feature comparison table */}
       <Reveal className="mt-16">
         <div className="rounded-lg bg-white p-5 shadow-sm">
-          <p className="text-base leading-relaxed text-cohort-ink-70">
-            <span className="font-semibold text-cohort-ink-90">Tier 0</span> —
-            매크로 dashboard, 무료.
+          <p className="text-base leading-relaxed text-cohort-ink-70 break-keep">
+            <span className="font-semibold text-cohort-ink-90">무료</span> —
+            매크로·페이스·행동 가드 도구를 모두 이용할 수 있어요.
           </p>
-          <p className="mt-2 text-base leading-relaxed text-cohort-ink-70">
-            <span className="font-semibold text-cohort-ink-90">Pro</span> —
-            $19/월, 3개 도구 전체.
+          <p className="mt-2 text-base leading-relaxed text-cohort-ink-70 break-keep">
+            <span className="font-semibold text-cohort-ink-90">프로 · 프리미엄</span>{' '}
+            — 설정에서 선택하는 후원(기능 차등 없음). 개인 학습 프로젝트
+            운영을 돕고 싶을 때만.
           </p>
         </div>
       </Reveal>
@@ -204,18 +212,27 @@ export default function LandingPage() {
       {/* Inline-flow spacer — reserves vertical space equal to the fixed
           CTA so Footer (root layout sibling) is not occluded. Matches the
           BottomNav spacer pattern (Hotfix #3, 2026-05-27). */}
-      <div aria-hidden="true" className="h-20 md:h-24" />
+      <div aria-hidden="true" className="h-28 md:h-32" />
 
       {/* Bottom-fixed CTA */}
       <div className="fixed inset-x-0 bottom-0 border-t border-cohort-ink-10 bg-cohort-ivory/95 px-6 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 backdrop-blur">
-        <div className="mx-auto max-w-md">
+        <div className="mx-auto flex max-w-md flex-col gap-2">
           <Link
-            href="/waitlist"
+            href="/signup"
             onClick={handleCtaClick}
             className="flex min-h-[52px] w-full items-center justify-center rounded-lg bg-cohort-primary px-5 text-base font-semibold text-cohort-ivory shadow-mascot-aurora transition-colors duration-fast ease-out hover:bg-aurora-alert active:bg-aurora-concerned focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cohort-primary"
           >
-            사전 신청하기 (무료)
+            무료로 시작하기
           </Link>
+          <p className="text-center text-sm text-cohort-ink-50">
+            이미 계정이 있으신가요?{' '}
+            <Link
+              href="/login"
+              className="font-medium text-cohort-primary underline-offset-2 hover:underline"
+            >
+              로그인
+            </Link>
+          </p>
         </div>
       </div>
     </main>

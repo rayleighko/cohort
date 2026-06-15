@@ -82,24 +82,6 @@ export async function POST(request: NextRequest) {
   // 영역 run + cast 영역 제거 의무.
   const admin = createAdminClient();
 
-  if (body.q0_user_stage === 'learning') {
-    await admin.from('user_investment_profile' as never).upsert({
-      user_id: userId,
-      user_stage: 'learning',
-      user_stage_self_referred_valley: false,
-    } as never);
-    return NextResponse.json(
-      {
-        fit: false,
-        redirect: 'graceful_exit',
-        message:
-          'Cohort 영역 fit X. Valley/이효석아카데미/김단테 영역 학습 영역 추천 영역. ' + // OPTION-B-ALLOWED: 학습 리소스 안내 (교육 콘텐츠 — 투자 추천 아님)
-          '단 학습 끝난 후 다시 와주세요.',
-      },
-      { headers: { 'Cache-Control': 'no-store' } },
-    );
-  }
-
   if (body.q2_portfolio_composition_pct) {
     const redacted = redactPortfolioCompositionPct(body.q2_portfolio_composition_pct);
     if (!redacted) {

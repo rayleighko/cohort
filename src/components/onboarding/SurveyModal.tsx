@@ -80,50 +80,42 @@ const EMPTY_PORTFOLIO = Object.fromEntries(
   PORTFOLIO_ASSET_KEYS.map((k) => [k, 0]),
 ) as Record<PortfolioAssetKey, number>;
 
-// ── Graceful exit (Q0 learning) ─────────────────────────────────────────────
+/** Compact touch target (44px min) — mobile survey height budget */
+const SURVEY_CHOICE_LABEL = cn(
+  'flex min-h-[44px] cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 text-sm leading-snug transition-colors motion-reduce:transition-none',
+);
 
-function GracefulExitScreen() {
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="rounded-xl bg-cohort-ink-05 px-5 py-4"
-    >
-      <p className="break-keep text-sm leading-relaxed text-cohort-ink-70">
-        Cohort는 이미 본인만의 plan이 있는 분들을 위한 페이스 동반자입니다.
-      </p>
-      <p className="mt-2 break-keep text-sm leading-relaxed text-cohort-ink-70">
-        학습 단계에 계신 분들께는{' '}
-        <strong className="text-cohort-ink-90">Valley / 이효석아카데미 / 김단테</strong>{' '}
-        채널을 추천 영역에서 말씀드립니다. 학습을 마치신 후 다시 방문해 주세요.
-        {/* OPTION-B-ALLOWED: 학습 리소스 안내 (교육 콘텐츠 — 투자 추천 아님) */}
-      </p>
-    </div>
-  );
-}
+const SURVEY_CHOICE_SELECTED = 'border-cohort-primary bg-cohort-primary/5';
+const SURVEY_CHOICE_DEFAULT = 'border-cohort-ink-10 bg-white';
 
-// ── Shared option lists ─────────────────────────────────────────────────────
-
-const Q0_OPTIONS = [
-  { value: 'learning', label: '(a) 투자 시작을 위한 학습이 진행 중' },
+const Q0_OPTIONS: {
+  value: Q0Stage;
+  label: string;
+  disabled?: boolean;
+}[] = [
+  {
+    value: 'learning',
+    label: '(a) 투자 시작을 위한 학습이 진행 중',
+    disabled: true,
+  },
   {
     value: 'post_learning_planned',
-    label: '(b) 학습이 끝났고 본인 plan이 있으며 운용을 진행 중',
+    label: '(b) 학습이 끝났고 본인 투자 계획이 있으며 운용을 진행 중',
   },
   {
     value: 'active_investor_enforcement',
-    label: '(c) Active investor + plan + 매크로 + 분할매수 enforcement가 in place',
+    label: '(c) 능동적 투자자 — 투자 계획·매크로·분할매수 원칙이 갖춰져 있음',
   },
 ];
 
 const Q8_OPTIONS: { value: FrameworkValue; label: string }[] = [
-  { value: 'druckenmiller_macro_13f', label: '드러켄밀러식 매크로 베팅 + 13F 클로닝' },
-  { value: 'kimdante_macro_korea_us', label: '김단테식 매크로 분석 + 한미 cross-border' },
-  { value: 'buffett_index_value', label: '버핏식 인덱스 적립 + value investing' },
-  { value: 'dalio_all_weather', label: '달리오식 all-weather + risk parity' },
-  { value: 'kostolany_psychology_cycle', label: '코스톨라니식 심리적 cycle' },
-  { value: 'technical_fundamental', label: '기술적/기본적 분석 (chart + 재무 통합)' },
-  { value: 'unsure', label: '모름 / 본인 framework이 unsure' },
+  { value: 'druckenmiller_macro_13f', label: '드러켄밀러식 매크로 베팅 + 13F 공시 추적' },
+  { value: 'kimdante_macro_korea_us', label: '김단테식 매크로 분석 + 한·미 크로스보더' },
+  { value: 'buffett_index_value', label: '버핏식 인덱스 적립 + 가치 투자' },
+  { value: 'dalio_all_weather', label: '달리오식 올웨더 + 리스크 패리티' },
+  { value: 'kostolany_psychology_cycle', label: '코스톨라니식 심리·시장 사이클' },
+  { value: 'technical_fundamental', label: '기술적·기본적 분석 (차트 + 재무 통합)' },
+  { value: 'unsure', label: '잘 모르겠음 / 본인만의 투자 방식' },
 ];
 
 const TIME_HORIZON_OPTIONS = [
@@ -149,9 +141,9 @@ const SPLIT_BUY_OPTIONS = [
 ];
 
 const PLAN_FORMALIZATION_OPTIONS = [
-  { value: '문서화된 plan', label: '문서화된 plan (정기 review 있음)' },
-  { value: '머릿속 plan', label: '머릿속 plan (비문서)' },
-  { value: 'plan 형성 중', label: 'plan을 형성하는 중' },
+  { value: '문서화된 plan', label: '문서화된 투자 계획 (정기 점검 있음)' },
+  { value: '머릿속 plan', label: '머릿속 투자 계획 (비문서)' },
+  { value: 'plan 형성 중', label: '투자 계획을 정리하는 중' },
 ];
 
 const EMOTIONAL_DECISION_OPTIONS = [
@@ -160,6 +152,8 @@ const EMOTIONAL_DECISION_OPTIONS = [
   { value: '3-5회', label: '3-5회' },
   { value: '5회 이상', label: '5회 이상' },
 ];
+
+type RadioOption = { value: string; label: string; disabled?: boolean };
 
 function FactualRadioStep({
   title,
@@ -172,28 +166,42 @@ function FactualRadioStep({
   name: string;
   value: string;
   onChange: (v: string) => void;
-  options: { value: string; label: string }[];
+  options: RadioOption[];
 }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {title ? (
-        <p className="break-keep text-base font-semibold text-cohort-ink-90">{title}</p>
+        <p className="break-keep text-sm font-semibold text-cohort-ink-90 sm:text-base">
+          {title}
+        </p>
       ) : null}
       <RadioGroup value={value} onValueChange={onChange} aria-label={title || name}>
         {options.map((opt) => {
           const selected = value === opt.value;
+          const isDisabled = opt.disabled === true;
           return (
             <label
               key={opt.value}
+              aria-disabled={isDisabled || undefined}
               className={cn(
-                'flex min-h-[52px] cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors motion-reduce:transition-none',
-                selected
-                  ? 'border-cohort-primary bg-cohort-primary/5'
-                  : 'border-cohort-ink-10 bg-white',
+                SURVEY_CHOICE_LABEL,
+                isDisabled && 'cursor-not-allowed opacity-50',
+                !isDisabled && (selected ? SURVEY_CHOICE_SELECTED : SURVEY_CHOICE_DEFAULT),
+                isDisabled && 'border-cohort-ink-10 bg-cohort-ink-05',
               )}
             >
-              <RadioGroupItem value={opt.value} id={`${name}-${opt.value}`} />
-              <Label htmlFor={`${name}-${opt.value}`} className="flex-1 cursor-pointer font-normal">
+              <RadioGroupItem
+                value={opt.value}
+                id={`${name}-${opt.value}`}
+                disabled={isDisabled}
+              />
+              <Label
+                htmlFor={`${name}-${opt.value}`}
+                className={cn(
+                  'flex-1 break-keep font-normal leading-snug',
+                  isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
+                )}
+              >
                 {opt.label}
               </Label>
             </label>
@@ -213,7 +221,6 @@ export default function SurveyModal({
   entrySurface = 'onboarding_gate',
 }: SurveyModalProps) {
   const [step, setStep] = useState(0);
-  const [gracefulExit, setGracefulExit] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [portfolioError, setPortfolioError] = useState<string | null>(null);
@@ -292,7 +299,6 @@ export default function SurveyModal({
   );
 
   const canProceed = (): boolean => {
-    if (gracefulExit) return true;
     if (step === 0) return !!form.q0_user_stage;
     if (glRtsQuestion) {
       const ans = form.gl_rts[glRtsQuestion.id];
@@ -328,29 +334,17 @@ export default function SurveyModal({
 
   const handleQ0Next = () => {
     if (!form.q0_user_stage) return;
-    if (form.q0_user_stage === 'learning') {
-      setGracefulExit(true);
-      posthog.capture(COHORT_EVENTS.SURVEY_Q0_LEARNING_EXIT, {
-        q0_user_stage: 'learning',
-      });
-      void fetch('/api/survey', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q0_user_stage: 'learning' }),
-      });
-    } else {
-      posthog.capture(COHORT_EVENTS.SURVEY_STEP_ADVANCED, {
-        from_step: 0,
-        to_step: GL_RTS_START,
-        from_question_id: 'q0_user_stage',
-        duration_ms: Date.now() - stepStartedAtRef.current,
-      });
-      setStep(GL_RTS_START);
-    }
+    posthog.capture(COHORT_EVENTS.SURVEY_STEP_ADVANCED, {
+      from_step: 0,
+      to_step: GL_RTS_START,
+      from_question_id: 'q0_user_stage',
+      duration_ms: Date.now() - stepStartedAtRef.current,
+    });
+    setStep(GL_RTS_START);
   };
 
   const handleClose = () => {
-    if (!gracefulExit && !submitAttemptedRef.current) {
+    if (!submitAttemptedRef.current) {
       const meta = getSurveyStepMeta(step);
       posthog.capture(COHORT_EVENTS.SURVEY_ABANDONED, {
         last_step_index: step,
@@ -478,44 +472,46 @@ export default function SurveyModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-cohort-charcoal/40 sm:items-center"
+      className="fixed inset-0 z-[100] flex bg-cohort-charcoal/40 sm:items-center sm:justify-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label="투자 프로필 설문"
     >
       <div
-        className="flex w-full max-w-md flex-col rounded-t-2xl bg-white sm:rounded-2xl"
+        className="flex h-[100dvh] max-h-[100dvh] w-full max-w-md flex-col bg-white sm:h-auto sm:max-h-[min(90dvh,720px)] sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="border-b border-cohort-ink-10 px-5 py-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-cohort-ink-90">
+        <div className="shrink-0 border-b border-cohort-ink-10 px-4 py-3 sm:px-5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="min-w-0 truncate text-sm font-semibold text-cohort-ink-90">
               {stepLabel}
-              {!gracefulExit && step > 0 ? ` · ${step}/${LAST_STEP}` : ''}
+              {step > 0 ? ` · ${step}/${LAST_STEP}` : ''}
             </p>
             <button
               type="button"
               onClick={handleClose}
-              className="flex h-[44px] w-[44px] items-center justify-center rounded-xl text-cohort-ink-50 hover:text-cohort-ink-90"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-cohort-ink-50 hover:text-cohort-ink-90 sm:h-11 sm:w-11"
               aria-label="설문 닫기"
             >
               ✕
             </button>
           </div>
-          {!gracefulExit && step >= GL_RTS_START && (
-            <Progress value={progressPct} className="mt-3" aria-label="설문 진행률" />
+          {step >= GL_RTS_START && (
+            <Progress value={progressPct} className="mt-2 h-1" aria-label="설문 진행률" />
           )}
         </div>
 
-        <div className="overflow-y-auto px-5 py-5" style={{ maxHeight: '70vh' }}>
-          {step === 0 && !gracefulExit && (
-            <div className="flex flex-col gap-4">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3 sm:px-5 sm:py-4">
+          {step === 0 && (
+            <div className="flex flex-col gap-3">
               <div>
-                <p className="break-keep text-base font-semibold text-cohort-ink-90">
+                <p className="break-keep text-sm font-semibold text-cohort-ink-90 sm:text-base">
                   지금 본인의 투자 상태를 선택해 주세요.
                 </p>
-                <p className="mt-1 break-keep text-xs text-cohort-ink-50">
-                  Cohort는 이미 본인만의 투자 plan이 있는 분들을 위한 서비스입니다.
+                <p className="mt-1 break-keep text-xs leading-relaxed text-cohort-ink-50">
+                  코호트는 이미 본인만의 투자 계획이 있는 분들을 위한 서비스입니다.
+                  나중에 맞지 않다고 느끼시면 설정에서 프로필을 다시 바꿀 수
+                  있습니다.
                 </p>
               </div>
               <FactualRadioStep
@@ -525,15 +521,6 @@ export default function SurveyModal({
                 onChange={(v) => set('q0_user_stage', v as Q0Stage)}
                 options={Q0_OPTIONS}
               />
-            </div>
-          )}
-
-          {gracefulExit && (
-            <div className="flex flex-col gap-4">
-              <p className="break-keep text-base font-semibold text-cohort-ink-90">
-                지금 단계에서는 fit이 맞지 않습니다.
-              </p>
-              <GracefulExitScreen />
             </div>
           )}
 
@@ -564,9 +551,9 @@ export default function SurveyModal({
           )}
 
           {step === 15 && (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               <div>
-                <p className="break-keep text-base font-semibold text-cohort-ink-90">
+                <p className="break-keep text-sm font-semibold text-cohort-ink-90 sm:text-base">
                   Q2. 현재 포트폴리오 구성 (비율만, % 합계 100% ±5)
                 </p>
                 <p className="mt-1 break-keep text-xs text-cohort-ink-50">
@@ -629,21 +616,19 @@ export default function SurveyModal({
           )}
 
           {step === 17 && (
-            <div className="flex flex-col gap-4">
-              <p className="break-keep text-base font-semibold text-cohort-ink-90">
+            <div className="flex flex-col gap-3">
+              <p className="break-keep text-sm font-semibold text-cohort-ink-90 sm:text-base">
                 Q4. 투자 정보를 주로 어디서 얻으시나요? (복수 선택)
               </p>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 {INFO_SOURCE_OPTIONS.map((opt) => {
                   const checked = form.q4_info_sources.includes(opt.value);
                   return (
                     <label
                       key={opt.value}
                       className={cn(
-                        'flex min-h-[52px] cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors motion-reduce:transition-none',
-                        checked
-                          ? 'border-cohort-primary bg-cohort-primary/5'
-                          : 'border-cohort-ink-10 bg-white',
+                        SURVEY_CHOICE_LABEL,
+                        checked ? SURVEY_CHOICE_SELECTED : SURVEY_CHOICE_DEFAULT,
                       )}
                     >
                       <Checkbox
@@ -660,7 +645,10 @@ export default function SurveyModal({
                         }}
                         id={`info-${opt.value}`}
                       />
-                      <Label htmlFor={`info-${opt.value}`} className="flex-1 cursor-pointer font-normal">
+                      <Label
+                        htmlFor={`info-${opt.value}`}
+                        className="flex-1 cursor-pointer break-keep font-normal leading-snug"
+                      >
                         {opt.label}
                       </Label>
                     </label>
@@ -682,7 +670,7 @@ export default function SurveyModal({
 
           {step === 19 && (
             <FactualRadioStep
-              title="Q6. 본인의 투자 plan은 어느 수준으로 정리되어 있나요?"
+              title="Q6. 본인의 투자 계획은 어느 수준으로 정리되어 있나요?"
               name="q6_plan_formalization"
               value={form.q6_plan_formalization}
               onChange={(v) => set('q6_plan_formalization', v)}
@@ -692,7 +680,7 @@ export default function SurveyModal({
 
           {step === 20 && (
             <FactualRadioStep
-              title="Q7. 지난 12개월 동안 plan과 무관한 감정적 매매 결정을 몇 번 했나요?"
+              title="Q7. 지난 12개월 동안 투자 계획과 무관한 감정적 매매 결정을 몇 번 했나요?"
               name="q7_emotional_decision_count_12m"
               value={form.q7_emotional_decision_count_12m}
               onChange={(v) => set('q7_emotional_decision_count_12m', v)}
@@ -701,21 +689,19 @@ export default function SurveyModal({
           )}
 
           {step === 21 && (
-            <div className="flex flex-col gap-4">
-              <p className="break-keep text-base font-semibold text-cohort-ink-90">
-                Q8. 본인의 투자 framework과 가장 가까운 것을 모두 선택해 주세요.
+            <div className="flex flex-col gap-3">
+              <p className="break-keep text-sm font-semibold text-cohort-ink-90 sm:text-base">
+                Q8. 본인의 투자 방식과 가장 가까운 것을 모두 선택해 주세요.
               </p>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 {Q8_OPTIONS.map((opt) => {
                   const checked = form.q8_framework_affinity.includes(opt.value);
                   return (
                     <label
                       key={opt.value}
                       className={cn(
-                        'flex min-h-[52px] cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors motion-reduce:transition-none',
-                        checked
-                          ? 'border-cohort-primary bg-cohort-primary/5'
-                          : 'border-cohort-ink-10 bg-white',
+                        SURVEY_CHOICE_LABEL,
+                        checked ? SURVEY_CHOICE_SELECTED : SURVEY_CHOICE_DEFAULT,
                       )}
                     >
                       <Checkbox
@@ -735,7 +721,10 @@ export default function SurveyModal({
                         }}
                         id={`fw-${opt.value}`}
                       />
-                      <Label htmlFor={`fw-${opt.value}`} className="flex-1 cursor-pointer font-normal">
+                      <Label
+                        htmlFor={`fw-${opt.value}`}
+                        className="flex-1 cursor-pointer break-keep font-normal leading-snug"
+                      >
                         {opt.label}
                       </Label>
                     </label>
@@ -759,12 +748,12 @@ export default function SurveyModal({
           )}
 
           {step === 22 && (
-            <div className="flex flex-col gap-4">
-              <p className="break-keep text-base font-semibold text-cohort-ink-90">
+            <div className="flex flex-col gap-3">
+              <p className="break-keep text-sm font-semibold text-cohort-ink-90 sm:text-base">
                 Q9. 본인이 가장 흔들리기 쉬운 상황을 1-2문장으로 적어주세요.
               </p>
               <p className="break-keep text-xs text-cohort-ink-50">
-                입력하신 내용은 Cohort의 개인화 페이스 설정에만 활용됩니다.
+                입력하신 내용은 코호트의 개인화 페이스 설정에만 활용됩니다.
               </p>
               <Textarea
                 name="q9_weakness_self_assessment"
@@ -776,13 +765,13 @@ export default function SurveyModal({
           )}
 
           {step === 23 && (
-            <div className="flex flex-col gap-4">
-              <p className="break-keep text-base font-semibold text-cohort-ink-90">
-                Q10. Cohort를 통해 가장 바라는 변화는 무엇인가요?
+            <div className="flex flex-col gap-3">
+              <p className="break-keep text-sm font-semibold text-cohort-ink-90 sm:text-base">
+                Q10. 코호트를 통해 가장 바라는 변화는 무엇인가요?
               </p>
               <Textarea
                 name="q10_target_outcome"
-                placeholder="예: 매크로 변화를 놓치지 않고 본인 plan대로 집행하고 싶다"
+                placeholder="예: 매크로 변화를 놓치지 않고 본인 계획대로 집행하고 싶다"
                 value={form.q10_target_outcome}
                 onChange={(e) => set('q10_target_outcome', e.target.value)}
               />
@@ -796,31 +785,34 @@ export default function SurveyModal({
           )}
         </div>
 
-        <div className="border-t border-cohort-ink-10 px-5 py-4">
-          {gracefulExit ? (
-            <Button onClick={onClose} variant="secondary">
-              닫기
-            </Button>
-          ) : step === 0 ? (
+        <div className="shrink-0 border-t border-cohort-ink-10 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-5">
+          {step === 0 ? (
             <Button
               onClick={handleQ0Next}
               disabled={!form.q0_user_stage}
               aria-disabled={!form.q0_user_stage}
+              className="min-h-[44px] py-2.5"
             >
               다음
             </Button>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                onClick={handleBack}
+                disabled={submitting}
+                className="min-h-[44px] w-auto shrink-0 px-4 py-2.5"
+              >
+                이전
+              </Button>
               <Button
                 onClick={handleNext}
                 disabled={submitting || !canProceed()}
                 aria-busy={submitting}
                 aria-disabled={!canProceed()}
+                className="min-h-[44px] flex-1 py-2.5"
               >
                 {submitting ? '저장 중…' : isLastStep ? '완료' : '다음'}
-              </Button>
-              <Button variant="secondary" onClick={handleBack} disabled={submitting}>
-                이전
               </Button>
             </div>
           )}

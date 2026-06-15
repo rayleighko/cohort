@@ -3,8 +3,8 @@
  * never trusts a client-supplied tier. Used by Shape A/B/C route guards
  * and the settings subscription UI.
  *
- * Tiers: free / trial / pro / premium. V1 Shapes A/B/C require pro-level
- * access; an active trial grants pro-level access within its window.
+ * Tiers: free / trial / pro / premium. V1 features are public for signed-in
+ * users; tier is used for chat quota + voluntary support status only.
  */
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -88,15 +88,11 @@ export async function loadTierState(): Promise<TierState> {
 }
 
 /**
- * Server guard — call at the top of a gated page. Redirects insufficient
- * tiers to /settings#upgrade. Returns the tier state on success.
+ * Legacy page guard — loads tier state without feature gating.
+ * Paid tiers are voluntary support; all dashboard features stay public.
  */
 export async function requireTier(
-  required: SubscriptionTier,
+  _required: SubscriptionTier,
 ): Promise<TierState> {
-  const state = await loadTierState();
-  if (!hasAccess(state.effective, required)) {
-    redirect('/settings#upgrade');
-  }
-  return state;
+  return loadTierState();
 }

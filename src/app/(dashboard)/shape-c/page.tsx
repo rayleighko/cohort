@@ -1,11 +1,7 @@
-import { requireTier } from '@/lib/payment/tier-gating';
-
 /**
  * Shape C — Custom Trigger Alert + Behavioral Guard. TODO(W4-W5): trigger engine.
- * Pro-gated — free users redirect to /settings#upgrade.
  */
 export default async function ShapeCPage() {
-  await requireTier('pro');
 
   return (
     <main className="mx-auto max-w-md px-6 py-10">

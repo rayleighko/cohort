@@ -10,9 +10,8 @@
  *   triggered → COHORT_FALLBACK_REDIRECT text, no alarming visual signal
  *   error    → calm Korean fallback
  *
- * Cache key is [endpoint, composite.computedAt] — narration re-fetches
- * only when /api/macro ISR refreshes a new snapshot. dedupingInterval
- * matches the macro ISR window (1h).
+ * Cache key is [endpoint, asOfDate, score] — narration re-fetches when macro
+ * data day or composite score changes. dedupingInterval 5 min.
  *
  * D25 archive fallback (W5 Wed 2026-05-27): when an `initialArchive` is
  * passed, we seed SWR with that text via fallbackData so first paint shows
@@ -45,7 +44,7 @@ interface NarrationError extends Error {
 }
 
 const FALLBACK_KO = '[Aurora가 morning brief를 준비 중입니다]';
-const HOUR_MS = 3_600_000;
+const NARRATION_REFRESH_MS = 5 * 60 * 1000;
 const ARCHIVE_ANNOTATION_KO =
   '오늘의 cohort — 어제 morning brief 표시 중 · 새 brief 준비 중…';
 
@@ -161,16 +160,20 @@ export function AuroraNarrationBody({ composite, initialArchive }: Props) {
       }
     : undefined;
 
-  const { data, error, isLoading } = useSWR<NarrationResponse, NarrationError>(
-    ['/api/aurora/narration', composite.computedAt],
+  const { data, error, isLoading, isValidating } = useSWR<NarrationResponse, NarrationError>(
+    [
+      '/api/aurora/narration',
+      composite.asOfDate,
+      composite.score.toFixed(2),
+    ],
     () => fetchNarration(composite),
     {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: HOUR_MS,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: NARRATION_REFRESH_MS,
       shouldRetryOnError: false,
       fallbackData: archiveFallback,
-      revalidateOnMount: Boolean(archiveFallback),
+      revalidateOnMount: true,
     },
   );
 
@@ -182,9 +185,10 @@ export function AuroraNarrationBody({ composite, initialArchive }: Props) {
   // detect whether the live fetch has completed.
   const showingArchive = Boolean(
     archiveFallback &&
+      initialArchive?.asOfDate === composite.asOfDate &&
       data &&
       data.text === archiveFallback.text &&
-      isLoading,
+      isValidating,
   );
 
   if (isLoading && !archiveFallback) {

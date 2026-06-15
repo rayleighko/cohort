@@ -39,6 +39,7 @@ import {
   type NarrationCategory,
 } from '@/lib/aurora/aurora-prompt';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getCachedMorningBriefResponse } from '@/lib/aurora/narration-cache';
 import { getServerPostHog } from '@/lib/analytics/posthog-server';
 import type {
   MacroComposite,
@@ -256,6 +257,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
   const category: NarrationCategory = body.category ?? 'morning_brief';
+
+  if (category === 'morning_brief') {
+    const cached = await getCachedMorningBriefResponse(
+      body.composite.asOfDate,
+      body.composite,
+    );
+    if (cached) {
+      return noStoreJson({ ...cached, category: 'morning_brief' });
+    }
+  }
 
   // Per-category required-field validation.
   const promptInput: AuroraNarrationInput = { category, composite: body.composite };

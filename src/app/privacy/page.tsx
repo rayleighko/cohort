@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '개인정보처리방침 | Cohort',
+  title: '개인정보처리방침 | 코호트',
   description:
-    'Cohort 개인정보처리방침 — 운영자가 운영하는 Cohort 서비스의 개인정보 수집·처리·파기·이용자 권리 안내.',
+    '코호트 개인정보처리방침 — 운영자가 운영하는 코호트 서비스의 개인정보 수집·처리·파기·이용자 권리 안내.',
 };
 
 export default function PrivacyPage() {
@@ -14,13 +14,13 @@ export default function PrivacyPage() {
           개인정보처리방침
         </h1>
         <p className="mt-3 break-keep text-sm text-cohort-ink-50">
-          시행일자: 2026-06-15 (V1 launch) · 최종 수정: 2026-05-27
+          시행일자: 2026-06-15 (V1 출시) · 최종 수정: 2026-05-27
         </p>
       </header>
 
       <article className="break-keep text-base leading-relaxed text-cohort-ink-70">
         <p className="text-sm text-cohort-ink-70">
-          Cohort 서비스(이하 &ldquo;서비스&rdquo;)를 운영하는 개인 운영자(이하
+          코호트 서비스(이하 &ldquo;서비스&rdquo;)를 운영하는 개인 운영자(이하
           &ldquo;운영자&rdquo;)는 이용자의 개인정보 보호를 위해 「개인정보 보호법」 및
           관련 법령을 준수하며, 본 처리방침을 통해 개인정보의 처리 방침을 안내합니다.
         </p>
@@ -43,8 +43,8 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong className="text-cohort-ink-90">서비스 제공</strong>:
-              매크로 dashboard, 분할매수 의사결정 도구, custom trigger 알림,
-              Aurora 🕊 + Vesper 🦅 마스코트 AI 대화, 본인 plan 영역 reference,
+              매크로 대시보드, 분할매수 의사결정 도구, 사용자 설정 조건 알림,
+              Aurora 🕊 + Vesper 🦅 마스코트 AI 대화, 본인 투자 계획 참조,
               알림 전송.
             </li>
             <li>
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
           </h3>
           <ul className="mt-2 list-disc space-y-1 pl-6">
             <li>이메일 주소</li>
-            <li>비밀번호 (bcrypt 해시 저장)</li>
+            <li>비밀번호 (암호화 해시 저장)</li>
             <li>회원 가입 일자</li>
           </ul>
 
@@ -80,20 +80,20 @@ export default function PrivacyPage() {
           </h3>
           <ul className="mt-2 list-disc space-y-1 pl-6">
             <li>IP 주소, 쿠키, 서비스 이용 기록, 접속 로그</li>
-            <li>디바이스 정보 (OS, 브라우저)</li>
-            <li>PWA 설치 여부</li>
+            <li>디바이스 정보 (운영체제, 브라우저)</li>
+            <li>웹앱 설치 여부</li>
           </ul>
 
           <h3 className="mt-5 text-base font-semibold text-cohort-ink-90">
             별도 동의 후 수집 항목 (선택)
           </h3>
           <ul className="mt-2 list-disc space-y-1 pl-6">
-            <li>투자 경력 분류 (1-2년 / 3-5년 / 6-10년 / 10+년)</li>
+            <li>투자 경력 분류 (1–2년 / 3–5년 / 6–10년 / 10년 이상)</li>
             <li>자산 구성 분류 (퍼센트 단위, 종목명·금액 미수집)</li>
             <li>사용 중인 세제 혜택 계좌 종류</li>
-            <li>정보 source 사용 패턴, 결제 의향 및 가격 민감도, 직업 분야 분류</li>
+            <li>정보 출처 사용 패턴, 결제 의향 및 가격 민감도, 직업 분야 분류</li>
             <li>익명화된 Aurora · Vesper 대화 내역</li>
-            <li>익명화된 trigger 설정 및 발화 기록</li>
+            <li>익명화된 조건 알림 설정 및 발화 기록</li>
           </ul>
 
           <p className="mt-5">
@@ -115,7 +115,7 @@ export default function PrivacyPage() {
             <li>회원 가입 및 관리: 회원 탈퇴 시까지 (분쟁 발생 시 분쟁 해결 시까지)</li>
             <li>서비스 제공: 회원 탈퇴 시까지</li>
             <li>결제 및 정산: 「전자상거래법」에 따라 5년</li>
-            <li>익명화된 사용 행동 분석 데이터: 90일 raw → 이후 익명 집계 영구 보존</li>
+            <li>익명화된 사용 행동 분석 데이터: 90일 원본 보관 → 이후 익명 집계 영구 보존</li>
             <li>Aurora · Vesper 대화 내역: 회원 탈퇴 시까지 (즉시 삭제 요청 가능)</li>
             <li>마케팅·광고 정보 동의: 동의 철회 시까지</li>
           </ul>
@@ -264,12 +264,12 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong className="text-cohort-ink-90">기술적 조치</strong>: 접근권한
-              관리, 접근통제 시스템, 비밀번호 bcrypt 해시 저장, Supabase Row Level
-              Security 및 at-rest 암호화, HTTPS / TLS 1.2+ 전송 암호화.
+              관리, 접근통제 시스템, 비밀번호 암호화 해시 저장, Supabase 행 수준 보안
+              및 저장 데이터 암호화, HTTPS·TLS 1.2 이상 전송 암호화.
             </li>
             <li>
               <strong className="text-cohort-ink-90">물리적 조치</strong>: 클라우드
-              수탁자 (Supabase / Vercel)의 시설 접근통제에 의존.
+              수탁자(Supabase·Vercel)의 시설 접근통제에 의존.
             </li>
           </ol>
         </section>
@@ -280,22 +280,22 @@ export default function PrivacyPage() {
           </h2>
           <p className="mt-3">
             운영자는 Aurora 🕊 + Vesper 🦅 마스코트 AI 대화 서비스 제공을 위해 Anthropic
-            Claude API를 활용합니다. 본 AI는 사용자의 대화 내용 + 본인 plan + 매크로
-            score를 참조하여 응답을 생성합니다.
+            Claude API를 활용합니다. 본 AI는 사용자의 대화 내용, 본인 투자 계획, 매크로
+            점수를 참조하여 응답을 생성합니다.
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-6">
             <li>
               Aurora · Vesper AI는 <strong>투자 자문 서비스가 아닙니다</strong>. 일반적인
-              투자 교육, 본인 plan reference, 멘탈 관리, 원칙 reinforcement만 제공합니다.
+              투자 교육, 본인 투자 계획 참조, 멘탈 관리, 원칙 강화 대화만 제공합니다.
             </li>
             <li>
               &ldquo;지금 매수해야 할까?&rdquo;, &ldquo;비중 X%로 가야 할까?&rdquo;
-              같은 구체적 추천 질의에는 자동화된 안전 필터가 활성화되어 본인 plan
-              재점검 안내로 redirect됩니다.
+              같은 구체적 추천 질의에는 자동화된 안전 필터가 활성화되어 본인 투자
+              계획 재점검 안내로 전환됩니다.
             </li>
             <li>최종 투자 결정은 사용자 본인의 책임입니다.</li>
             <li>
-              사용자는 마스코트 AI 대화를 거부하고 dashboard만 사용할 수 있으며, 자신의
+              사용자는 마스코트 AI 대화를 거부하고 대시보드만 사용할 수 있으며, 자신의
               대화 내역을 언제든지 조회 및 삭제할 수 있습니다.
             </li>
           </ul>

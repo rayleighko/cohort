@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { loadTierState } from '@/lib/payment/tier-gating';
 import SubscriptionPanel from '@/components/settings/SubscriptionPanel';
 import { NotificationOptIn } from '@/components/notification/NotificationOptIn';
+import { ProfileSettingsPanel } from '@/components/settings/ProfileSettingsPanel';
 import SignOutButton from '@/components/auth/SignOutButton';
 import DeleteAccountButton from '@/components/account/DeleteAccountButton';
 
@@ -23,14 +24,14 @@ export default async function SettingsPage({
       <h1 className="text-2xl font-bold text-cohort-charcoal">설정</h1>
 
       {checkoutSuccess && (
-        <p className="mt-4 rounded-xl bg-cohort-primary/10 px-4 py-3 text-sm text-cohort-primary">
-          구독이 시작되었어요. Aurora 🕊와 Vesper 🦅가 함께합니다.
+        <p className="mt-4 rounded-xl bg-cohort-primary/10 px-4 py-3 text-sm text-cohort-primary break-keep">
+          후원해 주셔서 고마워요. 코호트를 이어 가는 데 큰 힘이 됩니다.
         </p>
       )}
 
-      {/* Subscription */}
+      {/* Voluntary support — features stay public */}
       <h2 className="mt-6 text-sm font-semibold uppercase tracking-wide text-cohort-charcoal/45">
-        구독
+        프로젝트 지원
       </h2>
       <div className="mt-2">
         <SubscriptionPanel
@@ -46,6 +47,14 @@ export default async function SettingsPage({
       </h2>
       <div className="mt-2">
         <NotificationOptIn />
+      </div>
+
+      {/* 투자 프로필 — 재설정 (graceful exit 대체) */}
+      <h2 className="mt-8 text-sm font-semibold uppercase tracking-wide text-cohort-charcoal/45">
+        투자 프로필
+      </h2>
+      <div className="mt-2">
+        <ProfileSettingsPanel />
       </div>
 
       {/* 계정 */}

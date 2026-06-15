@@ -92,23 +92,31 @@ describe('POST /api/survey — authentication', () => {
 });
 
 describe('POST /api/survey — Q0 narrow filter (vault 61 D16)', () => {
-  it('Q0 = "learning" → graceful exit response (fit: false, redirect, Valley mention)', async () => {
-    const req = makeRequest({ q0_user_stage: 'learning' });
+  it('Q0 = "learning" with full survey → fit ✓, user_stage stored', async () => {
+    const req = makeRequest({
+      q0_user_stage: 'learning',
+      gl_rts_answers: validGlRtsPayload(),
+      q1_time_horizon: '10y+',
+      q8_framework_affinity: ['buffett_index_value'],
+    });
     const res = await POST(req as never);
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json.fit).toBe(false);
-    expect(json.redirect).toBe('graceful_exit');
-    expect(json.message).toContain('Valley');
-    // Only user_stage upsert — no Q1-Q11 data inserted
+    expect(json.fit).toBe(true);
     expect(mockedUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({ user_stage: 'learning', user_stage_self_referred_valley: false }),
+      expect.objectContaining({
+        user_stage: 'learning',
+        time_horizon: '10y+',
+      }),
     );
-    // Ensure no Q1 data passed
-    expect(mockedUpsert.mock.calls.length).toBeGreaterThan(0);
-    // Cast 영역 mock.calls 영역 default `[]` 영역 tuple 영역 escape (vitest 영역 mock typing limitation)
-    const upsertArg = (mockedUpsert.mock.calls[0] as unknown as [Record<string, unknown>])[0];
-    expect(upsertArg.time_horizon).toBeUndefined();
+  });
+
+  it('Q0 = "learning" without GL-RTS → 400 invalid_gl_rts_answers', async () => {
+    const req = makeRequest({ q0_user_stage: 'learning' });
+    const res = await POST(req as never);
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toBe('invalid_gl_rts_answers');
   });
 
   it('Q0 = "post_learning_planned" → fit ✓, Q1-Q10 upserted', async () => {

@@ -27,15 +27,37 @@ vi.mock('@/lib/analytics/posthog-server', () => ({
 }));
 
 // Service-role Supabase admin client — Day 9 best-effort persistence into
-// aurora_narration_log. Default mock: insert returns no error.
+// aurora_narration_log. Default mock: insert returns no error; select → [].
 const mockedInsert = vi.fn(async () => ({ error: null as Error | null }));
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: vi.fn(() => ({
     from: vi.fn(() => ({
       insert: mockedInsert,
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn(async () => ({ data: [], error: null })),
     })),
   })),
 }));
+
+const mockedGetCachedMorningBrief = vi.hoisted(() =>
+  vi.fn(async () => null as Awaited<
+    ReturnType<
+      typeof import('@/lib/aurora/narration-cache').getCachedMorningBriefResponse
+    >
+  >),
+);
+
+vi.mock('@/lib/aurora/narration-cache', async (importOriginal) => {
+  const actual = await importOriginal<
+    typeof import('@/lib/aurora/narration-cache')
+  >();
+  return {
+    ...actual,
+    getCachedMorningBriefResponse: mockedGetCachedMorningBrief,
+  };
+});
 
 import { POST } from '../route';
 import { callPersona } from '@/lib/claude/client';
@@ -53,6 +75,7 @@ const SAMPLE_COMPOSITE: MacroComposite = {
       source: 'fred',
       code: 'KR_US_RATE_SPREAD',
       latest: 1.05,
+      observationDate: '2026-05-22',
       normalized: 1.6,
       weight: 0.25,
       contribution: 0.4,
@@ -61,6 +84,7 @@ const SAMPLE_COMPOSITE: MacroComposite = {
       source: 'ecos',
       code: 'USDKRW',
       latest: 1342.5,
+      observationDate: '2026-05-22',
       normalized: 0.5,
       weight: 0.3,
       contribution: 0.15,
@@ -113,9 +137,31 @@ afterEach(() => {
   mockedApplySafetyFilter.mockReset();
   mockedInsert.mockReset();
   mockedInsert.mockImplementation(async () => ({ error: null }));
+  mockedGetCachedMorningBrief.mockReset();
+  mockedGetCachedMorningBrief.mockImplementation(async () => null);
 });
 
 describe('POST /api/aurora/narration — Day 7 backward compatibility', () => {
+  it('returns cached morning_brief without calling Claude when asOfDate match exists', async () => {
+    mockedGetCachedMorningBrief.mockResolvedValueOnce({
+      character: 'aurora',
+      text: '캐시된 오늘 brief.',
+      triggered: false,
+      zone: 'neutral-dovish',
+      category: 'morning_brief',
+    });
+
+    const res = await POST(
+      makeRequest({ composite: SAMPLE_COMPOSITE }) as never,
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.text).toBe('캐시된 오늘 brief.');
+    expect(mockedCallPersona).not.toHaveBeenCalled();
+    expect(mockedInsert).not.toHaveBeenCalled();
+  });
+
   it('returns 200 + narration + triggered=false + category=morning_brief on default (no category)', async () => {
     mockedCallPersona.mockResolvedValueOnce(
       '오늘 cohort. 한국 매크로 composite는 +2.3 (중립–비둘기). 한미 금리차가 핵심 driver. 본인 plan 페이스 유지해보세요.',

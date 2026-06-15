@@ -12,6 +12,12 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdn.cohort.co.kr' },
     ],
   },
+  async redirects() {
+    return [
+      // Waitlist retired — preserve old links and SEO bookmarks.
+      { source: '/waitlist', destination: '/signup', permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

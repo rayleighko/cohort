@@ -1,11 +1,7 @@
-import { requireTier } from '@/lib/payment/tier-gating';
-
 /**
  * Shape A — Macro Indicator Dashboard (full). TODO(W3): 50+ indicators + widgets.
- * Pro-gated — free users redirect to /settings#upgrade.
  */
 export default async function ShapeAPage() {
-  await requireTier('pro');
 
   return (
     <main className="mx-auto max-w-md px-6 py-10">

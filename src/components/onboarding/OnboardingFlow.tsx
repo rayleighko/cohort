@@ -12,7 +12,7 @@ interface OnboardingFlowProps {
 
 /**
  * Onboarding gate: PIPA consent → unified survey (Q0 + GL-RTS + factual).
- * Landing (/) stays waitlist-only; signed-in users reach this via /onboarding.
+ * Landing (/) → /signup. Signed-in users reach survey via /onboarding.
  */
 export default function OnboardingFlow({ userId }: OnboardingFlowProps) {
   const router = useRouter();
@@ -43,11 +43,11 @@ export default function OnboardingFlow({ userId }: OnboardingFlowProps) {
         entrySurface="onboarding_gate"
         onClose={() => {
           setSurveyOpen(false);
-          router.push('/shape-a');
+          router.push('/dashboard');
           router.refresh();
         }}
         onComplete={() => {
-          router.push('/shape-a');
+          router.push('/dashboard');
           router.refresh();
         }}
       />

@@ -160,6 +160,7 @@ describe('computeMacroComposite', () => {
     expect(result.degraded).toBeUndefined();
     expect(result.missingIndicators).toBeUndefined();
     expect(result.asOfDate).toBe(DATE);
+    expect(result.indicators.every((i) => i.observationDate)).toBe(true);
   });
 
   it('maps fully dovish-leaning inputs to dovish zone', () => {

@@ -8,18 +8,25 @@
  */
 import type { SubscriptionTier } from '@/types/shapes';
 
-/** Paid plans — USD pricing approximate, finalized before W5 launch. */
+/**
+ * Paid support tiers — USD pricing approximate.
+ * No feature differentiation in V1; amounts differ only.
+ */
 export const POLAR_PLANS = {
   pro: {
     tier: 'pro' as const,
-    label: 'Pro',
+    label: '프로',
+    supportLabel: '기본 지원',
     priceUsd: 19,
+    blurb: '서버·API 운영비에 기여해 주세요.',
     productEnvVar: 'POLAR_PRODUCT_ID_PRO',
   },
   premium: {
     tier: 'premium' as const,
-    label: 'Premium',
+    label: '프리미엄',
+    supportLabel: '넉넉한 지원',
     priceUsd: 59,
+    blurb: '학습 프로젝트를 더 오래 이어 가는 데 도움이 됩니다.',
     productEnvVar: 'POLAR_PRODUCT_ID_PREMIUM',
   },
 } as const;

@@ -36,12 +36,12 @@ describe('TermsPage', () => {
     render(<TermsPage />);
     expect(screen.getByText(/개별 종목 매수\/매도 추천/)).toBeDefined();
     expect(screen.getByText(/구체적 비중 권장/)).toBeDefined();
-    expect(screen.getByText(/timing 추천/)).toBeDefined();
+    expect(screen.getByText(/매매 시점 추천/)).toBeDefined();
   });
 
-  it('names Toss Payments KRW as the payment processor', () => {
+  it('names 토스페이먼츠 as the payment processor', () => {
     render(<TermsPage />);
-    expect(screen.getByText(/토스페이먼츠\(Toss Payments\)/)).toBeDefined();
+    expect(screen.getByText(/토스페이먼츠를 통해 원화\(KRW\)로 결제/)).toBeDefined();
   });
 
   it('sets 서울중앙지방법원 as the 1st-instance jurisdiction', () => {

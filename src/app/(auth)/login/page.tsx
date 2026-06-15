@@ -34,7 +34,7 @@ function LoginForm() {
     }
 
     // Honor the ?redirect= set by middleware; default to the authenticated home.
-    const redirect = params.get('redirect') ?? '/shape-a';
+    const redirect = params.get('redirect') ?? '/dashboard';
     router.push(redirect);
     router.refresh();
   }

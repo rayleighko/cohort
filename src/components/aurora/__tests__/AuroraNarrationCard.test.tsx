@@ -27,6 +27,7 @@ const SAMPLE_ARCHIVE: LatestNarration = {
   category: 'morning_brief',
   zone: 'neutral-dovish',
   createdAt: '2026-05-26T01:00:00.000Z',
+  asOfDate: '2026-05-27',
   isArchive: true,
 };
 
@@ -47,6 +48,7 @@ describe('AuroraNarrationBody — D25 archive fallback', () => {
       data: undefined,
       error: undefined,
       isLoading: true,
+      isValidating: true,
     });
     render(<AuroraNarrationBody composite={SAMPLE_COMPOSITE} />);
     expect(
@@ -66,6 +68,7 @@ describe('AuroraNarrationBody — D25 archive fallback', () => {
       },
       error: undefined,
       isLoading: true,
+      isValidating: true,
     });
     render(
       <AuroraNarrationBody
@@ -87,6 +90,7 @@ describe('AuroraNarrationBody — D25 archive fallback', () => {
       },
       error: undefined,
       isLoading: true,
+      isValidating: true,
     });
     render(
       <AuroraNarrationBody
@@ -171,6 +175,7 @@ describe('AuroraNarrationBody — D25 archive fallback', () => {
       },
       error: undefined,
       isLoading: true,
+      isValidating: true,
     });
     render(
       <AuroraNarrationBody
@@ -187,11 +192,12 @@ describe('AuroraNarrationBody — D25 archive fallback', () => {
     expect(swrConfig.revalidateOnMount).toBe(true);
   });
 
-  it('omits fallbackData and revalidateOnMount when initialArchive is null', () => {
+  it('omits fallbackData when initialArchive is null', () => {
     swrMock.mockReturnValue({
       data: undefined,
       error: undefined,
       isLoading: true,
+      isValidating: true,
     });
     render(
       <AuroraNarrationBody composite={SAMPLE_COMPOSITE} initialArchive={null} />,
@@ -201,6 +207,6 @@ describe('AuroraNarrationBody — D25 archive fallback', () => {
       revalidateOnMount?: boolean;
     };
     expect(swrConfig.fallbackData).toBeUndefined();
-    expect(swrConfig.revalidateOnMount).toBe(false);
+    expect(swrConfig.revalidateOnMount).toBe(true);
   });
 });

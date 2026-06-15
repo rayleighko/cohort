@@ -5,16 +5,16 @@ type Row = {
   category: string;
   composite_snapshot: unknown;
   created_at: string;
+  triggered: boolean;
 };
 
 interface SupabaseResult {
-  data: Row | null;
+  data: Row[] | null;
   error: { message: string } | null;
 }
 
 const chain = {
-  // these are reset per test in beforeEach
-  result: { data: null as Row | null, error: null as { message: string } | null } as SupabaseResult,
+  result: { data: [] as Row[], error: null as { message: string } | null } as SupabaseResult,
   throwOnCall: null as Error | null,
 };
 
@@ -37,21 +37,19 @@ function setSupabaseThrow(err: Error) {
 }
 
 beforeEach(() => {
-  chain.result = { data: null, error: null };
+  chain.result = { data: [], error: null };
   chain.throwOnCall = null;
 
   mockedCreateAdminClient.mockClear();
   mockedFrom.mockReset();
   mockedFrom.mockImplementation((_table: string) => {
     if (chain.throwOnCall) throw chain.throwOnCall;
-    const selfReturning = {
+    return {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn(async () => chain.result),
+      limit: vi.fn(async () => chain.result),
     };
-    return selfReturning;
   });
 
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -62,84 +60,101 @@ afterEach(() => {
 });
 
 describe('getLatestNarration', () => {
-  it('returns null when the table is empty (maybeSingle resolves data=null)', async () => {
-    setSupabaseResult({ data: null, error: null });
+  it('returns null when the table is empty', async () => {
+    setSupabaseResult({ data: [], error: null });
     const result = await getLatestNarration();
     expect(result).toBeNull();
     expect(mockedCreateAdminClient).toHaveBeenCalledOnce();
     expect(mockedFrom).toHaveBeenCalledWith('aurora_narration_log');
   });
 
-  it('returns the row with isArchive=true and zone from composite_snapshot', async () => {
+  it('returns the latest row when no preferredAsOfDate is given', async () => {
     setSupabaseResult({
-      data: {
-        text: '오늘의 cohort. 한국 macro composite는 +2.3 (neutral-dovish).',
-        category: 'morning_brief',
-        composite_snapshot: { zone: 'neutral-dovish' },
-        created_at: '2026-05-27T01:00:00.000Z',
-      },
+      data: [
+        {
+          text: '오늘의 cohort. 한국 macro composite는 +2.3 (neutral-dovish).',
+          category: 'morning_brief',
+          composite_snapshot: { zone: 'neutral-dovish', asOfDate: '2026-05-27' },
+          created_at: '2026-05-27T01:00:00.000Z',
+          triggered: false,
+        },
+      ],
       error: null,
     });
     const result = await getLatestNarration();
-    expect(result).not.toBeNull();
     expect(result?.text).toBe(
       '오늘의 cohort. 한국 macro composite는 +2.3 (neutral-dovish).',
     );
-    expect(result?.category).toBe('morning_brief');
-    expect(result?.zone).toBe('neutral-dovish');
-    expect(result?.createdAt).toBe('2026-05-27T01:00:00.000Z');
+    expect(result?.asOfDate).toBe('2026-05-27');
     expect(result?.isArchive).toBe(true);
+  });
+
+  it('returns the row matching preferredAsOfDate', async () => {
+    setSupabaseResult({
+      data: [
+        {
+          text: 'newer but wrong day',
+          category: 'morning_brief',
+          composite_snapshot: { zone: 'neutral', asOfDate: '2026-06-11' },
+          created_at: '2026-06-11T01:00:00.000Z',
+          triggered: false,
+        },
+        {
+          text: 'matched day brief',
+          category: 'morning_brief',
+          composite_snapshot: { zone: 'neutral-dovish', asOfDate: '2026-06-10' },
+          created_at: '2026-06-10T01:00:00.000Z',
+          triggered: false,
+        },
+      ],
+      error: null,
+    });
+    const result = await getLatestNarration('2026-06-10');
+    expect(result?.text).toBe('matched day brief');
+    expect(result?.asOfDate).toBe('2026-06-10');
+  });
+
+  it('returns null when preferredAsOfDate has no matching row (no stale cross-day archive)', async () => {
+    setSupabaseResult({
+      data: [
+        {
+          text: 'old brief',
+          category: 'morning_brief',
+          composite_snapshot: { zone: 'neutral', asOfDate: '2026-05-01' },
+          created_at: '2026-05-01T01:00:00.000Z',
+          triggered: false,
+        },
+      ],
+      error: null,
+    });
+    const result = await getLatestNarration('2026-06-11');
+    expect(result).toBeNull();
   });
 
   it('defaults zone to "neutral" when composite_snapshot lacks a zone field', async () => {
     setSupabaseResult({
-      data: {
-        text: 'fallback narration',
-        category: 'morning_brief',
-        composite_snapshot: { score: 0.5 },
-        created_at: '2026-05-26T01:00:00.000Z',
-      },
+      data: [
+        {
+          text: 'fallback narration',
+          category: 'morning_brief',
+          composite_snapshot: { score: 0.5, asOfDate: '2026-05-26' },
+          created_at: '2026-05-26T01:00:00.000Z',
+          triggered: false,
+        },
+      ],
       error: null,
     });
-    const result = await getLatestNarration();
+    const result = await getLatestNarration('2026-05-26');
     expect(result?.zone).toBe('neutral');
   });
 
-  it('defaults zone to "neutral" when composite_snapshot is null', async () => {
-    setSupabaseResult({
-      data: {
-        text: 'narration without snapshot',
-        category: 'morning_brief',
-        composite_snapshot: null,
-        created_at: '2026-05-26T01:00:00.000Z',
-      },
-      error: null,
-    });
-    const result = await getLatestNarration();
-    expect(result?.zone).toBe('neutral');
-  });
-
-  it('applies category=morning_brief + triggered=false + order DESC + limit 1 chain', async () => {
-    setSupabaseResult({ data: null, error: null });
+  it('queries recent morning brief rows (limit 30)', async () => {
+    setSupabaseResult({ data: [], error: null });
     await getLatestNarration();
-    // Capture the returned builder used during the call
     const builder = mockedFrom.mock.results[0]?.value as {
-      select: ReturnType<typeof vi.fn>;
-      eq: ReturnType<typeof vi.fn>;
-      order: ReturnType<typeof vi.fn>;
       limit: ReturnType<typeof vi.fn>;
-      maybeSingle: ReturnType<typeof vi.fn>;
     };
-    expect(builder.select).toHaveBeenCalledWith(
-      'text, category, composite_snapshot, created_at',
-    );
-    expect(builder.eq).toHaveBeenCalledWith('category', 'morning_brief');
-    expect(builder.eq).toHaveBeenCalledWith('triggered', false);
-    expect(builder.order).toHaveBeenCalledWith('created_at', {
-      ascending: false,
-    });
-    expect(builder.limit).toHaveBeenCalledWith(1);
-    expect(builder.maybeSingle).toHaveBeenCalledOnce();
+    expect(builder.limit).toHaveBeenCalledWith(30);
   });
 
   it('returns null and logs when Supabase reports an error', async () => {
@@ -150,7 +165,7 @@ describe('getLatestNarration', () => {
     expect(errorSpy).toHaveBeenCalled();
   });
 
-  it('returns null and logs when the admin client throws (env not set, network etc.)', async () => {
+  it('returns null and logs when the admin client throws', async () => {
     const errorSpy = vi.spyOn(console, 'error');
     setSupabaseThrow(new Error('admin_client_missing_env'));
     const result = await getLatestNarration();

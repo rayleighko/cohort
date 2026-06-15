@@ -22,11 +22,11 @@ import MascotAvatar from '@/components/mascot/MascotAvatar';
  * stored-consent expansion deferred to W4 full survey).
  *
  * Full onboarding survey follows consent in OnboardingFlow — default redirect
- * to /shape-a when `onConsentComplete` is not provided.
+ * to /dashboard when `onConsentComplete` is not provided.
  */
 interface ConsentModalProps {
   userId: string;
-  /** When set, runs after consent is saved instead of redirecting to /shape-a. */
+  /** When set, runs after consent is saved instead of redirecting to /dashboard. */
   onConsentComplete?: () => void;
 }
 
@@ -106,7 +106,7 @@ export default function ConsentModal({ userId, onConsentComplete }: ConsentModal
       return;
     }
 
-    router.push('/shape-a');
+    router.push('/dashboard');
     router.refresh();
   }
 

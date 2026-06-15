@@ -1,14 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getMacroSnapshot } from '@/lib/macro/snapshot';
 
-/**
- * Macro snapshot endpoint — public Tier 0 (no auth). Returns the macro
- * composite + raw indicators. ISR-cached for 1 hour.
- *
- * Partial fetch failures degrade (200 with `composite.degraded: true`);
- * total failure (no indicators recoverable) returns 503 with retry hint.
- */
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
   try {

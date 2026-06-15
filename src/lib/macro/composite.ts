@@ -6,6 +6,7 @@
  */
 import type { EcosObservation } from './ecos';
 import type { FredObservation } from './fred';
+import { kstTodayIso } from './kst-dates';
 
 export type MacroZone =
   | 'dovish'
@@ -18,6 +19,8 @@ export interface MacroIndicator {
   source: 'ecos' | 'fred';
   code: string;
   latest: number;
+  /** YYYY-MM-DD of the upstream observation backing `latest`. */
+  observationDate: string;
   normalized: number;
   weight: number;
   contribution: number;
@@ -114,6 +117,8 @@ export function computeMacroComposite(
       source: 'fred',
       code: 'KR_US_RATE_SPREAD',
       latest: spread,
+      observationDate:
+        krLatest.date > usLatest.date ? krLatest.date : usLatest.date,
       normalized,
       weight: WEIGHTS.kr_us_rate_spread,
       contribution: WEIGHTS.kr_us_rate_spread * normalized,
@@ -126,6 +131,7 @@ export function computeMacroComposite(
       source: 'ecos',
       code: 'USDKRW',
       latest: krwLatest.value,
+      observationDate: krwLatest.date,
       normalized,
       weight: WEIGHTS.krw_usd,
       contribution: WEIGHTS.krw_usd * normalized,
@@ -138,6 +144,7 @@ export function computeMacroComposite(
       source: 'fred',
       code: 'VIXCLS',
       latest: vixLatest.value,
+      observationDate: vixLatest.date,
       normalized,
       weight: WEIGHTS.vix,
       contribution: WEIGHTS.vix * normalized,
@@ -150,6 +157,7 @@ export function computeMacroComposite(
       source: 'fred',
       code: 'DTWEXBGS',
       latest: dxyLatest.value,
+      observationDate: dxyLatest.date,
       normalized,
       weight: WEIGHTS.dxy,
       contribution: WEIGHTS.dxy * normalized,
@@ -182,7 +190,7 @@ export function computeMacroComposite(
     [krLatest, krwLatest, usLatest, vixLatest, dxyLatest].reduce<string>(
       (max, o) => (o && o.date > max ? o.date : max),
       '',
-    ) || new Date().toISOString().slice(0, 10);
+    ) || kstTodayIso();
 
   const result: MacroComposite = {
     score,

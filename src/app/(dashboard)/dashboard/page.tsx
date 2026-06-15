@@ -9,10 +9,8 @@ import {
   type LatestNarration,
 } from '@/lib/aurora/get-latest-narration';
 import type { MacroComposite, MacroZone } from '@/lib/macro/composite';
-
-// Strategic Decision 0 Option B: zone label uses neutral monetary register
-// only. No allocation, timing, or buy/sell copy anywhere on this surface.
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata = {
   title: '오늘의 cohort — Macro Dashboard',
@@ -225,7 +223,7 @@ function NarrationBlock({
     <details className="group overflow-hidden rounded-2xl bg-white shadow-sm sm:shadow">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <span className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-aurora-calm">
-          <span aria-hidden="true">🕊</span> Aurora morning brief
+          <span aria-hidden="true">🕊</span> 오로라 아침 브리핑
         </span>
         <span className="font-mono text-xs text-cohort-ink-70">
           <span className="group-open:hidden">펼치기 ▾</span>
@@ -244,10 +242,8 @@ function NarrationBlock({
 
 async function MacroBody() {
   try {
-    const [{ composite, fetchedAt }, initialArchive] = await Promise.all([
-      getMacroSnapshot(),
-      getLatestNarration(),
-    ]);
+    const { composite, fetchedAt } = await getMacroSnapshot();
+    const initialArchive = await getLatestNarration(composite.asOfDate);
     return (
       <div className="flex flex-col gap-6">
         <header className="flex items-end justify-between gap-4">
@@ -255,6 +251,10 @@ async function MacroBody() {
             <p className="font-mono text-sm text-cohort-ink-70">
               기준일 {formatAsOf(composite.asOfDate)} · 갱신{' '}
               {formatKst(fetchedAt)} KST
+            </p>
+            <p className="text-xs text-cohort-ink-50 break-keep">
+              매크로는 요청 시 ECOS·FRED에서 불러옵니다. 7일 변화는 KST 기준
+              영업일 관측치 비교입니다.
             </p>
             <h1 className="break-keep text-2xl font-medium text-cohort-ink-90 sm:text-3xl">
               오늘의 cohort.
