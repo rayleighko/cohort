@@ -23,6 +23,8 @@
 |------|------|
 | [`engineering/agent-harness.md`](engineering/agent-harness.md) | 서브에이전트·브랜치·PR·머지 (integration tax 대응) |
 | [`engineering/tdd-ddd-playbook.md`](engineering/tdd-ddd-playbook.md) | v2부터 실운용할 TDD + DDD 경계 |
+| [`engineering/data-platform-strategy.md`](engineering/data-platform-strategy.md) | **DB-first** ingest — macro, OHLCV, ETL, legal gate |
+| [`engineering/implementation-standards.md`](engineering/implementation-standards.md) | **Performance · algorithms · API quality bar** (Ray 2026-06) |
 | [`engineering/docker-local.md`](engineering/docker-local.md) | 로컬 Docker / 향후 monorepo 레이아웃 |
 | [`engineering/dependency-upgrades.md`](engineering/dependency-upgrades.md) | Stack versions, removed deps, deferred bumps |
 | [`engineering/observability.md`](engineering/observability.md) | PostHog · Sentry · Prometheus/Grafana — 무엇을 볼 것인가 |

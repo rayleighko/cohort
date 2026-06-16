@@ -7,6 +7,29 @@
 
 ## Closed decisions
 
+### 2026-06-12 — Implementation quality bar
+
+**Asked by:** Ray  
+**Decision:** **No performance compromise on hot paths.** Prefer optimal/rational design; medium-term-necessary work (algorithms, DB-first, domain extract) gets extra effort now vs deferring hacks.
+
+**SoT:** [`implementation-standards.md`](implementation-standards.md) + `.cursor/rules/implementation-standards.mdc`
+
+---
+
+### 2026-06-12 — Data platform: DB-first ingest
+
+**Asked by:** Ray (product direction)  
+**Question:** Store commercial/public API data in our DB when possible?  
+**Decision:** **Yes — default DB-first** via ETL/worker; user requests read materialized tables.
+
+**Rationale:** Cost, reuse, backtest, reproducibility, optimization.
+
+**Gate:** Legal ToS + PIPA + Option B (facts only, no advisory ground truth).
+
+**SoT:** [`data-platform-strategy.md`](data-platform-strategy.md)
+
+---
+
 ### 2026-06-12 — Q5 Aurora brief + chat gate
 
 **Question:** Brief open vs chat-only lock vs both lock?  
@@ -62,6 +85,8 @@
 \* Scraping — not exchange-licensed; educational/backtest disclaimer; rate limit + cache.
 
 **Full analysis:** [`../versions/v3-learning-cycle/backtest-data-strategy.md`](../versions/v3-learning-cycle/backtest-data-strategy.md)
+
+**Platform principle (all domains):** [`../engineering/data-platform-strategy.md`](../engineering/data-platform-strategy.md) — DB-first when legal/technical OK.
 
 ---
 

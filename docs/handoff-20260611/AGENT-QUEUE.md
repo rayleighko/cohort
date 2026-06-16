@@ -16,9 +16,9 @@
 |----|------|-----------|------|--------|---------|
 | A1 | 로컬 diff 정리: macro/Aurora freshness + support UI + terms/privacy KO | parent agent | tsc + vitest macro/aurora | ⬜ | — |
 | A2 | `docs/handoff` 동기화 (HANDOFF + RUN-STATUS) | parent | — | 🔄 | — |
-| A3 | `.env.local.example`에 `TOSS_*` + `TOSS_LAB_ENABLED` | parent | — | ⬜ | — |
-| A4 | **Ray: commit + push** (1–3 commits, Conventional) | Ray | pre-push hook | 🚫 | A1, Ray OK |
-| A5 | Vercel redeploy + PostHog 퍼널 smoke | Ray | manual | 🚫 | A4 |
+| A3 | `.env.local.example`에 `TOSS_*` + `TOSS_LAB_ENABLED` | parent | — | ✅ | — |
+| A4 | **Ray: commit + push** (1–3 commits, Conventional) | Ray | pre-push hook | 🔄 | docs + 09d6b5b push |
+| A5 | Vercel redeploy + PostHog 퍼널 smoke | Ray | manual | ⬜ | A4 |
 
 **A1 디스패치 (병렬 가능):**
 - `cohort-design-system` + `cohort-accessibility-auditor` — SubscriptionPanel, settings (UI touch 시)
@@ -30,9 +30,9 @@
 
 | ID | Task | Sub-agent | Gate | Status | Depends |
 |----|------|-----------|------|--------|---------|
-| B1 | GitHub Actions CI (Task 2) | `shell` + parent | CI green | ✅ | A4 권장 |
-| B2 | `postgres_migration_history.md` 0004–0013 백필 | parent | — | ⬜ | — |
-| B3 | CLAUDE.md Polar/Toss drift 수정 | parent | — | ⬜ | — |
+| B1 | GitHub Actions CI (Task 2) | `shell` + parent | CI green | ✅ | push 후 verify |
+| B2 | `postgres_migration_history.md` 0004–0013 백필 | parent | — | ✅ | 0014 추가 |
+| B3 | CLAUDE.md Polar/Toss drift 수정 | parent | — | ✅ | main.mdc |
 
 ---
 
@@ -58,7 +58,7 @@ process.env.NODE_ENV === 'development' && process.env.TOSS_LAB_ENABLED === 'true
 
 | ID | Task | Status | Note |
 |----|------|--------|------|
-| D1 | `.cursor/mcp.json` token 제거 | ⬜ | Task 0 |
+| D1 | `.cursor/mcp.json` token 제거 | ✅ | env ref only |
 | D2 | `lawyer-attachments-html/` 삭제 + filter-repo | 🚫 | **Ray 명시 승인** |
 | D3 | gitleaks scan | ⬜ | D2 후 |
 
@@ -87,6 +87,8 @@ After each task:
 5. Do NOT push unless AGENT-QUEUE says batch end
 
 Stop and report blocked if: filter-repo, scoreGlRts implementation, or production secrets needed.
+
+**Implementation quality:** All API/macro/aurora/worker PRs must satisfy [`docs/engineering/implementation-standards.md`](../engineering/implementation-standards.md) §8 checklist.
 ```
 
 ---

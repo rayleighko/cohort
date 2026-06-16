@@ -1,0 +1,34 @@
+---
+description: Implementation quality bar — performance, algorithms, DB-first API patterns. Full doc docs/engineering/implementation-standards.md
+globs:
+  - src/**/*
+  - supabase/migrations/**
+alwaysApply: true
+---
+
+# Implementation Standards (summary)
+
+Full SoT: `docs/engineering/implementation-standards.md`
+
+## Non-negotiables for API & backend code
+
+1. **User-facing handlers never fan out** to N upstream HTTP calls — read Postgres materialized data or enqueue `ingest_job`.
+2. **Cache before Claude** — `aurora_narration_log` / quota paths first.
+3. **Parallel independent I/O** — `Promise.all` in RSC; no sequential waterfall.
+4. **Idempotent cron + upsert** — safe retries; indexed lookups.
+5. **Correct algorithm on hot paths** — if medium-term need (drift, backtest, macro DB, ingest queue), **implement the better design** even at higher short-term cost; log deferrals in journal only with Ray scope.
+
+## Cohort hot paths
+
+- Macro dashboard / series API
+- Aurora narration + chat
+- Shape C cron
+- Future: OHLCV ingest worker, drift calc
+
+## PR gate
+
+Agent PRs touching `src/app/api/**`, `src/lib/macro/**`, `src/lib/aurora/**`, workers, or migrations must confirm implementation-standards checklist §8.
+
+## Anti-patterns
+
+IP-1 live API fan-out · IP-2 Claude without cache · IP-3 unbounded cron scan · IP-4 O(n²) portfolio on load · IP-5 defer v2 data platform without journal

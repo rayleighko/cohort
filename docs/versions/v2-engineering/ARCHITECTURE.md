@@ -16,6 +16,7 @@ v2 = **same product boundary (Option B)**, but **engineering discipline** for po
 - Local Docker stack for Postgres + optional worker
 - Sub-agents on **short-lived branches → PR → human merge**
 - Observability runbooks (what to watch when something breaks)
+- **DB-first data platform** — upstream API → Postgres → app ([`../../engineering/data-platform-strategy.md`](../../engineering/data-platform-strategy.md))
 
 ---
 
@@ -46,6 +47,8 @@ flowchart TB
   APP --> PKG_PROFILE
   APP --> PKG_BROKER
   WORKER --> PKG_PROFILE
+  WORKER --> SUPA
+  CRON_ETL["workers/ingest — macro + OHLCV ETL"] --> SUPA
   APP --> VERCEL
   APP --> SUPA
   local -.->|dev only| APP
@@ -80,6 +83,9 @@ Contexts talk via **application services** and **shared types** — not direct D
 | V2-4 | `BrokerPort` + Toss lab read-only | Mock adapter tests |
 | V2-5 | Docker Compose dev DB | smoke script in CI optional job |
 | V2-6 | Drift dashboard scaffold (L2) | fixture portfolio → drift calc unit tests |
+| V2-7 | **Data platform DP-1–3** | `macro_observation` + OHLCV schema; dashboard reads DB |
+
+**Data ingest SoT:** [`../../engineering/data-platform-strategy.md`](../../engineering/data-platform-strategy.md)
 
 ---
 

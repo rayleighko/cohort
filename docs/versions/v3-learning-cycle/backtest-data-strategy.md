@@ -120,3 +120,5 @@ market_ohlcv_daily (symbol_id, trade_date, open, high, low, close, volume, sourc
 - US coverage → free but **slow** (Alpha Vantage 25/day) or **manual Stooq bulk**
 - Production-grade licensed KR feed → **paid** later
 - **Best path:** BT-0 CSV + BT-1 KR ETL + lazy US seed; revisit EODHD when users > pivot threshold
+
+**Platform principle (all domains):** [`../../engineering/data-platform-strategy.md`](../../engineering/data-platform-strategy.md)

@@ -34,7 +34,7 @@ alwaysApply: true
 
 - Frontend: Next.js 14 + TypeScript + Tailwind + PWA (manifest + service worker)
 - Backend: Supabase (Postgres + Auth + RLS + Realtime + Storage)
-- Payment: Toss Payments KRW V1 (W5 Wed live) + Polar USD V1 parallel + Polar legacy retain
+- Payment: Polar (MoR, USD — Pro $19 / Premium $59). Toss Open API는 **로컬 lab만** (`TOSS_LAB_ENABLED`, Vercel prod 금지). KRW live는 오픈 퀘스천 (docs/handoff-20260611/cohort-ideation-2026-06.md §9)
 - AI: Claude API — `claude-haiku-4-5-20251001` (safety filter Layer 2) + `claude-sonnet-4-6` (default per vault 62 §2.1 — env flag `AURORA_MODEL_ROUTING_ENABLED=false` 영역 V1 Sonnet default). `claude-opus-4-6` reserved.
 - Delivery: Resend (email) + Web Push API + 카카오 알림톡 (Tier 2+ — vault 56 D9 2-track)
 - Analytics: PostHog + Sentry
@@ -46,7 +46,7 @@ alwaysApply: true
 2. **Mobile-first PWA strict** — Tailwind mobile-first, vertical stack, 44px+ touch, bottom-fixed CTA, manifest+SW required.
 3. **Dual mascot safety filter 3-layer (bidirectional)** — Layer 1 regex + Layer 2 Haiku classifier + Layer 3 redirect. All Claude API calls (Aurora + Vesper) pass through. Bidirectional (input + output) per Day 11 (commit 309f6ca).
 4. **PIPA compliance strict** — Onboarding consent + Supabase RLS + 즉시 삭제 + Privacy/ToS before W5 launch. Q2 portfolio composition `JSONB` % 비율만 (절대 금액 X).
-5. **Sprint 0 5-week cap** — V1 = Shape A polish + Shape C build (Behavioral Guard) + Aurora chat evolution + Toss live + Viral Option A + Layer 1 Opus daily cache + Daily Archive View. V2 explicitly deferred.
+5. **Sprint 0 5-week cap** — V1 = Shape A polish + Shape C build (Behavioral Guard) + Aurora chat evolution + Polar live + Viral Option A + Layer 1 Opus daily cache + Daily Archive View. V2 explicitly deferred.
 
 ## Vault references (key files — `~/Documents/elevate-portfolio/`)
 

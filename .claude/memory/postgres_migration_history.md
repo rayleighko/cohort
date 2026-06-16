@@ -1,6 +1,6 @@
 ---
 name: postgres-migration-history
-description: Cohort Supabase migrations 0001-0013 — schema · polar · waitlist · narration/chat · quota · profile · shape C · notifications · RLS hotfix. Idempotency + repair convention
+description: Cohort Supabase migrations 0001-0014 — schema · polar · waitlist · narration/chat · quota · profile · shape C · notifications · RLS hotfix · GL-RTS answers. Idempotency + repair convention
 metadata:
   type: reference
   verified_at: 2026-06-11
@@ -25,6 +25,7 @@ Migrations live in `supabase/migrations/` (repo-relative). Applied via `supabase
 | 0011_user_notification_preference.sql | W4 Thu | user_notification_preference — channel opt-in + quiet hours (PIPA opt-in) |
 | 0012_aurora_narration_log_anon_select.sql | W5 Wed | aurora_narration_log anon SELECT policy + table separation contract (D25 archive fallback) |
 | 0013_user_profile_insert_rls.sql | W5 Wed Hotfix #7 | user_profile INSERT RLS policy + UPDATE WITH CHECK 강화 (onboarding 동의 저장 403 root cause) |
+| 0014_profile_gl_rts_answers.sql | 2026-06-11 Task 4 | user_investment_profile — `gl_rts_answers JSONB`, `profile_version` default `glrts-ko-v0.1` (채점은 Task 5) |
 
 **Convention**:
 - All migrations idempotent (`IF NOT EXISTS`, `CREATE POLICY IF NOT EXISTS` via DO block)

@@ -27,6 +27,7 @@ flowchart LR
 | Aurora brief | Cached by date in DB; safety-filtered narration |
 | Chat | Quota by tier; bidirectional safety filter |
 | Cron | **Trigger evaluation only** — not macro refresh |
+| Data | **DB-first target** — macro/OHLCV ETL → Postgres ([`docs/engineering/data-platform-strategy.md`](docs/engineering/data-platform-strategy.md)) |
 
 **Full v1 diagram & file map:** [`docs/versions/v1-main/ARCHITECTURE.md`](docs/versions/v1-main/ARCHITECTURE.md)
 
