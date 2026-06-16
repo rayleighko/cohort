@@ -6,6 +6,7 @@ Incremental DDD layout — see [`docs/engineering/tdd-ddd-playbook.md`](../../do
 |---------|------|--------|
 | Macro | `macro/` | POC re-export from `src/lib/macro` |
 | Profile | `profile/` | GL-RTS scoring (Task 5 — Ray Green) |
+| Principle | `principle/` | IPS wizard schema (C3) |
 | Broker | `broker/` | Toss lab (deferred) |
 | Pace | `pace/` | Shape C (deferred) |
 
