@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Global error boundary — Next.js 14 app router required pattern for
+ * Global error boundary — App Router required pattern for
  * Sentry React render error capture (Sentry 8.0+ recommendation).
  *
  * Source: https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/#react-render-errors-in-app-router

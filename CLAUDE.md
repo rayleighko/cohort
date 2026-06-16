@@ -16,7 +16,7 @@
 
 ## Stack
 
-- Frontend: Next.js 14 + TypeScript + Tailwind + PWA (manifest + service worker)
+- Frontend: Next.js 16 + React 19 + TypeScript 5.9 + Tailwind 3.4 + PWA (manifest + service worker)
 - Backend: Supabase (Postgres + Auth + RLS + Realtime + Storage)
 - Payment: Polar (MoR, USD — Pro $19 / Premium $59). Toss Payments는 코드에 미구현 (KRW 결제 전략은 오픈 퀘스천 — docs/handoff-20260611/cohort-ideation-2026-06.md §9)
 - AI: Claude API — `claude-haiku-4-5-20251001` (safety filter Layer 2) + `claude-sonnet-4-6` (Aurora/Vesper chat). `claude-opus-4-6` reserved.

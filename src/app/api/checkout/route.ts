@@ -12,7 +12,7 @@ import { productIdForPlan, type PaidPlan } from '@/lib/polar/plans';
  * and returns the hosted `checkout.url` for the client to redirect to.
  */
 export async function POST(request: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

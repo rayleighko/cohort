@@ -14,10 +14,11 @@ import DeleteAccountButton from '@/components/account/DeleteAccountButton';
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: { checkout?: string };
+  searchParams: Promise<{ checkout?: string }>;
 }) {
   const tier = await loadTierState();
-  const checkoutSuccess = searchParams.checkout === 'success';
+  const resolvedSearchParams = await searchParams;
+  const checkoutSuccess = resolvedSearchParams.checkout === 'success';
 
   return (
     <main className="mx-auto max-w-md px-6 py-10">

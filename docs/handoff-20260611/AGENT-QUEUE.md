@@ -30,7 +30,7 @@
 
 | ID | Task | Sub-agent | Gate | Status | Depends |
 |----|------|-----------|------|--------|---------|
-| B1 | GitHub Actions CI (Task 2) | `shell` + parent | CI green | ⬜ | A4 권장 |
+| B1 | GitHub Actions CI (Task 2) | `shell` + parent | CI green | ✅ | A4 권장 |
 | B2 | `postgres_migration_history.md` 0004–0013 백필 | parent | — | ⬜ | — |
 | B3 | CLAUDE.md Polar/Toss drift 수정 | parent | — | ⬜ | — |
 

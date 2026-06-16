@@ -97,9 +97,9 @@ function pickClosestToOffset(
 
 export async function GET(
   _request: NextRequest,
-  context: { params: { code: string } },
+  context: { params: Promise<{ code: string }> },
 ): Promise<NextResponse> {
-  const code = context.params.code;
+  const { code } = await context.params;
   if (typeof code !== 'string' || !ALLOWED_CODES.includes(code)) {
     return noStoreOnError(
       { error: 'unknown_code', allowed: ALLOWED_CODES },

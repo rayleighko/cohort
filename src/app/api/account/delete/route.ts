@@ -21,7 +21,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
  * (aurora_narration_log은 anonymous Tier 0 — user_id 컬럼 없음, 삭제 X 정합)
  */
 export async function POST(_request: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

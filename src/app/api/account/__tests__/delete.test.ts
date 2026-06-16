@@ -18,7 +18,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 const FAKE_USER = { id: 'user-uuid-1' };
 
 function mockAuth(user: typeof FAKE_USER | null) {
-  (createClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+  (createClient as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user } }),
       signOut: vi.fn().mockResolvedValue({ error: null }),

@@ -30,7 +30,7 @@ const COOLDOWN_MAX = 168;
 // ── GET — list triggers ───────────────────────────────────────────────────────
 
 export async function GET() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -56,7 +56,7 @@ export async function GET() {
 // ── POST — create trigger ─────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
 // ── PATCH — update trigger ────────────────────────────────────────────────────
 
 export async function PATCH(request: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -216,7 +216,7 @@ export async function PATCH(request: NextRequest) {
 // ── DELETE — soft-delete trigger ──────────────────────────────────────────────
 
 export async function DELETE(request: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

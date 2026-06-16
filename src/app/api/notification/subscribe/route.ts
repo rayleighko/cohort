@@ -44,7 +44,7 @@ function isValidSubscription(
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   const {
     data: { user },
     error: authErr,

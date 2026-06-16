@@ -15,6 +15,9 @@ import { updateSession } from '@/lib/supabase/middleware';
 const AB_COOKIE = 'cohort-ab-variant';
 const AB_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
+/** Set after first authenticated visit to `/` — allows return to landing in same session. */
+export const LANDING_PASS_COOKIE = 'cohort-landing-pass';
+
 /** Random A/B/C assignment, evenly weighted. */
 function assignAbVariant(): 'A' | 'B' | 'C' {
   const r = Math.random();
@@ -68,6 +71,26 @@ export async function middleware(request: NextRequest) {
     url.pathname = '/dashboard';
     url.search = '';
     return redirectWithCookies(url, response);
+  }
+
+  // First landing hit per session: signed-in users → dashboard (skip re-marketing).
+  // After `cohort-landing-pass` cookie is set, `/` renders normally (footer 홈 link).
+  if (
+    user &&
+    pathname === '/' &&
+    !request.cookies.get(LANDING_PASS_COOKIE)
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard';
+    url.search = '';
+    const redirect = redirectWithCookies(url, response);
+    redirect.cookies.set(LANDING_PASS_COOKIE, '1', {
+      sameSite: 'lax',
+      httpOnly: true,
+      path: '/',
+      // Session cookie — new browser session gets one auto-redirect again.
+    });
+    return redirect;
   }
 
   // Assign a sticky A/B variant on the landing page if not already set.

@@ -1,50 +1,81 @@
 # Cohort
 
-> Your investing cohort.
+> Your investing cohort — the investing pace companion for sophisticated retail.
 
-The investing pace companion for sophisticated retail — with **Aurora 🕊** (the dove) and **Vesper 🦅** (the hawk) at your side.
+**Live:** [cohort.co.kr](https://www.cohort.co.kr/) · **Docs index:** [`docs/README.md`](docs/README.md)
 
-## Brand
+Aurora 🕊 (patient pace) and Vesper 🦅 (sharp signals) help you stay on **your** plan — not ours.  
+**Option B:** Information + Tool + Decision Support only. No investment advice, no auto-trading.
 
-- **Name**: Cohort / 코호트
-- **Etymology**: Latin *cohors* — a group sharing a journey (originally a Roman military unit)
-- **Mascots**: Aurora (the dovish, patient pace-keeper) + Vesper (the hawkish, sharp opportunity-sensor)
-- **Visual identity**: 석류 (Pomegranate) — seeds united in one fruit
-- **Brand color**: deep pomegranate red (`#A8243F`)
+---
 
-## Tagline
+## Architecture at a glance (`main`)
 
-> 본인 plan과 cohort — 흔들리지 않는 페이스.
-> Your investing cohort. Stay on pace, with Aurora and Vesper.
+```mermaid
+flowchart LR
+  User["Browser PWA"] --> Next["Next.js 16 on Vercel"]
+  Next --> Supa["Supabase Auth + Postgres RLS"]
+  Next --> Macro["ECOS + FRED macro"]
+  Next --> AI["Claude Aurora/Vesper"]
+  Next --> Cron["Shape C triggers cron"]
+  AI --> Safety["3-layer safety filter"]
+```
 
-## Status
+| Path | What happens |
+|------|----------------|
+| `/dashboard` | Server-rendered macro snapshot (KST dates, ~15m cache) |
+| Aurora brief | Cached by date in DB; safety-filtered narration |
+| Chat | Quota by tier; bidirectional safety filter |
+| Cron | **Trigger evaluation only** — not macro refresh |
 
-Sprint 0 W1 — Foundation
-(Next.js 14 + Tailwind + PWA shell + Supabase + Toss Payments + Claude API)
+**Full v1 diagram & file map:** [`docs/versions/v1-main/ARCHITECTURE.md`](docs/versions/v1-main/ARCHITECTURE.md)
+
+---
+
+## Version roadmap (docs-first)
+
+| Version | Branch | Doc |
+|---------|--------|-----|
+| **v1** (now) | `main` | [`docs/versions/v1-main/`](docs/versions/v1-main/ARCHITECTURE.md) |
+| **v2** (next) | `version/v2-engineering` | TDD/DDD, CI, Docker, IPS, BrokerPort — [`docs/versions/v2-engineering/`](docs/versions/v2-engineering/ARCHITECTURE.md) |
+| **v3** (vision) | `version/v3-learning` | Quiz, quarterly review, backtest — [`docs/versions/v3-learning-cycle/`](docs/versions/v3-learning-cycle/VISION.md) |
+
+**Before v2 branch:** [`docs/engineering/phase-0-closeout.md`](docs/engineering/phase-0-closeout.md)
+
+Branch rules · agent PR workflow · journal: [`docs/engineering/`](docs/engineering/)
+
+---
 
 ## Stack
 
-- **Frontend**: Next.js 14 + Tailwind (mobile-first) + PWA (manifest + service worker)
-- **Backend**: Supabase (Postgres + Auth + RLS + Realtime + Storage)
-- **Payment**: Toss Payments (KRW V1) + Polar (USD Sprint 1+)
-- **AI**: Claude API + Aurora/Vesper dual persona + 자본시장법 safety filter (3-layer)
-- **Delivery**: Resend (email) + Web Push API + 카카오 알림톡 (Tier 2+)
-- **Analytics**: PostHog + Sentry
-- **Hosting**: Vercel + Supabase managed
-- **Domain**: cohort.co.kr (Korean V1) + cohort.fund/cohort.app (영문 Sprint 1+)
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 16 App Router, React 19, Tailwind 3.4, PWA |
+| Backend | Supabase (Postgres, Auth, RLS) |
+| AI | Claude (Sonnet chat/narration, Haiku safety) |
+| Payments | Polar (USD support tier) |
+| Analytics | PostHog, Sentry |
+| Hosting | Vercel + Supabase managed |
+| Runtime | Node ≥ 20.9 · **no NestJS** (Next monolith only) |
+| Local dev | `docker compose up -d postgres` — [`docs/engineering/docker-local.md`](docs/engineering/docker-local.md) |
 
-## Sprint roadmap (5-week cap)
+---
 
-- **W1**: Foundation (PWA shell + Auth + Payment scaffold + Mascot chat + Landing)
-- **W2**: Tier 0 Macro Dashboard + Aurora narration
-- **W3**: Shape A full + Shape B initial + Watchlist
-- **W4**: Shape B full + Shape C initial + Onboarding survey + 카카오 비즈
-- **W5**: Behavioral guard + Billing live + Privacy/ToS + Launch
+## Engineering
 
-## Strategic positioning (locked)
+- **Deep dive + interview Q&A:** [`docs/architecture-system-design.md`](docs/architecture-system-design.md) *(not duplicated here)*
+- **Work journal:** [`docs/journal/2026-06-v1-ship/JOURNAL.md`](docs/journal/2026-06-v1-ship/JOURNAL.md)
+- **4-step product ladder (L1–L4):** [`docs/handoff-20260611/portfolio-tool-roadmap.md`](docs/handoff-20260611/portfolio-tool-roadmap.md)
 
-**Option B**: Information + Tool + Decision Support — NO 추천 / 권장 / 비중 X% / 자동 매매.
-자본시장법 자문업 trigger 회피 strict.
+---
+
+## Brand
+
+- **Name:** Cohort / 코호트 — Latin *cohors*, a group sharing a journey
+- **Visual:** 석류 (pomegranate) · **Color:** `#A8243F`
+- **Tagline:** 본인 plan과 cohort — 흔들리지 않는 페이스.
+
+---
 
 ## License
 

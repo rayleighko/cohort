@@ -62,7 +62,7 @@ export interface TierState {
  * Redirects to /login if unauthenticated, /onboarding if no profile row.
  */
 export async function loadTierState(): Promise<TierState> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

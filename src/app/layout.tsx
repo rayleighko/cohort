@@ -36,7 +36,7 @@ const baseMetadata: Metadata = {
 /**
  * generateMetadata — Sentry wizard requirement (Sentry.getTraceData propagates
  * server → client trace continuity via HTML metadata). Required by @sentry/nextjs
- * 8.0+ Next.js 14 app router pattern.
+ * 8.0+ App Router pattern.
  *
  * Note: Next.js requires `metadata` OR `generateMetadata`, not both. We chose
  * generateMetadata to inject runtime trace data on each request.

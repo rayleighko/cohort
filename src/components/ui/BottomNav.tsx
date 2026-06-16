@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { ReactElement } from 'react';
 
 /**
  * Mobile bottom navigation — fixed inside (dashboard) layout.
@@ -13,7 +14,7 @@ type Tab = {
   href: string;
   label: string;
   match: (pathname: string) => boolean;
-  icon: JSX.Element;
+  icon: ReactElement;
 };
 
 const TABS: Tab[] = [

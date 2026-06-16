@@ -11,7 +11,7 @@ import { getPolarClient } from '@/lib/polar/client';
  * Korean payment-agent mandatory self-cancellation requirement.
  */
 export async function POST(_request: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

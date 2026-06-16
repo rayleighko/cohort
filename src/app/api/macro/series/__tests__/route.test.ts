@@ -56,7 +56,7 @@ describe('GET /api/macro/series/[code]', () => {
     mockedFred.mockResolvedValueOnce(makeSeries(17.5, 2.5));
 
     const res = await GET(makeRequest(), {
-      params: { code: 'VIXCLS' },
+      params: Promise.resolve({ code: 'VIXCLS' }),
     });
 
     expect(res.status).toBe(200);
@@ -80,7 +80,7 @@ describe('GET /api/macro/series/[code]', () => {
     mockedEcos.mockResolvedValueOnce(makeSeries(1342.5, -10.0));
 
     const res = await GET(makeRequest(), {
-      params: { code: 'USDKRW' },
+      params: Promise.resolve({ code: 'USDKRW' }),
     });
 
     expect(res.status).toBe(200);
@@ -93,7 +93,7 @@ describe('GET /api/macro/series/[code]', () => {
 
   it('returns 404 for an unknown code with allowed list', async () => {
     const res = await GET(makeRequest(), {
-      params: { code: 'BTCUSD' },
+      params: Promise.resolve({ code: 'BTCUSD' }),
     });
 
     expect(res.status).toBe(404);
@@ -107,7 +107,7 @@ describe('GET /api/macro/series/[code]', () => {
 
   it('returns 404 for path traversal attempt', async () => {
     const res = await GET(makeRequest(), {
-      params: { code: '../../etc/passwd' },
+      params: Promise.resolve({ code: '../../etc/passwd' }),
     });
     expect(res.status).toBe(404);
   });
@@ -116,7 +116,7 @@ describe('GET /api/macro/series/[code]', () => {
     mockedEcos.mockRejectedValueOnce(new EcosFetchError('ECOS HTTP 503'));
 
     const res = await GET(makeRequest(), {
-      params: { code: 'KR_10Y' },
+      params: Promise.resolve({ code: 'KR_10Y' }),
     });
 
     expect(res.status).toBe(503);
@@ -130,7 +130,7 @@ describe('GET /api/macro/series/[code]', () => {
     mockedFred.mockRejectedValueOnce(new FredFetchError('FRED 429 rate limit'));
 
     const res = await GET(makeRequest(), {
-      params: { code: 'DGS10' },
+      params: Promise.resolve({ code: 'DGS10' }),
     });
 
     expect(res.status).toBe(503);
@@ -147,7 +147,7 @@ describe('GET /api/macro/series/[code]', () => {
     mockedFred.mockResolvedValueOnce(series);
 
     const res = await GET(makeRequest(), {
-      params: { code: 'DTWEXBGS' },
+      params: Promise.resolve({ code: 'DTWEXBGS' }),
     });
 
     expect(res.status).toBe(200);
@@ -159,7 +159,7 @@ describe('GET /api/macro/series/[code]', () => {
     mockedFred.mockResolvedValueOnce([]);
 
     const res = await GET(makeRequest(), {
-      params: { code: 'VIXCLS' },
+      params: Promise.resolve({ code: 'VIXCLS' }),
     });
 
     expect(res.status).toBe(200);
@@ -171,13 +171,13 @@ describe('GET /api/macro/series/[code]', () => {
 
   it('sets cache-control: no-store on 404 + 503 paths (no caching of error states)', async () => {
     const r404 = await GET(makeRequest(), {
-      params: { code: 'UNKNOWN' },
+      params: Promise.resolve({ code: 'UNKNOWN' }),
     });
     expect(r404.headers.get('cache-control')).toBe('no-store');
 
     mockedEcos.mockRejectedValueOnce(new EcosFetchError('boom'));
     const r503 = await GET(makeRequest(), {
-      params: { code: 'KR_10Y' },
+      params: Promise.resolve({ code: 'KR_10Y' }),
     });
     expect(r503.headers.get('cache-control')).toBe('no-store');
   });
@@ -191,7 +191,7 @@ describe('GET /api/macro/series/[code]', () => {
     ]);
 
     const res = await GET(makeRequest(), {
-      params: { code: 'VIXCLS' },
+      params: Promise.resolve({ code: 'VIXCLS' }),
     });
 
     expect(res.status).toBe(200);
@@ -213,7 +213,7 @@ describe('GET /api/macro/series/[code]', () => {
     ]);
 
     const res = await GET(makeRequest(), {
-      params: { code: 'VIXCLS' },
+      params: Promise.resolve({ code: 'VIXCLS' }),
     });
 
     expect(res.status).toBe(200);
@@ -234,7 +234,7 @@ describe('GET /api/macro/series/[code]', () => {
     mockedFred.mockResolvedValueOnce(dates);
 
     const res = await GET(makeRequest(), {
-      params: { code: 'DTWEXBGS' },
+      params: Promise.resolve({ code: 'DTWEXBGS' }),
     });
 
     expect(res.status).toBe(200);

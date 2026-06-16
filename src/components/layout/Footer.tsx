@@ -45,7 +45,7 @@ export function Footer() {
               <ul className="space-y-1.5 text-cohort-ink-70">
                 <li>
                   <Link
-                    href="/about"
+                    href="/"
                     className="transition-colors hover:text-cohort-primary"
                   >
                     소개

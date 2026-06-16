@@ -8,8 +8,11 @@
 ## 1. 현재 상태 (As-Is) — 레포 실측
 
 ### 1-1. 실제 구조
-- **모노레포 아님.** 단일 Next.js 14 App Router 앱 + Supabase. NestJS·Rust 백엔드 없음. (핸드오프 프롬프트의 "pnpm 모노레포" 서술과 다름)
-- 스택: Next.js 14.2 / React 18 / TS 5.4 / Tailwind / Supabase(Auth+RLS+Postgres, SQL 마이그레이션 13개) / Anthropic SDK(Sonnet 4.6 페르소나 + Haiku 4.5 안전필터) / Polar 결제 / Resend / web-push / PostHog / Sentry / Vercel(+매분 cron)
+
+> **Historical snapshot (2026-06-11).** Current stack: see [`docs/versions/v1-main/ARCHITECTURE.md`](../../versions/v1-main/ARCHITECTURE.md) — Next.js **16**, React **19**. NestJS never shipped.
+
+- **모노레포 아님.** 단일 Next.js App Router 앱 + Supabase. NestJS·Rust 백엔드 **없음** (핸드오프 프롬프트의 "pnpm 모노레포" 서술과 다름)
+- 스택 *(2026-06-11 당시)*: Next.js 14.2 / React 18 / TS 5.4 … → **superseded by dependency-upgrades.md**
 
 ### 1-2. 구현된 것
 | 영역 | 상태 |
