@@ -3,37 +3,28 @@
 /**
  * IndicatorCard — single macro indicator surface card (W2 Day 3 / Day 8).
  *
- * Props: one `MacroIndicator` from the dashboard composite. The card
- * displays the Korean label, latest value with unit, 7-day delta (sign-
- * appropriate), a Recharts sparkline of the 30-day series, and the
- * contribution badge (-10..+10 weighted) tagged with the source.
+ * Displays Korean label, latest + prior-day values, 7-day delta, a 30-day
+ * chart with X/Y axes + tooltip, and contribution badge.
  *
- * Strategic Decision 0 Option B: never says "비중/매수/매도/timing/추천". OPTION-B-ALLOWED: 규칙 인용 주석.
- * Surfaces values + dates + neutral source labels only.
- *
- * Token discipline (AD-1): cohort/aurora tokens only — no raw hex/px
- * EXCEPT the Recharts `stroke` prop, which only accepts CSS color
- * strings (it doesn't process Tailwind classes). The literal hex used
- * matches the `cohort.ink-70` token (42 §6.2 raw value authority).
- *
- * State color rule (memory: component-time-state-color-rule): body text
- * uses cohort-ink-{50,70,90}; success/warning/danger restricted to
- * borders / large-text / icons. Sparkline stroke uses ink-70 neutral.
- *
- * Mobile-first: 360px width legible, break-keep on Korean text. Card is
- * read-only, no interactive elements (no 44px touch-target dependency).
+ * Strategic Decision 0 Option B: values + dates only — no advisory copy.
  */
 import { useMemo } from 'react';
 import useSWR from 'swr';
-import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import Card from '@/components/ui/Card';
+import IndicatorSeriesChart from '@/components/shape-a/IndicatorSeriesChart';
+import { SPARKLINE_STROKE } from '@/components/shape-a/chart-tokens';
+import {
+  formatDelta,
+  formatIndicatorValue,
+  formatObservationDate,
+} from '@/components/shape-a/series-format';
 import type { MacroIndicator } from '@/lib/macro/composite';
 
 interface Props {
   indicator: MacroIndicator;
 }
 
-interface SeriesResponse {
+export interface SeriesResponse {
   code: string;
   source: 'ecos' | 'fred';
   observations: Array<{ date: string; value: number }>;
@@ -41,9 +32,12 @@ interface SeriesResponse {
   latest_date: string | null;
   delta_reference_date: string | null;
   delta_7d: number | null;
+  previous_date: string | null;
+  previous_value: number | null;
+  delta_1d: number | null;
+  range_days: number;
 }
 
-const HOUR_MS = 3_600_000;
 const SERIES_REFRESH_MS = 5 * 60 * 1000;
 
 export const INDICATOR_LABEL_KO: Record<string, string> = {
@@ -64,9 +58,6 @@ export const INDICATOR_UNIT: Record<string, string> = {
   DGS10: '%',
 };
 
-// /api/macro/series/[code] allow-list. Composite-only indicators (e.g.
-// KR_US_RATE_SPREAD = us10y - kr10y) are derived, not standalone series
-// — skip the sparkline for those.
 export const SERIES_FETCHABLE = new Set([
   'KR_10Y',
   'USDKRW',
@@ -75,48 +66,20 @@ export const SERIES_FETCHABLE = new Set([
   'DTWEXBGS',
 ]);
 
-// cohort.ink-70 raw hex — required by Recharts stroke prop (className not
-// supported on <Line/>). Source of truth: tailwind.config.ts + 42 §6.2.
-export const SPARKLINE_STROKE = '#404040';
+export { SPARKLINE_STROKE };
 
-async function fetchSeries(code: string): Promise<SeriesResponse> {
-  const res = await fetch(`/api/macro/series/${encodeURIComponent(code)}`);
+async function fetchSeries(code: string, days = 30): Promise<SeriesResponse> {
+  const res = await fetch(
+    `/api/macro/series/${encodeURIComponent(code)}?days=${days}`,
+  );
   if (!res.ok) {
     throw new Error(`series_http_${res.status}`);
   }
   return (await res.json()) as SeriesResponse;
 }
 
-export function formatObservationDate(iso: string): string {
-  try {
-    return new Intl.DateTimeFormat('ko-KR', {
-      timeZone: 'Asia/Seoul',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(new Date(iso + 'T12:00:00'));
-  } catch {
-    return iso;
-  }
-}
+export { formatObservationDate, formatDelta };
 
-export function formatDelta(delta: number | null, unit: string): string | null {
-  if (delta === null) return null;
-  if (delta === 0) return `0${unit ? ` ${unit}` : ''}`;
-  const sign = delta > 0 ? '+' : '−';
-  const abs = Math.abs(delta);
-  const formatted = abs >= 100 ? abs.toFixed(0) : abs.toFixed(2);
-  return `${sign}${formatted}${unit ? ` ${unit}` : ''}`;
-}
-
-/**
- * Contribution-sign tinted chip background + text token (W3 Mon Day 1
- * polish): the previous `border-l-4` left-border accent (사장님 "카드 좌측
- * 보더" verbatim complaint) is retired. Signal is preserved through a
- * compact subtle-bg chip on the contribution figure. State-color rule
- * (42 §2.3) still honored — `bg-*-05` tints are UI elements (3:1 contrast
- * floor), body text remains cohort-ink-{50,70,90}. Threshold ±0.5 keeps
- * weak-signal indicators visually neutral.
- */
 export function contributionChip(contribution: number): string {
   if (contribution >= 0.5)
     return 'bg-cohort-success/10 text-cohort-success';
@@ -125,55 +88,25 @@ export function contributionChip(contribution: number): string {
   return 'bg-cohort-ink-05 text-cohort-ink-70';
 }
 
-function Sparkline({
-  observations,
-}: {
-  observations: SeriesResponse['observations'];
-}) {
-  if (!observations || observations.length < 2) return null;
+function ChartSkeleton() {
   return (
     <div
-      className="h-10 w-full"
-      role="img"
-      aria-label={`30일 추이 sparkline, ${observations.length}개 관측값`}
+      aria-hidden="true"
+      className="h-48 w-full min-w-0 rounded-sm bg-cohort-ink-05 motion-safe:animate-pulse"
+    />
+  );
+}
+
+function ChartUnavailable() {
+  return (
+    <div
+      className="flex h-48 w-full min-w-0 items-center justify-center rounded-sm bg-cohort-ink-05"
+      role="status"
     >
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={observations}
-          margin={{ top: 2, right: 2, bottom: 2, left: 2 }}
-        >
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke={SPARKLINE_STROKE}
-            strokeWidth={1.5}
-            dot={false}
-            isAnimationActive={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+      <p className="break-keep px-2 text-center text-xs text-cohort-ink-50">
+        시계열을 불러오지 못했어요. 잠시 후 다시 확인해 주세요.
+      </p>
     </div>
-  );
-}
-
-function SparklineSkeleton() {
-  // aria-hidden — the skeleton is a transient decoration; the meaningful
-  // state (label + latest value + delta) is already announced by sibling
-  // text. Polite live-region noise multiplied per-card on first paint.
-  return (
-    <div
-      aria-hidden="true"
-      className="h-10 w-full rounded-sm bg-cohort-ink-05 motion-safe:animate-pulse"
-    />
-  );
-}
-
-function SparklineUnavailable() {
-  return (
-    <div
-      aria-hidden="true"
-      className="h-10 w-full rounded-sm bg-cohort-ink-05"
-    />
   );
 }
 
@@ -184,11 +117,11 @@ export default function IndicatorCard({ indicator }: Props) {
   const unit = INDICATOR_UNIT[code] ?? '';
 
   const swrKey = SERIES_FETCHABLE.has(code)
-    ? (['/api/macro/series', code] as const)
+    ? (['/api/macro/series', code, 30] as const)
     : null;
   const { data, error, isLoading } = useSWR<SeriesResponse, Error>(
     swrKey,
-    () => fetchSeries(code),
+    () => fetchSeries(code, 30),
     {
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
@@ -197,58 +130,80 @@ export default function IndicatorCard({ indicator }: Props) {
     },
   );
 
-  const deltaText = useMemo(
+  const delta7Text = useMemo(
     () => (data ? formatDelta(data.delta_7d, unit) : null),
     [data, unit],
   );
+  const delta1Text = useMemo(
+    () => (data ? formatDelta(data.delta_1d, unit) : null),
+    [data, unit],
+  );
 
-  const displayDate =
-    data?.latest_date ?? observationDate ?? null;
-  const compareDate = data?.delta_reference_date ?? null;
+  const displayLatest = data?.latest ?? latest;
+  const displayDate = data?.latest_date ?? observationDate ?? null;
+  const compareDate7 = data?.delta_reference_date ?? null;
+  const previousDate = data?.previous_date ?? null;
+  const previousValue = data?.previous_value ?? null;
 
   const chipClass = contributionChip(contribution);
 
   return (
-    <Card>
-      <div className="flex flex-col gap-2">
+    <Card className="min-w-0">
+      <div className="flex min-w-0 flex-col gap-3">
         <div className="flex items-baseline justify-between gap-3">
           <span className="break-keep font-medium text-cohort-ink-90">
             {label}
           </span>
-          <span className="font-mono text-xs uppercase tracking-wider text-cohort-ink-50">
+          <span className="shrink-0 font-mono text-xs uppercase tracking-wider text-cohort-ink-50">
             {source}
           </span>
         </div>
+
         {displayDate ? (
-          <p className="font-mono text-xs text-cohort-ink-50">
-            관측 {formatObservationDate(displayDate)}
-            {compareDate && deltaText
-              ? ` · 7일 전(${formatObservationDate(compareDate)}) 대비`
-              : deltaText
-                ? ' · 7일 전 대비'
-                : ''}
+          <p className="break-keep font-mono text-xs text-cohort-ink-50">
+            최신 관측 {formatObservationDate(displayDate)} (KST 일별)
+            {compareDate7 && delta7Text
+              ? ` · 7일 전(${formatObservationDate(compareDate7)}) 대비 ${delta7Text}`
+              : null}
           </p>
         ) : null}
-        <div className="flex items-baseline gap-3">
+
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className="font-mono text-2xl font-medium text-cohort-ink-90">
-            {latest.toFixed(2)}
+            {formatIndicatorValue(displayLatest, code)}
           </span>
           {unit ? (
             <span className="font-mono text-sm text-cohort-ink-70">{unit}</span>
           ) : null}
-          {deltaText ? (
-            <span className="break-keep font-mono text-sm text-cohort-ink-70">
-              7일 {deltaText}
-            </span>
-          ) : null}
         </div>
-        {swrKey === null ? null : isLoading ? (
-          <SparklineSkeleton />
-        ) : error || !data ? (
-          <SparklineUnavailable />
+
+        {previousDate && previousValue !== null ? (
+          <p className="break-keep font-mono text-xs text-cohort-ink-70">
+            직전 관측 {formatObservationDate(previousDate)}{' '}
+            {formatIndicatorValue(previousValue, code)}
+            {unit ? ` ${unit}` : ''}
+            {delta1Text ? ` · 전일 대비 ${delta1Text}` : ''}
+          </p>
         ) : (
-          <Sparkline observations={data.observations} />
+          <p className="break-keep text-xs text-cohort-ink-50">
+            ECOS·FRED 일별 종가 기준 — 실시간 호가가 아니에요. 주말·공휴일은
+            직전 영업일 관측치가 표시됩니다.
+          </p>
         )}
+
+        {swrKey === null ? null : isLoading ? (
+          <ChartSkeleton />
+        ) : error || !data ? (
+          <ChartUnavailable />
+        ) : (
+          <IndicatorSeriesChart
+            observations={data.observations}
+            code={code}
+            unit={unit}
+            height={192}
+          />
+        )}
+
         <div className="flex items-baseline justify-between gap-3 font-mono text-xs text-cohort-ink-70">
           <span>가중 {(weight * 100).toFixed(0)}%</span>
           <span
