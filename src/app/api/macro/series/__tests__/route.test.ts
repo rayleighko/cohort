@@ -76,12 +76,13 @@ describe('GET /api/macro/series/[code]', () => {
     );
   });
 
-  it('returns 200 with USDKRW series from ECOS', async () => {
+  it('returns 200 with USDKRW series from ECOS + prior-day fields', async () => {
     mockedEcos.mockResolvedValueOnce(makeSeries(1342.5, -10.0));
 
-    const res = await GET(makeRequest(), {
-      params: Promise.resolve({ code: 'USDKRW' }),
-    });
+    const res = await GET(
+      new Request('http://localhost/api/macro/series/USDKRW?days=30') as never,
+      { params: Promise.resolve({ code: 'USDKRW' }) },
+    );
 
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -89,6 +90,30 @@ describe('GET /api/macro/series/[code]', () => {
     expect(body.source).toBe('ecos');
     expect(body.latest).toBe(1342.5);
     expect(body.delta_7d).toBeCloseTo(-10.0, 5);
+    expect(body.previous_date).toBeTruthy();
+    expect(body.previous_value).not.toBeNull();
+    expect(body.delta_1d).not.toBeNull();
+    expect(body.range_days).toBe(30);
+  });
+
+  it('honours ?days=90 for longer history window', async () => {
+    mockedFred.mockResolvedValueOnce(makeSeries(17.5, 2.5));
+
+    const res = await GET(
+      new Request('http://localhost/api/macro/series/VIXCLS?days=90') as never,
+      { params: Promise.resolve({ code: 'VIXCLS' }) },
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.range_days).toBe(90);
+    expect(mockedFred).toHaveBeenCalledWith(
+      'VIXCLS',
+      expect.objectContaining({
+        startDate: expect.any(String),
+        endDate: expect.any(String),
+      }),
+    );
   });
 
   it('returns 404 for an unknown code with allowed list', async () => {

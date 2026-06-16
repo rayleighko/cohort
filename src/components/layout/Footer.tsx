@@ -35,7 +35,7 @@ export function Footer() {
                     href="/chat"
                     className="transition-colors hover:text-cohort-primary"
                   >
-                    Aurora 채팅
+                    Aurora 페이스 컴패니언
                   </Link>
                 </li>
               </ul>

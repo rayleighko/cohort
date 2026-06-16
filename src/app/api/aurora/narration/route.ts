@@ -40,6 +40,8 @@ import {
 } from '@/lib/aurora/aurora-prompt';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getCachedMorningBriefResponse } from '@/lib/aurora/narration-cache';
+import { buildMorningBriefTemplate } from '@/lib/aurora/narration-templates';
+import { canUseLlmBeta } from '@/lib/companion/llm-beta-access';
 import { getServerPostHog } from '@/lib/analytics/posthog-server';
 import type {
   MacroComposite,
@@ -268,6 +270,44 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (cached) {
       return noStoreJson({ ...cached, category: 'morning_brief' });
     }
+
+    if (!canUseLlmBeta('narration')) {
+      const text = buildMorningBriefTemplate(body.composite);
+      const persistOk = await persistNarration({
+        category,
+        composite: body.composite,
+        text,
+        triggered: false,
+        safetyCategory: null,
+      });
+      await emitPostHog({
+        zone: body.composite.zone,
+        triggered: false,
+        category,
+        safetyCategory: null,
+        persistenceFailed: !persistOk,
+      });
+      return noStoreJson({
+        character: 'aurora',
+        text,
+        triggered: false,
+        zone: body.composite.zone,
+        category: 'morning_brief',
+        mode: 'template',
+      });
+    }
+  }
+
+  if (!canUseLlmBeta('narration')) {
+    const text = buildMorningBriefTemplate(body.composite);
+    return noStoreJson({
+      character: 'aurora',
+      text,
+      triggered: false,
+      zone: body.composite.zone,
+      category,
+      mode: 'template',
+    });
   }
 
   // Per-category required-field validation.

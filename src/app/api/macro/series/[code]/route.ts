@@ -55,6 +55,19 @@ interface SeriesResponse {
   /** YYYY-MM-DD used as the 7-day-ago comparator (within ±3d window). */
   delta_reference_date: string | null;
   delta_7d: number | null;
+  /** Prior business-day comparator (~1 calendar day back, ±3d window). */
+  previous_date: string | null;
+  previous_value: number | null;
+  delta_1d: number | null;
+  /** Number of calendar days requested (7 | 30 | 90). */
+  range_days: number;
+}
+
+function parseRangeDays(request: NextRequest): number {
+  const raw = new URL(request.url).searchParams.get('days');
+  if (raw === '7') return 7;
+  if (raw === '90') return 90;
+  return 30;
 }
 
 function noStoreOnError(payload: unknown, status: number): NextResponse {
@@ -96,7 +109,7 @@ function pickClosestToOffset(
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ code: string }> },
 ): Promise<NextResponse> {
   const { code } = await context.params;
@@ -107,9 +120,10 @@ export async function GET(
     );
   }
 
+  const rangeDays = parseRangeDays(request);
   const meta = SERIES_META[code];
   const endDate = kstTodayIso();
-  const startDate = kstDaysAgoIso(30);
+  const startDate = kstDaysAgoIso(rangeDays);
 
   let raw: SeriesObservation[];
   try {
@@ -142,13 +156,16 @@ export async function GET(
   // upstream contract drifts (ECOS historically inconsistent), then cap to
   // the last 30 entries.
   const sorted = [...raw].sort((a, b) => a.date.localeCompare(b.date));
-  const observations = sorted.slice(-30);
+  const observations = sorted.slice(-rangeDays);
   const latestObs =
     observations.length > 0 ? observations[observations.length - 1] : undefined;
   const latest = latestObs?.value ?? null;
   const sevenBack = pickClosestToOffset(observations, 7);
+  const oneBack = pickClosestToOffset(observations, 1);
   const delta_7d =
     latest !== null && sevenBack ? latest - sevenBack.value : null;
+  const delta_1d =
+    latest !== null && oneBack ? latest - oneBack.value : null;
 
   const response: SeriesResponse = {
     code,
@@ -158,6 +175,10 @@ export async function GET(
     latest_date: latestObs?.date ?? null,
     delta_reference_date: sevenBack?.date ?? null,
     delta_7d,
+    previous_date: oneBack?.date ?? null,
+    previous_value: oneBack?.value ?? null,
+    delta_1d,
+    range_days: rangeDays,
   };
   return NextResponse.json(response);
 }

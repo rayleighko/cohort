@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MacroComposite } from '@/lib/macro/composite';
 
 vi.mock('@/lib/claude/client', () => ({
@@ -131,7 +131,12 @@ function makeRequest(body: unknown): Request {
   });
 }
 
+beforeEach(() => {
+  vi.stubEnv('COHORT_NARRATION_LLM_ENABLED', 'true');
+});
+
 afterEach(() => {
+  vi.unstubAllEnvs();
   vi.restoreAllMocks();
   mockedCallPersona.mockReset();
   mockedApplySafetyFilter.mockReset();
@@ -142,6 +147,21 @@ afterEach(() => {
 });
 
 describe('POST /api/aurora/narration — Day 7 backward compatibility', () => {
+  it('uses template morning_brief when LLM narration disabled', async () => {
+    vi.stubEnv('COHORT_NARRATION_LLM_ENABLED', 'false');
+
+    const res = await POST(
+      makeRequest({ composite: SAMPLE_COMPOSITE }) as never,
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.mode).toBe('template');
+    expect(body.text).toContain('오늘 cohort');
+    expect(mockedCallPersona).not.toHaveBeenCalled();
+    expect(mockedInsert).toHaveBeenCalledOnce();
+  });
+
   it('returns cached morning_brief without calling Claude when asOfDate match exists', async () => {
     mockedGetCachedMorningBrief.mockResolvedValueOnce({
       character: 'aurora',

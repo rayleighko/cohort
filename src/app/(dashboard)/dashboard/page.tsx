@@ -160,7 +160,7 @@ function IndicatorGrid({ composite }: { composite: MacroComposite }) {
       >
         Indicators
       </h2>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {composite.indicators.map((i) => (
           <IndicatorCard key={i.code} indicator={i} />
         ))}

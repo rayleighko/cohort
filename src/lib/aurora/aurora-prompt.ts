@@ -28,6 +28,11 @@ import type {
   MacroComposite,
   MacroIndicator,
 } from '@/lib/macro/composite';
+import {
+  INDICATOR_LABEL_KO,
+  INDICATOR_UNIT,
+  ZONE_LABEL_KO,
+} from '@/lib/aurora/macro-labels';
 
 export type NarrationCategory =
   | 'morning_brief'
@@ -53,32 +58,6 @@ export interface AuroraNarrationInput {
   /** Required for `weekly_summary` — last 3-14 daily composites (asc). */
   history?: MacroComposite[];
 }
-
-const INDICATOR_LABEL_KO: Record<string, string> = {
-  KR_US_RATE_SPREAD: '한미 금리차',
-  USDKRW: '원/달러 환율',
-  VIXCLS: 'VIX 변동성 지수',
-  DTWEXBGS: '달러 지수 (DXY)',
-  KR_10Y: '한국 국고채 10년',
-  DGS10: '미국 국채 10년',
-};
-
-const ZONE_LABEL_KO: Record<MacroComposite['zone'], string> = {
-  dovish: '비둘기파',
-  'neutral-dovish': '중립–비둘기',
-  neutral: '중립',
-  'neutral-hawkish': '중립–매파',
-  hawkish: '매파',
-};
-
-const INDICATOR_UNIT: Record<string, string> = {
-  KR_US_RATE_SPREAD: '%p',
-  USDKRW: '원',
-  VIXCLS: '',
-  DTWEXBGS: '',
-  KR_10Y: '%',
-  DGS10: '%',
-};
 
 export const AURORA_NARRATION_SYSTEM = `You are Aurora 🕊 (아우로라), the patient pace-keeper mascot of Cohort. You accompany Top 5-10% Korean sophisticated retail investors on their long-term investment journey.
 

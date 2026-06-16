@@ -11,7 +11,13 @@ import Button from '@/components/ui/Button';
  * Settings — re-run unified profile survey (Q0 + GL-RTS + factual).
  * Replaces post-survey "graceful exit" channel recommendations.
  */
-export function ProfileSettingsPanel() {
+export function ProfileSettingsPanel({
+  hasActiveIps = false,
+  ipsVersion,
+}: {
+  hasActiveIps?: boolean;
+  ipsVersion?: number;
+}) {
   const router = useRouter();
   const [surveyOpen, setSurveyOpen] = useState(false);
 
@@ -34,8 +40,15 @@ export function ProfileSettingsPanel() {
           href="/settings/ips"
           className="flex min-h-[44px] w-full items-center justify-center rounded-xl border border-cohort-primary px-5 text-base font-semibold text-cohort-primary"
         >
-          투자 원칙 (IPS) 작성
+          {hasActiveIps
+            ? `투자 원칙 (IPS) 수정${ipsVersion ? ` · v${ipsVersion}` : ''}`
+            : '투자 원칙 (IPS) 작성'}
         </Link>
+        {hasActiveIps ? (
+          <p className="break-keep text-[11px] leading-relaxed text-cohort-success">
+            저장된 IPS가 있어요. 수정하면 새 버전으로 저장됩니다.
+          </p>
+        ) : null}
         <p className="break-keep text-[11px] leading-relaxed text-cohort-charcoal/45">
           평온할 때 본인 plan을 문서로 정리해 두는 단계예요. 코호트는 매수·매도나
           비중을 제안하지 않고, 본인이 쓴 원칙만 정리합니다.

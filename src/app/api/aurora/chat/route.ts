@@ -48,6 +48,7 @@ import {
   tomorrowMidnightKstIso,
   type TierType,
 } from '@/lib/aurora/chat-quota';
+import { canUseLlmBeta } from '@/lib/companion/llm-beta-access';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -431,6 +432,17 @@ function noStoreJson(
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  if (!canUseLlmBeta('chat')) {
+    return noStoreJson(
+      {
+        error: 'llm_beta_disabled',
+        text:
+          'AI Beta 채팅은 현재 꺼져 있어요. 페이스 컴패니언(버튼·키워드)을 이용해 주세요.',
+      },
+      { status: 403 },
+    );
+  }
+
   let raw: unknown;
   try {
     raw = await request.json();
