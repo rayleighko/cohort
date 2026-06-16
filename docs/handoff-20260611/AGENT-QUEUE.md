@@ -42,7 +42,7 @@
 |----|------|-----------|------|--------|---------|
 | C1 | Task 5 `scoreGlRts` **Green** | **Ray 타이핑** + parent review | vitest profile | 🚫 | Ray session |
 | C2 | `profile_snapshot` migration 초안 | parent | migration dry-run | ⬜ | C1 |
-| C3 | IPS 위저드 spec (`docs/` + zod 스키마 골격) | `cohort-component-spec-writer` | Option B copy skill | ⬜ | C2 |
+| C3 | IPS 위저드 spec (`docs/` + zod 스키마 골격) | `cohort-component-spec-writer` | Option B copy skill | ✅ | v2 c1090fb+ |
 | C4 | Toss **lab** read-only: `src/lib/broker/toss-lab.ts` + `/api/lab/toss/*` | parent | `TOSS_LAB_ENABLED` + NODE_ENV | ⬜ | A3 |
 | C5 | `docs/infra/toss-open-api-lab.md` (개인 IP·비프로덕션) | parent | — | ⬜ | C4 |
 
