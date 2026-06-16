@@ -231,7 +231,7 @@ export default function IpsWizardShell({
           <p className="text-sm leading-relaxed text-cohort-charcoal/75 break-keep">
             <span className="font-semibold text-cohort-primary">Aurora 🕊</span>{' '}
             평온할 때 정해 둔 본인 plan이, 흔들릴 때 돌아갈 자리예요. 코호트는
-            추천하지 않고, 본인이 쓴 원칙만 정리해 드려요.
+            매수·매도나 비중을 제안하지 않고, 본인이 쓴 원칙만 정리해 드려요.
           </p>
         </div>
 
