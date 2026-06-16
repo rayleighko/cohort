@@ -42,6 +42,7 @@ const CHOICE_LABEL = cn(
 
 interface IpsWizardShellProps {
   prefill?: IpsProfilePrefill;
+  initialDraft?: IpsWizardDraft;
   actualAllocationPct?: Record<string, number> | null;
   planFormalization?: string | null;
 }
@@ -124,12 +125,15 @@ function RadioChoices<T extends string>({
 
 export default function IpsWizardShell({
   prefill,
+  initialDraft,
   actualAllocationPct,
   planFormalization,
 }: IpsWizardShellProps) {
   const router = useRouter();
   const [stepIdx, setStepIdx] = useState(0);
-  const [draft, setDraft] = useState<IpsWizardDraft>(() => createInitialDraft(prefill));
+  const [draft, setDraft] = useState<IpsWizardDraft>(
+    () => initialDraft ?? createInitialDraft(prefill),
+  );
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -178,7 +182,28 @@ export default function IpsWizardShell({
       return;
     }
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(doc));
+      const res = await fetch('/api/principle/ips', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(doc),
+      });
+
+      if (res.status === 401) {
+        setError('로그인 후 저장할 수 있어요.');
+        return;
+      }
+
+      if (!res.ok) {
+        setError('저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        return;
+      }
+
+      try {
+        sessionStorage.removeItem(STORAGE_KEY);
+      } catch {
+        /* ignore legacy local key cleanup */
+      }
+
       router.push('/settings?ips=saved');
       router.refresh();
     } catch {

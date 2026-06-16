@@ -5,6 +5,8 @@ import { NotificationOptIn } from '@/components/notification/NotificationOptIn';
 import { ProfileSettingsPanel } from '@/components/settings/ProfileSettingsPanel';
 import SignOutButton from '@/components/auth/SignOutButton';
 import DeleteAccountButton from '@/components/account/DeleteAccountButton';
+import { loadActiveIps } from '@/lib/principle/ips-persistence';
+import { createClient } from '@/lib/supabase/server';
 
 /**
  * Settings — subscription + 알림 + 계정 + 법적 고지 + 데이터 관리.
@@ -21,6 +23,12 @@ export default async function SettingsPage({
   const checkoutSuccess = resolvedSearchParams.checkout === 'success';
   const ipsSaved = resolvedSearchParams.ips === 'saved';
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const activeIps = user ? await loadActiveIps(supabase, user.id) : null;
+
   return (
     <main className="mx-auto max-w-md px-6 py-10">
       <h1 className="text-2xl font-bold text-cohort-charcoal">설정</h1>
@@ -33,8 +41,7 @@ export default async function SettingsPage({
 
       {ipsSaved && (
         <p className="mt-4 rounded-xl bg-cohort-primary/10 px-4 py-3 text-sm text-cohort-primary break-keep">
-          투자 원칙(IPS)을 이 기기에 저장했어요. 서버 동기화는 다음 업데이트에서
-          연결됩니다.
+          투자 원칙(IPS)을 저장했어요. 페이스 컴패니언과 plan 상기에 반영됩니다.
         </p>
       )}
 
@@ -63,7 +70,10 @@ export default async function SettingsPage({
         투자 프로필
       </h2>
       <div className="mt-2">
-        <ProfileSettingsPanel />
+        <ProfileSettingsPanel
+          hasActiveIps={Boolean(activeIps)}
+          ipsVersion={activeIps?.version}
+        />
       </div>
 
       {/* 계정 */}

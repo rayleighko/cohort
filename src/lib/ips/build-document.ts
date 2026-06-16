@@ -5,6 +5,37 @@ import {
 } from '@/domains/principle/domain/ips-schema';
 import type { IpsWizardDraft } from './wizard-types';
 
+/** Map stored IpsDocument → wizard draft for re-edit. */
+export function draftFromIpsDocument(doc: IpsDocument): IpsWizardDraft {
+  return {
+    horizon: {
+      yearsBand: doc.horizon.yearsBand,
+      note: doc.horizon.note ?? '',
+    },
+    allocation: {
+      targets: doc.allocation.targets.map((t) => ({ ...t })),
+    },
+    lossLimit: {
+      maxDrawdownReviewPct: doc.lossLimit.maxDrawdownReviewPct,
+      action: doc.lossLimit.action,
+      customNote: doc.lossLimit.customNote ?? '',
+    },
+    pace: {
+      monthlyContributionBand: doc.pace.monthlyContributionBand,
+      splitBuyRule: doc.pace.splitBuyRule ?? '',
+    },
+    rebalance: {
+      driftThresholdPct: doc.rebalance.driftThresholdPct,
+      cadence: doc.rebalance.cadence,
+    },
+    review: {
+      cadence: doc.review.cadence,
+      preCommitmentTemplateId: 'custom',
+      preCommitmentText: doc.review.preCommitment.text,
+    },
+  };
+}
+
 /** Assemble validated IpsDocument from wizard draft — null if invalid. */
 export function buildIpsDocumentFromDraft(draft: IpsWizardDraft): IpsDocument | null {
   const result = safeParseIpsDocument({
