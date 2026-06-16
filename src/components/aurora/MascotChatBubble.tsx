@@ -90,7 +90,7 @@ export default function MascotChatBubble({ composite }: MascotChatBubbleProps) {
         ref={triggerRef}
         type="button"
         onClick={onOpen}
-        aria-label="Aurora 대화 열기"
+        aria-label="Aurora 페이스 컴패니언 열기"
         aria-haspopup="dialog"
         aria-expanded={open}
         // bottom positioning honors PWA-installed iPhone X+ safe-area inset

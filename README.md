@@ -16,20 +16,36 @@ flowchart LR
   User["Browser PWA"] --> Next["Next.js 16 on Vercel"]
   Next --> Supa["Supabase Auth + Postgres RLS"]
   Next --> Macro["ECOS + FRED macro"]
-  Next --> AI["Claude Aurora/Vesper"]
+  Next --> Companion["Pace companion\n(rule-based, $0 API)"]
   Next --> Cron["Shape C triggers cron"]
+  Next -.->|"Beta opt-in"| AI["Claude Aurora/Vesper"]
   AI --> Safety["3-layer safety filter"]
 ```
 
 | Path | What happens |
 |------|----------------|
 | `/dashboard` | Server-rendered macro snapshot (KST dates, ~15m cache) |
-| Aurora brief | Cached by date in DB; safety-filtered narration |
-| Chat | Quota by tier; bidirectional safety filter |
+| Aurora brief | **Template by default** (zone + driver); optional LLM via env |
+| Pace companion | **Rule-based** `/api/companion/turn` — chat-like UI, no LLM cost |
+| AI Beta chat | **Off by default** — `COHORT_LLM_BETA_ENABLED=true` + Pro tier (planned) |
 | Cron | **Trigger evaluation only** — not macro refresh |
-| Data | **DB-first target** — macro/OHLCV ETL → Postgres ([`docs/engineering/data-platform-strategy.md`](docs/engineering/data-platform-strategy.md)) |
 
 **Full v1 diagram & file map:** [`docs/versions/v1-main/ARCHITECTURE.md`](docs/versions/v1-main/ARCHITECTURE.md)
+
+---
+
+## Zero-cost AI strategy (default)
+
+Cohort’s core product is **pace keeping** (macro dashboard, Shape B/C, IPS wizard) — not open-ended LLM chat.
+
+| Layer | Default | Cost |
+|-------|---------|------|
+| **Pace companion** | Intent router + Aurora templates (`src/lib/companion/`) | **$0** |
+| **Morning brief** | `buildMorningBriefTemplate()` | **$0** |
+| **LLM narration** | `COHORT_NARRATION_LLM_ENABLED=true` | Claude |
+| **LLM chat (Beta)** | `COHORT_LLM_BETA_ENABLED=true` | Claude + quota |
+
+System prompts in `aurora-prompt.ts` / `chat-prompt.ts` remain the **quality SoT** for Beta/Pro; the default path encodes the same Option B rules as deterministic copy.
 
 ---
 
@@ -53,7 +69,8 @@ Branch rules · agent PR workflow · journal: [`docs/engineering/`](docs/enginee
 |-------|------------|
 | Frontend | Next.js 16 App Router, React 19, Tailwind 3.4, PWA |
 | Backend | Supabase (Postgres, Auth, RLS) |
-| AI | Claude (Sonnet chat/narration, Haiku safety) |
+| AI (default) | Rule-based companion + template narration (**$0 API**) |
+| AI (Beta) | Claude (Sonnet/Haiku when env flags enabled) |
 | Payments | Polar (USD support tier) |
 | Analytics | PostHog, Sentry |
 | Hosting | Vercel + Supabase managed |

@@ -169,6 +169,36 @@ export type Database = {
         }
         Relationships: []
       }
+      investment_principle: {
+        Row: {
+          acknowledged_at: string
+          created_at: string
+          document: Json
+          id: string
+          superseded_at: string | null
+          user_id: string
+          version: number
+        }
+        Insert: {
+          acknowledged_at?: string
+          created_at?: string
+          document: Json
+          id?: string
+          superseded_at?: string | null
+          user_id: string
+          version?: number
+        }
+        Update: {
+          acknowledged_at?: string
+          created_at?: string
+          document?: Json
+          id?: string
+          superseded_at?: string | null
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
       loi_conversion: {
         Row: {
           churn_reason: string[] | null
@@ -578,6 +608,7 @@ export type Database = {
           gl_rts_answers: Json | null
           info_sources: string[] | null
           last_updated_at: string
+          linked_principle_id: string | null
           macro_watching_freq: string | null
           payment_willingness_ceiling_krw: number | null
           plan_formalization: string | null
@@ -604,6 +635,7 @@ export type Database = {
           gl_rts_answers?: Json | null
           info_sources?: string[] | null
           last_updated_at?: string
+          linked_principle_id?: string | null
           macro_watching_freq?: string | null
           payment_willingness_ceiling_krw?: number | null
           plan_formalization?: string | null
@@ -630,6 +662,7 @@ export type Database = {
           gl_rts_answers?: Json | null
           info_sources?: string[] | null
           last_updated_at?: string
+          linked_principle_id?: string | null
           macro_watching_freq?: string | null
           payment_willingness_ceiling_krw?: number | null
           plan_formalization?: string | null

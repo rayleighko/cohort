@@ -1,25 +1,10 @@
 'use client';
 
 /**
- * Aurora 🕊 chat window — Client component overlay.
+ * Aurora 🕊 pace companion window — chat-like UI, rule-based responses ($0 LLM).
  *
- * Mobile: full-screen overlay (mobile-first PWA strict per 38-brief).
- * Md+: bottom-right card 400×600px constrained.
- *
- * Day 11 (W3 Day 1 scaffold) scope cap:
- * - Tier 0 anonymous session_id (client-generated UUID in sessionStorage)
- * - No history hydration on mount (fresh-conversation UX); history is fetched
- *   server-side per /api/aurora/chat turn for prompt context
- * - No markdown rendering, no rich UI, no voice input, no images
- *
- * Accessibility:
- * - role="dialog" aria-modal="true" with aria-labelledby on the header
- * - focus moves to the input on open + restores to the trigger on close
- * - Escape closes; outside-tap on overlay closes (md+) or back button (mobile)
- * - aria-live="polite" on message list so new turns are announced
- *
- * Composite context: optionally passed in for the system prompt's macro
- * preamble. Day 11 sources composite from the parent dashboard.
+ * Default: POST /api/companion/turn (intent router + templates).
+ * Optional AI Beta (env flag): POST /api/aurora/chat (Claude, gated server-side).
  */
 import {
   useCallback,
@@ -31,7 +16,8 @@ import {
   type KeyboardEvent,
 } from 'react';
 import type { MacroComposite } from '@/lib/macro/composite';
-import type { ChatMessage as ChatMessageData } from '@/lib/aurora/chat-prompt';
+import { COMPANION_QUICK_ACTIONS } from '@/lib/companion/intent-router';
+import { isClientLlmBetaVisible } from '@/lib/companion/config';
 import ChatMessage from './ChatMessage';
 
 export interface ChatWindowProps {
@@ -39,6 +25,8 @@ export interface ChatWindowProps {
   onClose: () => void;
   sessionId: string;
   composite?: MacroComposite;
+  /** When true, renders inline (full page) instead of overlay dialog. */
+  embedded?: boolean;
 }
 
 interface TurnView {
@@ -48,22 +36,46 @@ interface TurnView {
   triggered: boolean;
 }
 
-interface ChatTurnResponse {
+interface CompanionTurnResponse {
   character: 'aurora';
   text: string;
   triggered: boolean;
-  sessionId: string;
+  mode: 'companion';
+}
+
+interface LlmTurnResponse {
+  character: 'aurora';
+  text: string;
+  triggered: boolean;
   turnIndex: number;
 }
 
 const WELCOME_KO =
-  '안녕하세요. Aurora 🕊 입니다. 매크로 지표나 본인 plan reference, 또는 멘탈 관리 관련 질문 있으시면 천천히 적어주세요.';
+  'Aurora 🕊 페이스 컴패니언이에요. 아래 버튼이나 짧은 질문으로 매크로·plan·분할매수·trigger·IPS를 확인해 보세요.';
 
-async function postTurn(input: {
+const LLM_BETA_VISIBLE = isClientLlmBetaVisible();
+
+async function postCompanionTurn(input: {
+  message?: string;
+  quickActionId?: string;
+  composite?: MacroComposite;
+}): Promise<CompanionTurnResponse> {
+  const res = await fetch('/api/companion/turn', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    throw new Error(`companion_http_${res.status}`);
+  }
+  return (await res.json()) as CompanionTurnResponse;
+}
+
+async function postLlmTurn(input: {
   sessionId: string;
   message: string;
   composite?: MacroComposite;
-}): Promise<ChatTurnResponse> {
+}): Promise<LlmTurnResponse> {
   const res = await fetch('/api/aurora/chat', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -75,13 +87,13 @@ async function postTurn(input: {
       const body = (await res.json()) as { text?: string };
       if (typeof body.text === 'string') serverText = body.text;
     } catch {
-      /* non-JSON body */
+      /* non-JSON */
     }
     const err = new Error(`chat_http_${res.status}`);
     (err as Error & { serverText?: string }).serverText = serverText;
     throw err;
   }
-  return (await res.json()) as ChatTurnResponse;
+  return (await res.json()) as LlmTurnResponse;
 }
 
 export default function ChatWindow({
@@ -89,6 +101,7 @@ export default function ChatWindow({
   onClose,
   sessionId,
   composite,
+  embedded = false,
 }: ChatWindowProps) {
   const headerId = useId();
   const disclaimerId = useId();
@@ -97,32 +110,23 @@ export default function ChatWindow({
   const previousActiveRef = useRef<Element | null>(null);
 
   const [turns, setTurns] = useState<TurnView[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      text: WELCOME_KO,
-      triggered: false,
-    },
+    { id: 'welcome', role: 'assistant', text: WELCOME_KO, triggered: false },
   ]);
   const [draft, setDraft] = useState('');
   const [pending, setPending] = useState(false);
+  const [useLlmBeta, setUseLlmBeta] = useState(false);
 
-  // Focus management — move focus to input on open; restore on close (a11y).
   useEffect(() => {
     if (open) {
       previousActiveRef.current = document.activeElement;
-      // requestAnimationFrame to ensure the input is mounted + visible.
       const id = requestAnimationFrame(() => inputRef.current?.focus());
       return () => cancelAnimationFrame(id);
     }
     const prev = previousActiveRef.current;
-    if (prev instanceof HTMLElement) {
-      prev.focus();
-    }
+    if (prev instanceof HTMLElement) prev.focus();
     return undefined;
   }, [open]);
 
-  // Escape closes.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: globalThis.KeyboardEvent) => {
@@ -135,11 +139,54 @@ export default function ChatWindow({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  // Scroll to bottom on new turn (motion-reduce respects 'auto' default).
   useEffect(() => {
     if (!open) return;
     listEndRef.current?.scrollIntoView({ block: 'end' });
   }, [open, turns.length]);
+
+  const appendAssistant = useCallback((text: string, triggered: boolean, id: string) => {
+    setTurns((prev) => [...prev, { id, role: 'assistant', text, triggered }]);
+  }, []);
+
+  const runCompanion = useCallback(
+    async (input: { message?: string; quickActionId?: string; userLabel: string }) => {
+      if (pending) return;
+      setTurns((prev) => [
+        ...prev,
+        {
+          id: `u-${Date.now()}`,
+          role: 'user',
+          text: input.userLabel,
+          triggered: false,
+        },
+      ]);
+      setPending(true);
+      try {
+        const res = await postCompanionTurn({
+          message: input.message,
+          quickActionId: input.quickActionId,
+          composite,
+        });
+        appendAssistant(res.text, res.triggered, `a-${Date.now()}`);
+      } catch {
+        appendAssistant(
+          '잠시 연결할 수 없어요. 대시보드와 설정에서 plan·IPS를 확인해 주세요.',
+          false,
+          `a-err-${Date.now()}`,
+        );
+      } finally {
+        setPending(false);
+      }
+    },
+    [appendAssistant, composite, pending],
+  );
+
+  const onQuickAction = useCallback(
+    (id: string, label: string) => {
+      void runCompanion({ quickActionId: id, userLabel: label });
+    },
+    [runCompanion],
+  );
 
   const onSubmit = useCallback(
     async (e?: FormEvent) => {
@@ -147,127 +194,124 @@ export default function ChatWindow({
       const text = draft.trim();
       if (text.length === 0 || pending) return;
 
-      const userTurn: TurnView = {
-        id: `u-${Date.now()}`,
-        role: 'user',
-        text,
-        triggered: false,
-      };
-      setTurns((prev) => [...prev, userTurn]);
       setDraft('');
-      setPending(true);
 
-      try {
-        const res = await postTurn({ sessionId, message: text, composite });
+      if (useLlmBeta && LLM_BETA_VISIBLE) {
         setTurns((prev) => [
           ...prev,
-          {
-            id: `a-${res.turnIndex}`,
-            role: 'assistant',
-            text: res.text,
-            triggered: res.triggered,
-          },
+          { id: `u-${Date.now()}`, role: 'user', text, triggered: false },
         ]);
-      } catch (err) {
-        const serverText =
-          (err as Error & { serverText?: string }).serverText ??
-          '[Aurora가 잠시 자리를 비웠습니다. 잠시 후 다시 시도해주세요.]';
-        setTurns((prev) => [
-          ...prev,
-          {
-            id: `a-err-${Date.now()}`,
-            role: 'assistant',
-            text: serverText,
-            triggered: false,
-          },
-        ]);
-      } finally {
-        setPending(false);
+        setPending(true);
+        try {
+          const res = await postLlmTurn({ sessionId, message: text, composite });
+          appendAssistant(res.text, res.triggered, `a-${res.turnIndex}`);
+        } catch (err) {
+          const serverText =
+            (err as Error & { serverText?: string }).serverText ??
+            'AI Beta를 사용할 수 없어요. 페이스 컴패니언 버튼을 이용해 주세요.';
+          appendAssistant(serverText, false, `a-err-${Date.now()}`);
+        } finally {
+          setPending(false);
+        }
+        return;
       }
+
+      await runCompanion({ message: text, userLabel: text });
     },
-    [composite, draft, pending, sessionId],
+    [appendAssistant, composite, draft, pending, runCompanion, sessionId, useLlmBeta],
   );
 
-  // Caret-aware Enter contract (사장님 spec 2026-05-24):
-  //   • Enter at end of textarea (and non-empty draft) → send
-  //   • Enter mid-textarea                              → newline (default)
-  //   • Shift+Enter (anywhere)                          → newline (default)
-  //   • Cmd (mac) / Ctrl (win) + Enter (anywhere)       → newline (intentional)
-  // Cmd/Ctrl+Enter is a no-op in native textarea, so we manually splice '\n'
-  // at the caret via setRangeText (auto-updates selection + scroll).
   const onKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key !== 'Enter') return;
-
       const target = e.currentTarget;
-
-      // Cmd/Ctrl+Enter → 명시적 개행
       if (e.metaKey || e.ctrlKey) {
         e.preventDefault();
         target.setRangeText('\n', target.selectionStart, target.selectionEnd, 'end');
         setDraft(target.value);
         return;
       }
-
-      // Shift+Enter → textarea default newline; nothing to override
       if (e.shiftKey) return;
-
-      // 일반 Enter — caret 위치 + non-empty draft check
       const caretAtEnd =
         target.selectionStart === target.value.length &&
         target.selectionEnd === target.value.length;
-
       if (caretAtEnd && target.value.trim().length > 0) {
         e.preventDefault();
         void onSubmit();
       }
-      // caret 중간 또는 empty draft면 default behavior (newline insert)
     },
     [onSubmit],
   );
 
-  if (!open) return null;
+  if (!open && !embedded) return null;
 
-  return (
+  const panel = (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-end md:p-6"
-      onClick={(e) => {
-        // Outside-tap closes ONLY on md+ where the window is a bottom-right
-        // card. Mobile full-screen overlay does not close on outside-tap
-        // (there is no outside — the overlay fills the viewport).
-        if (e.target === e.currentTarget) onClose();
-      }}
+      role={embedded ? undefined : 'dialog'}
+      aria-modal={embedded ? undefined : true}
+      aria-labelledby={headerId}
+      className={
+        embedded
+          ? 'flex h-full min-h-[420px] flex-col rounded-2xl border border-cohort-ink-10 bg-white shadow-sm'
+          : 'flex h-full w-full flex-col bg-white shadow-mascot-aurora md:h-[600px] md:max-h-[80vh] md:w-[400px] md:rounded-2xl'
+      }
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={headerId}
-        className="flex h-full w-full flex-col bg-white shadow-mascot-aurora md:h-[600px] md:max-h-[80vh] md:w-[400px] md:rounded-2xl"
-      >
         <header className="flex items-center justify-between gap-2 border-b border-cohort-ink-10 px-4 py-3">
-          <h2
-            id={headerId}
-            className="break-keep text-base font-medium text-cohort-ink-90"
-          >
-            <span aria-hidden="true">🕊</span>{' '}
-            <span>Aurora와 대화</span>
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Aurora 대화 닫기"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-cohort-ink-70 transition-colors duration-fast ease-out hover:bg-cohort-ink-05 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cohort-primary"
-          >
-            <span aria-hidden="true" className="text-xl leading-none">
-              ×
-            </span>
-          </button>
+          <div>
+            <h2
+              id={headerId}
+              className="break-keep text-base font-medium text-cohort-ink-90"
+            >
+              <span aria-hidden="true">🕊</span> Aurora 페이스 컴패니언
+            </h2>
+            <p className="text-[11px] text-cohort-ink-50">규칙 기반 · API 과금 없음</p>
+          </div>
+          {!embedded && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="페이스 컴패니언 닫기"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-cohort-ink-70 transition-colors duration-fast ease-out hover:bg-cohort-ink-05 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cohort-primary"
+            >
+              <span aria-hidden="true" className="text-xl leading-none">
+                ×
+              </span>
+            </button>
+          )}
         </header>
+
+        {LLM_BETA_VISIBLE && (
+          <div className="border-b border-cohort-ink-10 bg-cohort-ivory px-3 py-2">
+            <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-xs text-cohort-charcoal break-keep">
+              <input
+                type="checkbox"
+                checked={useLlmBeta}
+                onChange={(e) => setUseLlmBeta(e.target.checked)}
+                className="h-4 w-4 accent-cohort-primary"
+              />
+              AI Beta (실험 · Claude · Pro 예정)
+            </label>
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-2 border-b border-cohort-ink-10 bg-cohort-ivory px-3 py-2">
+          {COMPANION_QUICK_ACTIONS.map((action) => (
+            <button
+              key={action.id}
+              type="button"
+              disabled={pending}
+              onClick={() => onQuickAction(action.id, action.label)}
+              className="min-h-[36px] rounded-full border border-cohort-ink-10 bg-white px-3 text-xs text-cohort-charcoal break-keep hover:border-cohort-primary/40 disabled:opacity-50"
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
 
         <div
           role="log"
           aria-live="polite"
-          aria-label="Aurora 대화 기록"
+          aria-label="Aurora 페이스 컴패니언 기록"
           className="flex flex-1 flex-col gap-3 overflow-y-auto bg-cohort-ivory px-3 py-4"
         >
           {turns.map((t) => (
@@ -281,14 +325,13 @@ export default function ChatWindow({
             <div
               role="status"
               aria-live="polite"
-              aria-label="Aurora 응답 생성 중"
               className="flex items-center gap-2 px-2"
             >
               <span
                 aria-hidden="true"
                 className="inline-flex h-2 w-2 rounded-full bg-cohort-ink-30 motion-safe:animate-pulse"
               />
-              <span className="text-xs text-cohort-ink-50">Aurora 응답 준비 중…</span>
+              <span className="text-xs text-cohort-ink-50">응답 준비 중…</span>
             </div>
           ) : null}
           <div ref={listEndRef} aria-hidden="true" />
@@ -307,7 +350,11 @@ export default function ChatWindow({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="질문을 적어주세요 (Enter 전송 · Shift/⌘Enter 줄바꿈)"
+            placeholder={
+              useLlmBeta && LLM_BETA_VISIBLE
+                ? 'AI Beta 질문 (Enter 전송)'
+                : '키워드 질문 (예: plan, trigger, 매크로)'
+            }
             rows={2}
             maxLength={2000}
             disabled={pending}
@@ -331,6 +378,18 @@ export default function ChatWindow({
           정보 + 의사결정 지원 도구입니다. 투자 자문이 아닙니다.
         </p>
       </div>
+  );
+
+  if (embedded) return panel;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-end md:p-6"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      {panel}
     </div>
   );
 }

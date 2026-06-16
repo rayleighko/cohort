@@ -147,6 +147,7 @@ function makeRequest(body: unknown): Request {
 }
 
 beforeEach(() => {
+  vi.stubEnv('COHORT_LLM_BETA_ENABLED', 'true');
   // Default: no prior history + no prior quota usage. Tests that need prior
   // state (turns or quota row) override before POST.
   mockedHistorySelect.mockResolvedValue({ data: [], error: null });
@@ -160,6 +161,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   vi.restoreAllMocks();
   mockedCallPersonaMultiTurn.mockReset();
   mockedApplySafetyFilter.mockReset();
@@ -171,6 +173,17 @@ afterEach(() => {
   mockedResolveUserTier.mockReset();
   mockedPostHogCapture.mockReset();
   mockedPostHogShutdown.mockReset();
+});
+
+describe('POST /api/aurora/chat — LLM beta gate', () => {
+  it('returns 403 when COHORT_LLM_BETA_ENABLED is not true', async () => {
+    vi.stubEnv('COHORT_LLM_BETA_ENABLED', 'false');
+    const res = await POST(
+      makeRequest({ sessionId: VALID_SESSION, message: '안녕' }) as never,
+    );
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe('llm_beta_disabled');
+  });
 });
 
 describe('POST /api/aurora/chat — input validation', () => {
