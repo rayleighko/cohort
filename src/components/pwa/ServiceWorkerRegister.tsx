@@ -2,27 +2,30 @@
 
 import { useEffect } from 'react';
 
+import { registerServiceWorker } from '@/lib/notification/sw-register';
+
 /**
  * Registers the Cohort service worker on mount (client-only).
- * Rendered once in the root layout. Caching strategy lands in W2.
+ * Rendered once in the root layout. Required for web push + PWA shell.
  */
 export default function ServiceWorkerRegister() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!('serviceWorker' in navigator)) return;
-    if (process.env.NODE_ENV !== 'production') return;
 
     const register = () => {
-      navigator.serviceWorker
-        .register('/service-worker.js', { scope: '/' })
-        .catch((err) => {
-          // Non-fatal: PWA shell still works without the SW.
-          console.warn('[Cohort] service worker registration failed', err);
-        });
+      registerServiceWorker().catch((err) => {
+        // Non-fatal: PWA shell still works without the SW.
+        console.warn('[Cohort] service worker registration failed', err);
+      });
     };
 
-    window.addEventListener('load', register);
-    return () => window.removeEventListener('load', register);
+    if (document.readyState === 'complete') {
+      register();
+    } else {
+      window.addEventListener('load', register);
+      return () => window.removeEventListener('load', register);
+    }
   }, []);
 
   return null;

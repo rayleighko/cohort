@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const VAPID_TEST_KEY =
-  'BIqNQTjV-Q6JZsX2gqL4lLpEKnD2YxJ8cFqMzKvNgY8tRwK9rJlPmHkS7uVwAaBbCcDdEeFfGgHhIiJjKk';
+  'BIyMOTr6aI3b5JwkQv947QWUE9fcfTc-sYt6Wb-i0FXp7EYnZJE7bBu8D9pnInb7hweWRx85wSNMnLNbZm3Xqyw';
 
 function makeSubscription(endpoint = 'https://push.example.com/abc') {
   return {
@@ -15,6 +15,19 @@ function makeSubscription(endpoint = 'https://push.example.com/abc') {
       };
     },
   };
+}
+
+function stubServiceWorkerNavigator(
+  registration: ServiceWorkerRegistration,
+  registerImpl?: () => Promise<ServiceWorkerRegistration>,
+) {
+  const register = registerImpl ?? vi.fn(async () => registration);
+  vi.stubGlobal('navigator', {
+    serviceWorker: {
+      register,
+      ready: Promise.resolve(registration),
+    },
+  });
 }
 
 function makeRegistration(
@@ -50,10 +63,10 @@ describe('registerServiceWorker', () => {
     expect(res).toBeNull();
   });
 
-  it('returns ServiceWorkerRegistration on success', async () => {
+  it('returns ServiceWorkerRegistration on success after ready', async () => {
     const registration = makeRegistration();
     const register = vi.fn(async () => registration);
-    vi.stubGlobal('navigator', { serviceWorker: { register } });
+    stubServiceWorkerNavigator(registration, register);
     const { registerServiceWorker } = await import('../sw-register');
     const res = await registerServiceWorker();
     expect(res).toBe(registration);
@@ -65,7 +78,14 @@ describe('registerServiceWorker', () => {
     const register = vi.fn(async () => {
       throw new Error('reg-failed');
     });
-    vi.stubGlobal('navigator', { serviceWorker: { register } });
+    vi.stubGlobal('navigator', {
+      serviceWorker: {
+        register,
+        ready: new Promise(() => {
+          /* never resolves — register throws first */
+        }),
+      },
+    });
     const { registerServiceWorker } = await import('../sw-register');
     const res = await registerServiceWorker();
     expect(res).toBeNull();
@@ -113,12 +133,36 @@ describe('requestPushPermission', () => {
 });
 
 describe('subscribeWebPush', () => {
+  beforeEach(() => {
+    if (!('PushManager' in globalThis)) {
+      vi.stubGlobal('PushManager', class PushManager {});
+    }
+  });
+
   it('returns vapid_public_key_not_set when VAPID env unset', async () => {
     vi.stubEnv('NEXT_PUBLIC_VAPID_PUBLIC_KEY', '');
     const { subscribeWebPush } = await import('../sw-register');
     const res = await subscribeWebPush();
     expect(res.success).toBe(false);
     expect(res.error).toBe('vapid_public_key_not_set');
+  });
+
+  it('returns vapid_public_key_invalid when public key is malformed', async () => {
+    vi.stubEnv('NEXT_PUBLIC_VAPID_PUBLIC_KEY', 'not-a-valid-vapid-key');
+    const { subscribeWebPush } = await import('../sw-register');
+    const res = await subscribeWebPush();
+    expect(res.success).toBe(false);
+    expect(res.error).toBe('vapid_public_key_invalid');
+  });
+
+  it('returns push_not_supported when PushManager missing', async () => {
+    vi.stubEnv('NEXT_PUBLIC_VAPID_PUBLIC_KEY', VAPID_TEST_KEY);
+    // @ts-expect-error — simulate unsupported browser
+    delete globalThis.PushManager;
+    const { subscribeWebPush } = await import('../sw-register');
+    const res = await subscribeWebPush();
+    expect(res.success).toBe(false);
+    expect(res.error).toBe('push_not_supported');
   });
 
   it('returns service_worker_registration_failed when register returns null', async () => {
@@ -131,9 +175,7 @@ describe('subscribeWebPush', () => {
 
   it('returns notification_permission_denied when permission != granted', async () => {
     const registration = makeRegistration();
-    vi.stubGlobal('navigator', {
-      serviceWorker: { register: vi.fn(async () => registration) },
-    });
+    stubServiceWorkerNavigator(registration);
     vi.stubGlobal('Notification', {
       permission: 'denied',
       requestPermission: vi.fn(),
@@ -151,9 +193,7 @@ describe('subscribeWebPush', () => {
       getSubscription: vi.fn(async () => existing),
       subscribe,
     });
-    vi.stubGlobal('navigator', {
-      serviceWorker: { register: vi.fn(async () => registration) },
-    });
+    stubServiceWorkerNavigator(registration);
     vi.stubGlobal('Notification', {
       permission: 'granted',
       requestPermission: vi.fn(),
@@ -172,9 +212,7 @@ describe('subscribeWebPush', () => {
       getSubscription: vi.fn(async () => null),
       subscribe,
     });
-    vi.stubGlobal('navigator', {
-      serviceWorker: { register: vi.fn(async () => registration) },
-    });
+    stubServiceWorkerNavigator(registration);
     vi.stubGlobal('Notification', {
       permission: 'granted',
       requestPermission: vi.fn(),
@@ -199,9 +237,7 @@ describe('subscribeWebPush', () => {
       getSubscription: vi.fn(async () => null),
       subscribe,
     });
-    vi.stubGlobal('navigator', {
-      serviceWorker: { register: vi.fn(async () => registration) },
-    });
+    stubServiceWorkerNavigator(registration);
     vi.stubGlobal('Notification', {
       permission: 'granted',
       requestPermission: vi.fn(),
@@ -210,6 +246,18 @@ describe('subscribeWebPush', () => {
     const res = await subscribeWebPush();
     expect(res.success).toBe(false);
     expect(res.error).toBe('subscribe-blew-up');
+  });
+});
+
+describe('formatPushErrorMessage', () => {
+  it('maps known internal codes to Korean copy', async () => {
+    const { formatPushErrorMessage } = await import('../sw-register');
+    expect(formatPushErrorMessage('vapid_public_key_not_set')).toContain('VAPID');
+    expect(formatPushErrorMessage('notification_permission_denied')).toContain('권한');
+    expect(formatPushErrorMessage('no active Service Worker')).toContain('새로고침');
+    expect(formatPushErrorMessage('Registration failed - push service not available')).toContain(
+      'FCM',
+    );
   });
 });
 

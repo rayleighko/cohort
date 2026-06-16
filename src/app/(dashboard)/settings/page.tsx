@@ -14,11 +14,12 @@ import DeleteAccountButton from '@/components/account/DeleteAccountButton';
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ checkout?: string }>;
+  searchParams: Promise<{ checkout?: string; ips?: string }>;
 }) {
   const tier = await loadTierState();
   const resolvedSearchParams = await searchParams;
   const checkoutSuccess = resolvedSearchParams.checkout === 'success';
+  const ipsSaved = resolvedSearchParams.ips === 'saved';
 
   return (
     <main className="mx-auto max-w-md px-6 py-10">
@@ -27,6 +28,13 @@ export default async function SettingsPage({
       {checkoutSuccess && (
         <p className="mt-4 rounded-xl bg-cohort-primary/10 px-4 py-3 text-sm text-cohort-primary break-keep">
           후원해 주셔서 고마워요. 코호트를 이어 가는 데 큰 힘이 됩니다.
+        </p>
+      )}
+
+      {ipsSaved && (
+        <p className="mt-4 rounded-xl bg-cohort-primary/10 px-4 py-3 text-sm text-cohort-primary break-keep">
+          투자 원칙(IPS)을 이 기기에 저장했어요. 서버 동기화는 다음 업데이트에서
+          연결됩니다.
         </p>
       )}
 
