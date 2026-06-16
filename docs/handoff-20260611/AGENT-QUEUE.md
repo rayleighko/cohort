@@ -17,8 +17,8 @@
 | A1 | 로컬 diff 정리: macro/Aurora freshness + support UI + terms/privacy KO | parent agent | tsc + vitest macro/aurora | ⬜ | — |
 | A2 | `docs/handoff` 동기화 (HANDOFF + RUN-STATUS) | parent | — | 🔄 | — |
 | A3 | `.env.local.example`에 `TOSS_*` + `TOSS_LAB_ENABLED` | parent | — | ✅ | — |
-| A4 | **Ray: commit + push** (1–3 commits, Conventional) | Ray | pre-push hook | 🔄 | docs + 09d6b5b push |
-| A5 | Vercel redeploy + PostHog 퍼널 smoke | Ray | manual | ⬜ | A4 |
+| A4 | **Ray: commit + push** (1–3 commits, Conventional) | Ray | pre-push hook | ✅ | 8b6753d |
+| A5 | Vercel redeploy + PostHog 퍼널 smoke | Ray | manual | ⬜ | Ray manual |
 
 **A1 디스패치 (병렬 가능):**
 - `cohort-design-system` + `cohort-accessibility-auditor` — SubscriptionPanel, settings (UI touch 시)
