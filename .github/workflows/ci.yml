@@ -30,7 +30,8 @@ jobs:
 
       - name: "[1/6] Brand mapping scan"
         run: |
-          LEGACY_REFS=$(grep -rn -E "(준\s|Joon[^a-z]|joon-mate|joon_chat|JoonAvatar|JoonChatBubble|JoonNarration|joon-prompt)" src/ 2>/dev/null | grep -v "// HISTORICAL" | grep -v "// LEGACY" || true)
+          # Match legacy mascot "준 " only when not part of a Korean compound (e.g. skip "수준").
+          LEGACY_REFS=$(grep -rn -E "(^|[^가-힣])준\s|(Joon[^a-z]|joon-mate|joon_chat|JoonAvatar|JoonChatBubble|JoonNarration|joon-prompt)" src/ 2>/dev/null | grep -v "// HISTORICAL" | grep -v "// LEGACY" || true)
           if [ -n "$LEGACY_REFS" ]; then
             echo "FAIL — Legacy brand references found in src/:"
             echo "$LEGACY_REFS" | head -10

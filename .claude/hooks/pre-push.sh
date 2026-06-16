@@ -20,7 +20,7 @@ echo ""
 echo "[1/5] Brand mapping scan (legacy 준/Joon/joon-mate references)..."
 
 if [ -d "src" ]; then
-  LEGACY_REFS=$(grep -rn -E "(준\s|Joon[^a-z]|joon-mate|joon_chat|JoonAvatar|JoonChatBubble|JoonNarration|joon-prompt)" src/ 2>/dev/null | grep -v "// HISTORICAL" | grep -v "// LEGACY" || true)
+  LEGACY_REFS=$(grep -rn -E "(^|[^가-힣])준\s|(Joon[^a-z]|joon-mate|joon_chat|JoonAvatar|JoonChatBubble|JoonNarration|joon-prompt)" src/ 2>/dev/null | grep -v "// HISTORICAL" | grep -v "// LEGACY" || true)
   if [ -n "$LEGACY_REFS" ]; then
     echo "  FAIL — Legacy brand references found in src/:"
     echo "$LEGACY_REFS" | head -10
