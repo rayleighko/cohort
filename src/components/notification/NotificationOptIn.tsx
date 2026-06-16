@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import {
+  formatPushErrorMessage,
   subscribeWebPush,
   unsubscribeWebPush,
 } from '@/lib/notification/sw-register';
@@ -143,7 +144,7 @@ export function NotificationOptIn({
       </div>
       {hasError && errorMessage && (
         <p className="mt-2 break-keep text-xs text-cohort-danger" role="alert">
-          오류: {errorMessage}
+          {formatPushErrorMessage(errorMessage)}
         </p>
       )}
     </div>

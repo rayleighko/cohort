@@ -13,6 +13,7 @@ const unsubscribeWebPushMock = vi.fn();
 vi.mock('@/lib/notification/sw-register', () => ({
   subscribeWebPush: (...args: unknown[]) => subscribeWebPushMock(...args),
   unsubscribeWebPush: (...args: unknown[]) => unsubscribeWebPushMock(...args),
+  formatPushErrorMessage: (code: string) => code,
 }));
 
 import { NotificationOptIn } from '../NotificationOptIn';
