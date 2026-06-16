@@ -133,6 +133,12 @@ export const ipsDocumentSchema = z
 export type IpsDocument = z.infer<typeof ipsDocumentSchema>;
 export type IpsHorizon = z.infer<typeof ipsHorizonSchema>;
 export type IpsAllocation = z.infer<typeof ipsAllocationSchema>;
+export type HorizonYearsBand = z.infer<typeof horizonYearsBandSchema>;
+export type AssetClass = z.infer<typeof assetClassSchema>;
+export type LossLimitAction = z.infer<typeof lossLimitActionSchema>;
+export type MonthlyContributionBand = z.infer<typeof monthlyContributionBandSchema>;
+export type RebalanceCadence = z.infer<typeof rebalanceCadenceSchema>;
+export type ReviewCadence = z.infer<typeof reviewCadenceSchema>;
 
 /** Parse and validate IPS JSON — throws ZodError on failure. */
 export function parseIpsDocument(input: unknown): IpsDocument {

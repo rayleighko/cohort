@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -29,6 +30,16 @@ export function ProfileSettingsPanel() {
         >
           투자 프로필 다시 설정
         </Button>
+        <Link
+          href="/settings/ips"
+          className="flex min-h-[44px] w-full items-center justify-center rounded-xl border border-cohort-primary px-5 text-base font-semibold text-cohort-primary"
+        >
+          투자 원칙 (IPS) 작성
+        </Link>
+        <p className="break-keep text-[11px] leading-relaxed text-cohort-charcoal/45">
+          평온할 때 본인 plan을 문서로 정리해 두는 단계예요. 코호트는 추천하지
+          않고, 본인이 쓴 원칙만 정리합니다.
+        </p>
       </div>
       <SurveyModal
         open={surveyOpen}
