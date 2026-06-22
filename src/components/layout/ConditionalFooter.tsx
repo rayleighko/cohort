@@ -11,6 +11,10 @@ import { Footer } from './Footer';
  * compliance pages (Landing, Privacy, Terms, signup, login, waitlist) keep it
  * for 운영자 정보 + 면책 고지 표시 + brand surface.
  *
+ * `/regime` is the standalone Bearings (EN) landing — a separate brand surface
+ * with its own self-contained footer/disclaimer; the Cohort KR Footer (with
+ * 사업자 정보) must not bleed into it.
+ *
  * Routes are matched by prefix; child routes (e.g. /settings/notifications)
  * inherit the hide rule. SSR fallback (no pathname yet) renders the Footer
  * so first paint never flashes operator info missing on a public route.
@@ -23,6 +27,7 @@ const HIDE_FOOTER_PREFIXES = [
   '/shape-a',
   '/shape-b',
   '/shape-c',
+  '/regime',
 ];
 
 export function ConditionalFooter() {
