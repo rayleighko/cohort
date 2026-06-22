@@ -10,6 +10,12 @@ export const COHORT_EVENTS = {
   WAITLIST_SUBMIT: 'waitlist_submit',
   CTA_CLICK: 'cta_click',
 
+  // Bearings — /regime EN landing (USD validation funnel).
+  // The server still fires WAITLIST_SUBMIT (with source='regime-landing') for
+  // the unified funnel; these client events isolate the regime-landing surface.
+  REGIME_LANDING_VIEW: 'regime_landing_view',
+  REGIME_WAITLIST_SUBMIT: 'regime_waitlist_submit',
+
   // Auth + onboarding
   SIGNUP_START: 'signup_start',
   SIGNUP_COMPLETE: 'signup_complete',

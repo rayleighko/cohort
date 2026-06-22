@@ -16,8 +16,27 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // Waitlist retired — preserve old links and SEO bookmarks.
-      { source: '/waitlist', destination: '/signup', permanent: false },
+      // Waitlist retired — preserve old links and SEO bookmarks. Scoped away
+      // from the Bearings host so a thebearings.app/waitlist hit doesn't bounce
+      // an EN visitor into the KR /signup flow on the wrong domain.
+      {
+        source: '/waitlist',
+        destination: '/signup',
+        permanent: false,
+        missing: [{ type: 'host', value: '(www\\.)?thebearings\\.app' }],
+      },
+      // Bearings (EN, USD validation) is served from thebearings.app. The apex
+      // and www hosts land on the brand-isolated /regime route (where the
+      // Cohort KR footer is hidden, lang='en', and OG metadata resolve). The
+      // host condition scopes this strictly to thebearings.app — cohort.co.kr
+      // root stays the Korean landing, untouched. Temporary (307) during
+      // validation so the mapping can change without poisoning caches.
+      {
+        source: '/',
+        has: [{ type: 'host', value: '(www\\.)?thebearings\\.app' }],
+        destination: '/regime',
+        permanent: false,
+      },
     ];
   },
   async headers() {

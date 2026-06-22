@@ -9,12 +9,18 @@ import { getServerPostHog } from '@/lib/analytics/posthog-server';
 import { COHORT_EVENTS } from '@/lib/analytics/events';
 
 /**
- * Waitlist signup — POST { email, consent_pipa, consent_marketing?, ab_variant?, distinct_id? }.
+ * Waitlist signup — POST { email, consent_pipa, consent_marketing?, ab_variant?, distinct_id?, source? }.
  *
  * Server-side: zod validation (consent_pipa MUST be true), service-role insert
  * into the RLS-default-deny `waitlist` table, idempotent on duplicate email,
  * best-effort Resend confirmation, reliable server-side `waitlist_submit`
  * PostHog event. The email is stored in the DB only — NEVER sent to PostHog.
+ *
+ * `source` is optional, additive funnel attribution stored in the existing
+ * `referral_source` column (KR landing sends none → NULL, unchanged). The
+ * Bearings EN /regime landing sends source='regime-landing'. The KR-branded
+ * confirmation email is suppressed for that source (Bearings has its own,
+ * separate sender identity — TODO: EN template once thebearings.app verifies).
  */
 const bodySchema = z.object({
   email: z.string().email().max(320),
@@ -22,6 +28,7 @@ const bodySchema = z.object({
   consent_marketing: z.boolean().optional().default(false),
   ab_variant: z.enum(['A', 'B', 'C']).optional().default('C'),
   distinct_id: z.string().max(200).optional(),
+  source: z.string().max(64).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -31,8 +38,14 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'invalid_input' }, { status: 400 });
   }
-  const { email, consent_pipa, consent_marketing, ab_variant, distinct_id } =
-    parsed;
+  const {
+    email,
+    consent_pipa,
+    consent_marketing,
+    ab_variant,
+    distinct_id,
+    source,
+  } = parsed;
   const normalizedEmail = email.trim().toLowerCase();
 
   try {
@@ -42,6 +55,7 @@ export async function POST(request: NextRequest) {
       consent_pipa,
       consent_marketing,
       ab_variant,
+      referral_source: source ?? null,
     });
 
     if (insertError) {
@@ -54,18 +68,24 @@ export async function POST(request: NextRequest) {
 
     // Best-effort confirmation email. cohort.co.kr is unverified until W5, so
     // a send failure is expected for non-owner addresses — log, do not fail
-    // the request (the user IS on the waitlist).
-    try {
-      const { subject, html, text } = waitlistConfirmationEmail();
-      await getResendClient().emails.send({
-        from: WAITLIST_FROM,
-        to: normalizedEmail,
-        subject,
-        html,
-        text,
-      });
-    } catch (emailErr) {
-      Sentry.captureException(emailErr, { tags: { area: 'waitlist-email' } });
+    // the request (the user IS on the waitlist). Suppressed for the Bearings
+    // /regime source: the KR-branded template is off-brand for the EN funnel,
+    // and the success-state copy promises the read "when it's ready", not an
+    // immediate confirmation. An EN Bearings template lands once the domain
+    // is verified in Resend.
+    if (source !== 'regime-landing') {
+      try {
+        const { subject, html, text } = waitlistConfirmationEmail();
+        await getResendClient().emails.send({
+          from: WAITLIST_FROM,
+          to: normalizedEmail,
+          subject,
+          html,
+          text,
+        });
+      } catch (emailErr) {
+        Sentry.captureException(emailErr, { tags: { area: 'waitlist-email' } });
+      }
     }
 
     // Server-side conversion event — reliable (ad-blocker-proof).
@@ -78,6 +98,7 @@ export async function POST(request: NextRequest) {
         properties: {
           ab_variant,
           has_marketing_consent: consent_marketing,
+          source: source ?? 'kr-landing',
         },
       });
       await ph.shutdown();
