@@ -14,8 +14,8 @@ import type { Metadata } from 'next';
  * what is actually served (no apex↔www canonical split).
  *
  * The share card is the "Same kind of crash / opposite outcome" 2008-vs-2022
- * contrast card (1600×900) — a stronger hook than the regime matrix, and free
- * of the in-matrix data dots that were removed from the body visual.
+ * contrast card (1200×630, the 1.91:1 OG standard) — a stronger hook than the
+ * regime matrix, and free of the in-matrix data dots removed from the body.
  *
  * The route is brand-isolated: the global Cohort KR Footer is suppressed for
  * /regime (see ConditionalFooter), and the page sets <html lang="en"> at runtime.
@@ -25,7 +25,7 @@ const OG_IMAGE = 'https://www.thebearings.app/og/regime-contrast.png';
 const CANONICAL = 'https://www.thebearings.app/regime';
 const TITLE = 'Bearings — which regime is your portfolio betting on?';
 const DESCRIPTION =
-  'Every portfolio is a hidden forecast. See which economic regime you’re long, and which one breaks you. No login, no linking, nothing stored.';
+  'Every portfolio is a hidden forecast. See which economic regime you’re long — and which one quietly breaks you.';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
@@ -50,8 +50,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: OG_IMAGE,
-        width: 1600,
-        height: 900,
+        width: 1200,
+        height: 630,
         alt: 'Bearings — same kind of crash, opposite outcome: in 2008 bonds rose as stocks fell; in 2022 both fell together.',
       },
     ],
