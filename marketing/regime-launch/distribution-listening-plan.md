@@ -70,12 +70,19 @@ WHERE event IN ('regime_landing_view', 'waitlist_submit')
        OR coalesce(properties.$current_url, '') LIKE '%127.0.0.1%'
        OR coalesce(properties.$current_url, '') LIKE '%vercel.app%'
   )
+  -- Synthetic server-only QA submits (e.g. a curl straight to /api/waitlist)
+  -- have no client session and no $host, so the subquery above can't see them.
+  -- List any such test distinct_ids explicitly:
+  AND distinct_id NOT IN ('prodsmoke-cli-20260623')
 ```
 
-The subquery auto-excludes any current or future dev/preview session, so no
-manual `distinct_id` upkeep is needed. Once `www.thebearings.app` is live, real
-visitors hit the www host and are counted; localhost/preview QA is not. (Verified
-2026-06-23: with two QA sessions in prod, this query returns `0 / 0`.)
+The subquery auto-excludes any current or future *browser* session that touched a
+dev/preview host — self-maintaining, no upkeep for QA done through a browser. Only
+synthetic server-only submits (scripts that fabricate a `distinct_id`) need the
+explicit list, since they carry no host to match on. Real visitors hit
+`www.thebearings.app` and are counted. (Verified 2026-06-23: the two localhost QA
+sessions and the curl submit are excluded, while a real www-only prod session is
+kept — the query returns `landing_views 1 / signups 1`.)
 
 ---
 
