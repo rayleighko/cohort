@@ -1,0 +1,26 @@
+{
+  "name": "Bearings",
+  "short_name": "Bearings",
+  "description": "Which economic regime is your portfolio betting on? A regime read for what you already hold.",
+  "start_url": "/regime",
+  "scope": "/regime",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#A8243F",
+  "background_color": "#0A0A0A",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/bearings/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/bearings/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

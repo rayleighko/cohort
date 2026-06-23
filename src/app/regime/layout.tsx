@@ -40,6 +40,25 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'Bearings',
   },
+  // Route-scoped Bearings icons. Like appleWebApp above, the whole `icons` field
+  // is restated here so it REPLACES the root Cohort icons for /regime only — the
+  // root favicon/manifest still serve cohort.co.kr untouched. Files live under
+  // /public/bearings/ to keep them clearly separate from the Cohort root icons.
+  icons: {
+    icon: [
+      { url: '/bearings/favicon.ico', sizes: 'any' },
+      { url: '/bearings/favicon-16.png', type: 'image/png', sizes: '16x16' },
+      { url: '/bearings/favicon-32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/bearings/favicon-48.png', type: 'image/png', sizes: '48x48' },
+      { url: '/bearings/icon-192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/bearings/icon-512.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: { url: '/bearings/apple-touch-icon.png', sizes: '180x180' },
+  },
+  // Separate Bearings PWA manifest (name "Bearings", lang en, scope /regime) so
+  // "add to home screen" from thebearings.app is Bearings-branded. The Cohort KR
+  // manifest at /site.webmanifest is left as the root default for cohort.co.kr.
+  manifest: '/bearings.webmanifest',
   alternates: { canonical: CANONICAL },
   openGraph: {
     type: 'website',
