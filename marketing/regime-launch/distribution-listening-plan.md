@@ -46,6 +46,32 @@ holds individual positions, not a pure beginner or a bot).
 PostHog already records the funnel: `regime_landing_view` → `waitlist_submit`
 (`source='regime-landing'`). Pull those two numbers for the conversion rate.
 
+**Measurement hygiene — exclude internal/test traffic.** Validation counts must
+not be polluted by localhost dev, Vercel preview deploys, or QA smoke tests
+(three such events were captured to prod during pre-launch verification on
+2026-06-23). Always pull the go/kill numbers with this filtered HogQL, not a raw
+event count:
+
+```sql
+SELECT
+  countIf(event = 'regime_landing_view')                                          AS landing_views,
+  countIf(event = 'waitlist_submit' AND properties.source = 'regime-landing')     AS signups,
+  round(100.0 * countIf(event = 'waitlist_submit' AND properties.source = 'regime-landing')
+        / nullIf(countIf(event = 'regime_landing_view'), 0), 1)                    AS conv_pct
+FROM events
+WHERE event IN ('regime_landing_view', 'waitlist_submit')
+  AND timestamp >= toDateTime('2026-06-23 00:00:00')          -- set to the launch-window start
+  -- client events carry $host/$current_url → drop dev + preview hosts
+  AND coalesce(properties.$host, '')        NOT LIKE '%localhost%'
+  AND coalesce(properties.$current_url, '') NOT LIKE '%127.0.0.1%'
+  AND coalesce(properties.$current_url, '') NOT LIKE '%vercel.app%'
+  -- the server-side waitlist_submit has no $host → also drop known test ids
+  AND distinct_id NOT IN ('019ef276-9294-78ef-8516-9d313cff1631')  -- QA smoke test 2026-06-23
+```
+
+(Append any further internal `distinct_id`s to the `NOT IN` list as they appear.
+The `$host`/`vercel.app` filters keep future dev/preview noise out automatically.)
+
 ---
 
 ## 3. Go / Kill / Iterate — pre-committed baseline

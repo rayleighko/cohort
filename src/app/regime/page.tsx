@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import { posthog } from '@/lib/analytics/posthog';
+import { initPostHog, posthog } from '@/lib/analytics/posthog';
 import { COHORT_EVENTS } from '@/lib/analytics/events';
 
 /**
@@ -40,8 +40,8 @@ function RegimeMatrix() {
     <svg
       viewBox="0 0 320 320"
       role="img"
-      aria-label="A 2×2 economic regime matrix. Horizontal axis: inflation, low to high. Vertical axis: growth, low to high. A dovish read sits in the low-inflation half; a hawkish read sits in the high-inflation half. 2008 marks a growth scare in the low-growth, low-inflation quadrant; 2022 marks an inflation shock in the low-growth, high-inflation quadrant."
-      className="h-auto w-full max-w-[360px]"
+      aria-label="A 2×2 economic regime matrix. Horizontal axis: inflation, low to high. Vertical axis: growth, low to high. The four quadrants are recovery, overheat, deflation, and stagflation. A dovish read sits in the low-inflation half; a hawkish read sits in the high-inflation half."
+      className="mx-auto h-auto w-full max-w-[360px]"
     >
       {/* registration ticks (instrument corners) */}
       {[
@@ -137,19 +137,6 @@ function RegimeMatrix() {
         </text>
       </g>
 
-      {/* historical regime annotations */}
-      <g
-        fill="#6a6a6f"
-        fontFamily="'Berkeley Mono','JetBrains Mono',monospace"
-        fontSize="8"
-        letterSpacing="0.06em"
-      >
-        <circle cx="92" cy="214" r="2.5" fill="#6a6a6f" />
-        <text x="100" y="217">2008 · growth scare</text>
-        <circle cx="200" cy="214" r="2.5" fill="#6a6a6f" />
-        <text x="208" y="217">2022 · inflation shock</text>
-      </g>
-
       {/* axis labels (mono) */}
       <g
         fill="#aeaeb2"
@@ -181,6 +168,14 @@ export default function RegimePage() {
   useEffect(() => {
     const prev = document.documentElement.lang;
     document.documentElement.lang = 'en';
+    // The root PostHogProvider calls initPostHog() in its own mount effect, but
+    // React runs child effects before parent effects — so on a cold/direct load
+    // this page's effect fires BEFORE init runs, and posthog-js silently drops a
+    // capture() made before init(). That would lose regime_landing_view (the
+    // top-of-funnel metric) for exactly the direct-hit traffic a landing page
+    // gets. initPostHog() is idempotent (guarded), so calling it here guarantees
+    // init precedes the capture without risking a double init.
+    initPostHog();
     posthog.capture(COHORT_EVENTS.REGIME_LANDING_VIEW, {
       referrer: typeof document !== 'undefined' ? document.referrer : '',
     });
@@ -372,7 +367,7 @@ export default function RegimePage() {
             clearer read on what you already hold.
           </p>
           <p className="mt-4 font-mono text-[11px] tracking-wider text-neutral-600">
-            © 2026 Bearings · thebearings.app
+            © 2026 Bearings · www.thebearings.app
           </p>
         </footer>
       </div>

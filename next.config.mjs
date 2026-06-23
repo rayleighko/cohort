@@ -25,12 +25,16 @@ const nextConfig = {
         permanent: false,
         missing: [{ type: 'host', value: '(www\\.)?thebearings\\.app' }],
       },
-      // Bearings (EN, USD validation) is served from thebearings.app. The apex
-      // and www hosts land on the brand-isolated /regime route (where the
-      // Cohort KR footer is hidden, lang='en', and OG metadata resolve). The
-      // host condition scopes this strictly to thebearings.app — cohort.co.kr
-      // root stays the Korean landing, untouched. Temporary (307) during
-      // validation so the mapping can change without poisoning caches.
+      // Bearings (EN, USD validation) is served from www.thebearings.app — the
+      // canonical host. The apex (thebearings.app) 308-redirects to www at the
+      // Vercel domain layer (infra, not code), so this app effectively only
+      // ever sees the www host; the `(www\.)?` match keeps a defensive apex
+      // fallback in case that edge redirect is ever removed. The root lands on
+      // the brand-isolated /regime route (Cohort KR footer hidden, lang='en',
+      // OG metadata resolve). cohort.co.kr root stays the Korean landing,
+      // untouched. Temporary (307) during validation so the mapping can change
+      // without poisoning caches. NB: do NOT add a www→apex redirect here — it
+      // would form a loop against the apex→www 308 above.
       {
         source: '/',
         has: [{ type: 'host', value: '(www\\.)?thebearings\\.app' }],
