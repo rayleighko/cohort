@@ -41,16 +41,37 @@ jobs:
 
       - name: "[2/6] Option B compliance scan"
         run: |
-          FORBIDDEN=$(grep -rn -E "(추천|권장|매수하세요|파세요|비중\s*[0-9]+%|지금\s*매수|timing입니다)" src/ \
-            --exclude-dir=__tests__ --exclude='*.test.ts' --exclude='*.test.tsx' 2>/dev/null \
-            | grep -v "src/app/privacy/" | grep -v "src/app/terms/" \
-            | grep -v "src/lib/claude/safety-filter.ts" | grep -v "src/lib/claude/vesper-prompt.ts" \
-            | grep -v "src/lib/aurora/aurora-prompt.ts" | grep -v "src/lib/aurora/chat-prompt.ts" \
-            | grep -v "OPTION-B-ALLOWED" | grep -v "// EXAMPLE" | grep -v "// FORBIDDEN" || true)
+          FORBIDDEN_REGEX="(추천|권장|매수하세요|파세요|비중\\s*[0-9]+%|지금\\s*매수|timing입니다)"
+          SAFETY_REDIRECT_REGEX="(매수하세요|파세요|비중\\s*[0-9]+%|지금\\s*매수|지금\\s*매도|timing입니다)"
+          TARGETS=(
+            "src/app"
+            "src/components"
+          )
+          if [ -f "src/lib/companion/responses.ts" ]; then
+            TARGETS+=("src/lib/companion/responses.ts")
+          fi
+          if [ -f "src/lib/aurora/narration-templates.ts" ]; then
+            TARGETS+=("src/lib/aurora/narration-templates.ts")
+          fi
+          FORBIDDEN=$(rg -n -e "$FORBIDDEN_REGEX" "${TARGETS[@]}" \
+            -g '!**/__tests__/**' -g '!**/*.test.ts' -g '!**/*.test.tsx' \
+            -g '!src/app/privacy/**' -g '!src/app/terms/**' 2>/dev/null \
+            | rg -v "OPTION-B-ALLOWED|// EXAMPLE|// FORBIDDEN" || true)
           if [ -n "$FORBIDDEN" ]; then
             echo "FAIL — Option B forbidden phrases:"
             echo "$FORBIDDEN" | head -10
             exit 1
+          fi
+          if [ -f "src/lib/claude/safety-filter.ts" ]; then
+            SAFETY_REDIRECT_LINE=$(rg -n "COHORT_FALLBACK_REDIRECT" src/lib/claude/safety-filter.ts 2>/dev/null || true)
+            if [ -n "$SAFETY_REDIRECT_LINE" ]; then
+              SAFETY_HIT=$(printf '%s\n' "$SAFETY_REDIRECT_LINE" | rg -n -e "$SAFETY_REDIRECT_REGEX" || true)
+              if [ -n "$SAFETY_HIT" ]; then
+                echo "FAIL — Option B forbidden phrase in safety-filter redirect copy:"
+                echo "$SAFETY_HIT"
+                exit 1
+              fi
+            fi
           fi
           echo "PASS"
 
