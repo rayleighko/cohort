@@ -48,29 +48,34 @@ PostHog already records the funnel: `regime_landing_view` → `waitlist_submit`
 
 **Measurement hygiene — exclude internal/test traffic.** Validation counts must
 not be polluted by localhost dev, Vercel preview deploys, or QA smoke tests
-(three such events were captured to prod during pre-launch verification on
-2026-06-23). Always pull the go/kill numbers with this filtered HogQL, not a raw
-event count:
+(such events were captured to prod during pre-launch verification on 2026-06-23).
+Always pull the go/kill numbers with this filtered HogQL, not a raw event count:
 
 ```sql
 SELECT
-  countIf(event = 'regime_landing_view')                                          AS landing_views,
-  countIf(event = 'waitlist_submit' AND properties.source = 'regime-landing')     AS signups,
+  countIf(event = 'regime_landing_view')                                      AS landing_views,
+  countIf(event = 'waitlist_submit' AND properties.source = 'regime-landing') AS signups,
   round(100.0 * countIf(event = 'waitlist_submit' AND properties.source = 'regime-landing')
-        / nullIf(countIf(event = 'regime_landing_view'), 0), 1)                    AS conv_pct
+        / nullIf(countIf(event = 'regime_landing_view'), 0), 1)               AS conv_pct
 FROM events
 WHERE event IN ('regime_landing_view', 'waitlist_submit')
-  AND timestamp >= toDateTime('2026-06-23 00:00:00')          -- set to the launch-window start
-  -- client events carry $host/$current_url → drop dev + preview hosts
-  AND coalesce(properties.$host, '')        NOT LIKE '%localhost%'
-  AND coalesce(properties.$current_url, '') NOT LIKE '%127.0.0.1%'
-  AND coalesce(properties.$current_url, '') NOT LIKE '%vercel.app%'
-  -- the server-side waitlist_submit has no $host → also drop known test ids
-  AND distinct_id NOT IN ('019ef276-9294-78ef-8516-9d313cff1631')  -- QA smoke test 2026-06-23
+  AND timestamp >= toDateTime('2026-06-23 00:00:00')   -- set to the launch-window start
+  -- Exclude every session that ever touched a dev/preview host. Client events
+  -- (regime_landing_view, regime_waitlist_submit) carry $host/$current_url; the
+  -- server-side waitlist_submit carries neither, so it is matched by distinct_id
+  -- against those same internal sessions. Self-maintaining — no hardcoded ids.
+  AND distinct_id NOT IN (
+    SELECT DISTINCT distinct_id FROM events
+    WHERE coalesce(properties.$host, '')        LIKE '%localhost%'
+       OR coalesce(properties.$current_url, '') LIKE '%127.0.0.1%'
+       OR coalesce(properties.$current_url, '') LIKE '%vercel.app%'
+  )
 ```
 
-(Append any further internal `distinct_id`s to the `NOT IN` list as they appear.
-The `$host`/`vercel.app` filters keep future dev/preview noise out automatically.)
+The subquery auto-excludes any current or future dev/preview session, so no
+manual `distinct_id` upkeep is needed. Once `www.thebearings.app` is live, real
+visitors hit the www host and are counted; localhost/preview QA is not. (Verified
+2026-06-23: with two QA sessions in prod, this query returns `0 / 0`.)
 
 ---
 
