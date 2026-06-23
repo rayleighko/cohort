@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/macro/ecos', async () => {
   const actual = await vi.importActual<typeof import('@/lib/macro/ecos')>(
@@ -43,6 +43,7 @@ function makeSeries(latest: number, deltaSevenAgo: number) {
 }
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
   mockedEcos.mockReset();
   mockedFred.mockReset();
@@ -52,8 +53,12 @@ const makeRequest = () =>
   new Request('http://localhost/api/macro/series/x') as never;
 
 describe('GET /api/macro/series/[code]', () => {
-  // FLAKY: wall-clock date-dependent (see #5). Pre-existing on origin/main, unrelated to regime-landing.
-  it.skip('returns 200 with VIXCLS series from FRED + latest + delta_7d', async () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-16T00:00:00.000Z'));
+  });
+
+  it('returns 200 with VIXCLS series from FRED + latest + delta_7d', async () => {
     mockedFred.mockResolvedValueOnce(makeSeries(17.5, 2.5));
 
     const res = await GET(makeRequest(), {
@@ -77,8 +82,7 @@ describe('GET /api/macro/series/[code]', () => {
     );
   });
 
-  // FLAKY: wall-clock date-dependent (see #5). Pre-existing on origin/main, unrelated to regime-landing.
-  it.skip('returns 200 with USDKRW series from ECOS', async () => {
+  it('returns 200 with USDKRW series from ECOS', async () => {
     mockedEcos.mockResolvedValueOnce(makeSeries(1342.5, -10.0));
 
     const res = await GET(makeRequest(), {
@@ -202,8 +206,7 @@ describe('GET /api/macro/series/[code]', () => {
     expect(body.delta_7d).toBeNull();
   });
 
-  // FLAKY: wall-clock date-dependent (see #5). Pre-existing on origin/main, unrelated to regime-landing.
-  it.skip('returns delta_7d=null when nearest observation is > 3 days from 7-day target (stale upstream guard)', async () => {
+  it('returns delta_7d=null when nearest observation is > 3 days from 7-day target (stale upstream guard)', async () => {
     // Upstream returns only one recent obs (3 days ago) — too far from
     // the 7-day-back target, so delta_7d collapses to null rather than
     // misleading "0 movement" copy.
@@ -225,8 +228,7 @@ describe('GET /api/macro/series/[code]', () => {
     expect(body.delta_7d).toBeNull();
   });
 
-  // FLAKY: wall-clock date-dependent (see #5). Pre-existing on origin/main, unrelated to regime-landing.
-  it.skip('sorts non-ascending upstream observations before latest/delta computation (drift guard)', async () => {
+  it('sorts non-ascending upstream observations before latest/delta computation (drift guard)', async () => {
     // Simulate descending-order upstream — route must sort, not trust order.
     const dates: Array<{ date: string; value: number }> = [];
     for (let i = 0; i <= 30; i++) {
